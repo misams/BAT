@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clampMaterials unit="MPa">
+    <material name="Titan" din="Ti6Al4V" number="3.7164.1">
+        <!--Youngs Modulus - E-->
+        <E>110000.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>920.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>870.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>9.00E-06</alpha>
+    </material>
+    <material name="Titan" din="Ti6Al4V ELI" number="">
+        <!--Youngs Modulus - E-->
+        <E>105000.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>825.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>760.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>9.00E-06</alpha>
+    </material>
+    <material name="Vetronite" din="" number="">
+        <!--Youngs Modulus - E-->
+        <E>20000.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>400.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>300.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>1.50E-05</alpha>
+    </material>
+    <material name="Stainless Steel" din="X5CrNiMo17" number="1.4401">
+        <!--Youngs Modulus - E-->
+        <E>200000.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>520.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>220.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>1.65E-05</alpha>
+    </material>
+    <material name="Stainless Steel" din="X10CrNiS18-9" number="1.4305">
+        <!--Youngs Modulus - E-->
+        <E>200000.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>500.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>190.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>1.60E-05</alpha>
+    </material>
+    <material name="EN AW-5754 H14" din="AlMg3" number="3.3535">
+        <!--Youngs Modulus - E-->
+        <E>70000.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>240.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>180.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>2.37E-05</alpha>
+    </material>
+    <material name="EN AW-6060 T6" din="AlMgSi" number="3.3206">
+        <!--Youngs Modulus - E-->
+        <E>70000.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>170.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>140.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>2.34E-05</alpha>
+    </material>
+    <material name="EN AW-7075 T7351" din="AlZn5.5MgCu" number="3.4365">
+        <!--Youngs Modulus - E-->
+        <E>71000.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>475.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>390.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>2.33E-05</alpha>
+    </material>
+    <material name="EN AW-6061 T651" din="AlMg1SiCu" number="">
+        <!--Youngs Modulus - E-->
+        <E>68300.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>290.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>240.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>2.34E-05</alpha>
+    </material>
+    <material name="Vespel" din="" number="">
+        <!--Youngs Modulus - E-->
+        <E>2413.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>86.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>51.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>4.50E-05</alpha>
+    </material>
+    <material name="Invar" din="" number="">
+        <!--Youngs Modulus - E-->
+        <E>137000.0</E>
+        <!--ultimate strength - sig_u-->
+        <sig_u>537.0</sig_u>
+        <!--yield strength - sig_y-->
+        <sig_y>317.0</sig_y>
+        <!--CTE - alpha-->
+        <alpha>1.64E-06</alpha>
+    </material>
+</clampMaterials> 
