@@ -1,11 +1,8 @@
-#import boltData.manage_json as bd
-from boltData.manage_json import write_json_file
-import functions.material as ma
+import functions.Material as ma
+import functions.Input_File_Parser as fp
 
 def main():
-    mat = ma.Material()
-    mat.select_material_db("Titan")
-    print(mat)
+    inp_file = fp.Input_File_Parser("/home/sams/git/BAT/template_input_file.inp")
 
 if __name__ == '__main__':
     main()

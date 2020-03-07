@@ -1,0 +1,59 @@
+#########################
+#                       #
+# BAT Input File        #
+#                       #
+#########################
+
+*PROJECT_NAME = first bolt analysis
+*METHOD = ESAPSS
+
+# Definition of used bolt
+*BOLT_DEFINITION
+    *JOINT_TYPE = 3 # really neccessary??
+    *BOLT_SIZE = M8 # or e.g. M8f for fine thread
+    *BOLT_MATERIAL = A4-80
+    *COF_CLAMP = 0.3 # min. coefficient of friction between clamped parts
+    *COF_BOLT = [0.1, 0.1] # optional [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
+    *TIGHT_TORQUE = 15 # also use "STD" --> standard tightening torque table
+    *BOLT_HEAD_TYPE = socket # or hexagon
+    *TORQUE_TOL_TIGHT_DEVICE = 1.0 # optional
+    *LOCKING_MECHANISM = yes # e.g. Helicoil
+    *PREVAILING_TORQUE = 0.6 # only used if *LOCKING_MECHANISM = yes
+    *LOADING_PLANE_FACTOR = 0.5
+*BOLT_DEFINITION_END
+
+# Definition of clamped parts
+*CLAMPED_PARTS_DEFINITION
+    *NMBR_SHEAR_PLANES = 1
+    *USE_SHIM = yes
+    # define n-clamped parts
+    *CLAMPED_PART(1) = [Titan, 10]
+    *CLAMPED_PART(2) = [Vespel SP1, 5]
+*CLAMPED_PARTS_DEFINITION_END
+
+# Definition of factors of safety
+*FOS_DEFINITION
+    *FOS_Y = 2 # yield 
+    *FOS_U = 3 # ultimate
+    *FOS_SLIP = 2 # slippage
+    *FOS_GAP = 2 # gapping
+*FOS_DEFINITION_END
+
+# Definition of bolt loads
+# load-ID, axial-force, lateral-force-1, lateral-force-2 (optional)
+*BOLT_LOAD_DEFINITION
+LC1	100	100	0
+LC2	33	0	0
+LC3	33	0	0
+LC4	33	0	0
+*BOLT_LOAD_DEFINITION_END
+
+# Definition of temperature environment
+*TEMP_DEFINITION
+# TBD
+*TEMP_DEFINITION_END
+
+# Definition of bolted flange
+*BOLTED_FLANGE_DEFINITION
+# TBD
+*BOLTED_FLANGE_DEFINITION_END
