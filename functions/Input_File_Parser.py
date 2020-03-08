@@ -27,5 +27,43 @@ class Input_File_Parser:
         with open(self.input_file) as fid:
             line = fid.readline() # first line in file
             while line: # loop through input-file
-                # check for commands
+                if line.lstrip()[0:13]=="*PROJECT_NAME":
+                    self.project_name = self.__proc_line(line)[1]
+                elif line.lstrip()[0:7]=="*METHOD":
+                    self.method = self.__proc_line(line)[1]
+                elif line.lstrip()[0:16]=="*BOLT_DEFINITION":
+                    line = fid.readline()
+                    # loop through bolt-definition block
+                    while line.lstrip()[0:20]!="*BOLT_DEFINITION_END":
+                        tmp_line = self.__proc_line(line) # process inp-file line
+                        if tmp_line[0]=="*JOINT_TYPE":
+                            self.joint_type = tmp_line[1]
+                        elif tmp_line[0]=="*BOLT_SIZE":
+                            self.bolt_size = tmp_line[1]
+                        elif tmp_line[0]=="*BOLT_MATERIAL":
+                            self.bolt_material = tmp_line[1]
+                        elif tmp_line[0]=="*COF_CLAMP":
+                            self.cof_clamp = tmp_line[1]
+                        elif tmp_line[0]=="*COF_BOLT":
+                            self.cof_bolt = tmp_line[1]
+
+                        line = fid.readline()
                 line = fid.readline()
+
+    # process commented input file line
+    def __proc_line(self, line):
+        # delete preceding whitespaces; replace comment chr and split string
+        tmp = line.lstrip().replace('#', '=').split('=')
+        return [tmp[0].strip(), tmp[1].strip()]
+
+    # redefine string-output for print()
+    # DEBUGGING function
+    def print(self):
+        print("*PROJECT_NAME:   {0:^}".format(self.project_name))
+        print("*METHOD:         {0:^}".format(self.method))
+        print("*JOINT_TYPE:     {0:^}".format(self.joint_type))
+        print("*BOLT_SIZE:      {0:^}".format(self.bolt_size))
+        print("*BOLT_MATERIAL:  {0:^}".format(self.bolt_material))
+        print("*COF_CLAMP:      {0:^}".format(self.cof_clamp))
+        print("*COF_BOLT:       {0:^}".format(str(self.cof_bolt)))
+
