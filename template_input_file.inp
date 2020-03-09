@@ -42,10 +42,11 @@
 # Definition of bolt loads
 # load-ID, axial-force, lateral-force-1, lateral-force-2 (optional)
 *BOLT_LOAD_DEFINITION
-LC1	100	100	0
-LC2	33	0	0
-LC3	33	0	0
-LC4	33	0	0
+ LC1	100	100	0
+ LC2	33	0	0
+ LC3	33	0	0
+ LC4	33	0	0
+LC5 12 50
 *BOLT_LOAD_DEFINITION_END
 
 # Definition of temperature environment
