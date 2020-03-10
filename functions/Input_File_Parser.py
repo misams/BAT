@@ -35,7 +35,7 @@ class Input_File_Parser:
 
     # read input file and process data
     def __read_input_file(self):
-        print("Read and process input file:\n")
+        print("Read and process input file: {0:^}".format(self.input_file))
         with open(self.input_file) as fid:
             line = fid.readline() # first line in file
             while line: # loop through input-file
