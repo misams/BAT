@@ -1,0 +1,22 @@
+#
+# Washer Geometry File
+#
+# DIN 125 Teil 1 washer for metric threaded bolts
+#
+# Name-ID; minor dia.; major dia.; height
+# -      ; mm        ; mm        ; mm
+#
+M2; 2.2; 5; 0.3
+M2.5; 2.7; 6; 0.5
+M3; 3.2; 7; 0.5
+M4; 4.3; 9; 0.8
+M5; 5.3; 10; 1
+M6; 6.4; 12; 1.6
+M7; 7.4; 14; 1.6
+M8; 8.4; 16; 1.6
+M10; 10.5; 20; 2
+M12; 13; 24; 2.5
+M14; 15; 28; 2.5
+M16; 17; 30; 3
+M18; 19; 34; 3
+M20; 21; 37; 3

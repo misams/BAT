@@ -25,7 +25,7 @@ class Material:
         self.tau_y = self.sig_y*0.577
         self.tau_u = self.sig_u*0.577
 
-    # string output for print
+    # string output for print()
     def __str__(self):
         return "{0:^}, {1:.1f}, {2:.1f}, {3:.1f}, {4:.3e}, {5:.1f}, {6:.1f}".format(\
             self.name, self.E, self.sig_y, self.sig_u, self.alpha, self.tau_y, self.tau_u)
