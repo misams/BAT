@@ -1,37 +1,58 @@
 import csv
 import os
 import functions.Bolt as bolt
+import functions.Washer as washer
 from pathlib import Path
 
 class BoltManager:
     def __init__(self, db_path):
-        # list of bolt-dict and washer-dict for all db-files available
-        self.bolts = []
-        self.washers = []
+        # bolt-dict and washer-dict for all bolts in db-files available
+        self.bolts = {}
+        self.washers = {}
         # process files in db-dir
         self.__read_db_files(db_path)
 
+    # read all *.bolt and *.wshr files in db_path and add to dict
     def __read_db_files(self, db_path):
         # db-directory
         db_dir = Path(db_path)
         # process only *.bolt files
         for f in db_dir.rglob('*.bolt'):
-            print("Process bolt db-file: {0:^}".format(str(f)))
-            bolt_id = ""
-            bolts_per_file = {}
+            print("Process and add bolt db-file: {0:^}".format(str(f)))
             # read csv 
             with open(f) as fid:
                 line = fid.readline() # first line in file
                 while line:
                     if line[0:7]=="BOLT_ID":
-                        bolt_id = line.split('=')[1].lstrip().rstrip()
-                        print("-> "+bolt_id)
+                        print("-> " + line.split('=')[1].lstrip().rstrip())
                     elif line[0]=='#':
-                        pass # ignore comment lines
+                        pass # ignore comment lines --> more elegant version of while/if??
                     else:
                         csv_row = line.strip().split(';')
                         # read all bolts of file and save it to dict
-                        bolts_per_file.update( { csv_row[0] : bolt.Bolt(csv_row)} )
+                        self.bolts.update( { csv_row[0] : bolt.Bolt(csv_row)} )
                     line = fid.readline()
-            # save dict to list of bolt files
-            self.bolts.append(bolts_per_file)
+        # process only *.wshr files
+        for f in db_dir.rglob('*.wshr'):
+            print("Process and add washer db-file: {0:^}".format(str(f)))
+            # read csv 
+            with open(f) as fid:
+                line = fid.readline() # first line in file
+                while line:
+                    if line[0:9]=="WASHER_ID":
+                        print("-> " + line.split('=')[1].lstrip().rstrip())
+                    elif line[0]=='#':
+                        pass # ignore comment lines --> more elegant version of while/if??
+                    else:
+                        csv_row = line.strip().split(';')
+                        # read all bolts of file and save it to dict
+                        self.washers.update( { csv_row[0] : washer.Washer(csv_row)} )
+                    line = fid.readline()
+
+    # print bolts and washers dicts
+    # DEBUGGING function
+    def print(self):
+        for key in self.bolts:
+            print(key, '->', self.bolts[key])
+        for key in self.washers:
+            print(key, '->', self.washers[key])

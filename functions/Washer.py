@@ -2,12 +2,14 @@
 Washer class
 """
 class Washer:
-    def __init__(self):
+    def __init__(self, splitted_row):
         self.name = ""
         # geometrical properties
         self.dmin = 0.0
         self.pmaj = 0.0
         self.h = 0.0
+        # process splitted *.wshr row
+        self.__csv_line_to_washer(splitted_row)
 
     # process csv-line out of washer database file
     def __csv_line_to_washer(self, row):

@@ -1,6 +1,6 @@
 import csv
 
-class Input_File_Parser:
+class InputFileParser:
     def __init__(self, input_file):
         # input file path
         self.input_file = input_file
@@ -57,7 +57,14 @@ class Input_File_Parser:
                         elif tmp_line[0]=="*COF_CLAMP":
                             self.cof_clamp = float(tmp_line[1])
                         elif tmp_line[0]=="*COF_BOLT":
-                            self.cof_bolt = tmp_line[1]
+                            # get (mu_head_max, mu_thread_max, mu_head_min, mu_thread_min)
+                            tmp_cof_bolt_str = tmp_line[1].replace('[','').replace(']','').split(',')
+                            if len(tmp_cof_bolt_str)==4:
+                                self.cof_bolt = (float(tmp_cof_bolt_str[0]), float(tmp_cof_bolt_str[1]), \
+                                    float(tmp_cof_bolt_str[2]), float(tmp_cof_bolt_str[3]))
+                            else:
+                                #TODO: error handling
+                                print("ERROR: 4 input parameters (COF_BOLT) neccessary!")
                         elif tmp_line[0]=="*TIGHT_TORQUE":
                             self.tight_torque = float(tmp_line[1])
                         elif tmp_line[0]=="*BOLT_HEAD_TYPE":
@@ -83,7 +90,9 @@ class Input_File_Parser:
                         elif tmp_line[0][:-3]=="*CLAMPED_PART":
                             # get clamped-part number (inside brackets) and save n-CP to dict
                             cp_nmbr = int(tmp_line[0][tmp_line[0].find("(")+1:tmp_line[0].find(")")])
-                            self.clamped_parts.update({cp_nmbr : tmp_line[1]})
+                            # get (clamped_part_material, thickness)
+                            tmp_cp_str = tmp_line[1].replace('[','').replace(']','').split(',')
+                            self.clamped_parts.update({cp_nmbr : (tmp_cp_str[0].strip(), float(tmp_cp_str[1]))})
                         line = fid.readline()
                 elif line.lstrip()[0:15]=="*FOS_DEFINITION":
                     line = fid.readline()
@@ -106,9 +115,9 @@ class Input_File_Parser:
                         # load-ID, axial-force, lateral-force-1, lateral-force-2 (optional)
                         tmp_line = line.split()
                         if len(tmp_line)==4: # optional lat-force-2 used
-                            self.bolt_loads.update({tmp_line[0] : [float(tmp_line[1]), float(tmp_line[2]), float(tmp_line[3])]})
+                            self.bolt_loads.update({tmp_line[0] : (float(tmp_line[1]), float(tmp_line[2]), float(tmp_line[3]))})
                         elif len(tmp_line)==3: # optional lat-force-2 NOT used
-                            self.bolt_loads.update({tmp_line[0] : [float(tmp_line[1]), float(tmp_line[2]), 0.0]})
+                            self.bolt_loads.update({tmp_line[0] : (float(tmp_line[1]), float(tmp_line[2]), 0.0)})
                         line = fid.readline()
 
                 line = fid.readline()
