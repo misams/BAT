@@ -10,21 +10,21 @@ class BoltManager:
         self.bolts = {}
         self.washers = {}
         # process files in db-dir
-        self.__read_db_files(db_path)
+        self._read_db_files(db_path)
 
     # read all *.bolt and *.wshr files in db_path and add to dict
-    def __read_db_files(self, db_path):
+    def _read_db_files(self, db_path):
         # db-directory
         db_dir = Path(db_path)
         # process only *.bolt files
         for f in db_dir.rglob('*.bolt'):
-            print("Process and add bolt db-file: {0:^}".format(str(f)))
+            print("Process and add bolt db-file: {0:^}".format(str(f)), end='')
             # read csv 
             with open(f) as fid:
                 line = fid.readline() # first line in file
                 while line:
                     if line[0:7]=="BOLT_ID":
-                        print("-> " + line.split('=')[1].lstrip().rstrip())
+                        print(" -> " + line.split('=')[1].lstrip().rstrip())
                     elif line[0]=='#':
                         pass # ignore comment lines --> more elegant version of while/if??
                     else:
@@ -34,13 +34,13 @@ class BoltManager:
                     line = fid.readline()
         # process only *.wshr files
         for f in db_dir.rglob('*.wshr'):
-            print("Process and add washer db-file: {0:^}".format(str(f)))
+            print("Process and add washer db-file: {0:^}".format(str(f)), end='')
             # read csv 
             with open(f) as fid:
                 line = fid.readline() # first line in file
                 while line:
                     if line[0:9]=="WASHER_ID":
-                        print("-> " + line.split('=')[1].lstrip().rstrip())
+                        print(" -> " + line.split('=')[1].lstrip().rstrip())
                     elif line[0]=='#':
                         pass # ignore comment lines --> more elegant version of while/if??
                     else:

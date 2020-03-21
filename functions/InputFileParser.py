@@ -1,9 +1,10 @@
 import csv
+from pathlib import Path
 
 class InputFileParser:
     def __init__(self, input_file):
         # input file path
-        self.input_file = input_file
+        self.input_file = Path(input_file)
         # input file values
         self.project_name = ""
         self.method = ""
@@ -21,7 +22,9 @@ class InputFileParser:
         self.loading_plane_factor = 0.0
         # clamped-parts-definition-block
         self.nmbr_shear_planes = 0
-        self.use_shim = ""
+        self.use_shim = None
+        self.through_hole_diameter = 0.0
+        self.subst_da = ""
         self.clamped_parts = {}
         # FOS-definition-block
         self.fos_y = 0.0
@@ -31,23 +34,23 @@ class InputFileParser:
         # bolt-loads
         self.bolt_loads = {}
         # read input file and process
-        self.__read_input_file()
+        self._read_input_file()
 
     # read input file and process data
-    def __read_input_file(self):
-        print("Read and process input file: {0:^}".format(self.input_file))
+    def _read_input_file(self):
+        print("Read and process input file:  {0:^}".format(str(self.input_file.absolute())))
         with open(self.input_file) as fid:
             line = fid.readline() # first line in file
             while line: # loop through input-file
                 if line.lstrip()[0:13]=="*PROJECT_NAME":
-                    self.project_name = self.__proc_line(line)[1]
+                    self.project_name = self._proc_line(line)[1]
                 elif line.lstrip()[0:7]=="*METHOD":
-                    self.method = self.__proc_line(line)[1]
+                    self.method = self._proc_line(line)[1]
                 elif line.lstrip()[0:16]=="*BOLT_DEFINITION":
                     line = fid.readline()
                     # loop through bolt-definition block
                     while line.lstrip()[0:20]!="*BOLT_DEFINITION_END":
-                        tmp_line = self.__proc_line(line) # process inp-file line
+                        tmp_line = self._proc_line(line) # process inp-file line
                         if tmp_line[0]=="*JOINT_TYPE":
                             self.joint_type = int(tmp_line[1])
                         elif tmp_line[0]=="*BOLT_SIZE":
@@ -82,11 +85,21 @@ class InputFileParser:
                     line = fid.readline()
                     # loop through clamped-parts-definition block
                     while line.lstrip()[0:29]!="*CLAMPED_PARTS_DEFINITION_END":
-                        tmp_line = self.__proc_line(line) # process inp-file line
+                        tmp_line = self._proc_line(line) # process inp-file line
                         if tmp_line[0]=="*NMBR_SHEAR_PLANES":
                             self.nmbr_shear_planes = int(tmp_line[1])
                         elif tmp_line[0]=="*USE_SHIM":
-                            self.use_shim = tmp_line[1]
+                            if tmp_line[1] == "no":
+                                self.use_shim = "no"
+                            else:
+                                # get (shim-material, shim-type) or no
+                                tmp_shim_str = tmp_line[1].replace('[','').replace(']','').split(',')
+                                self.use_shim = (tmp_shim_str[0].lstrip().rstrip(), \
+                                    tmp_shim_str[1].lstrip().rstrip())
+                        elif tmp_line[0]=="*THROUGH_HOLE_DIAMETER":
+                            self.through_hole_diameter = float(tmp_line[1])
+                        elif tmp_line[0]=="*SUBST_DA":
+                            self.subst_da = tmp_line[1]
                         elif tmp_line[0][:-3]=="*CLAMPED_PART":
                             # get clamped-part number (inside brackets) and save n-CP to dict
                             cp_nmbr = int(tmp_line[0][tmp_line[0].find("(")+1:tmp_line[0].find(")")])
@@ -98,7 +111,7 @@ class InputFileParser:
                     line = fid.readline()
                     # loop through FOS-definition block
                     while line.lstrip()[0:19]!="*FOS_DEFINITION_END":
-                        tmp_line = self.__proc_line(line) # process inp-file line
+                        tmp_line = self._proc_line(line) # process inp-file line
                         if tmp_line[0]=="*FOS_Y":
                             self.fos_y = float(tmp_line[1])
                         elif tmp_line[0]=="*FOS_U":
@@ -123,7 +136,7 @@ class InputFileParser:
                 line = fid.readline()
 
     # process commented input file line
-    def __proc_line(self, line):
+    def _proc_line(self, line):
         # delete preceding whitespaces; replace comment chr and split string
         tmp = line.lstrip().replace('#', '=').split('=')
         return [tmp[0].strip(), tmp[1].strip()]
@@ -145,7 +158,9 @@ class InputFileParser:
         print("*PREVAILING_TORQUE:          {0:^}".format(str(self.prevailing_torque)))
         print("*LOADING_PLANE_FACTOR:       {0:^}".format(str(self.loading_plane_factor)))
         print("*NMBR_SHEAR_PLANES:          {0:^}".format(str(self.nmbr_shear_planes)))
-        print("*USE_SHIM:                   {0:^}".format(self.use_shim))
+        print("*USE_SHIM:                   {0:^}".format(str(self.use_shim)))
+        print("*THROUGH_HOLE_DIAMETER:      {0:^}".format(str(self.through_hole_diameter)))
+        print("*SUBST_DA:                   {0:^}".format(self.subst_da))
         print("*CLAMPED_PARTS(i):           {0:^}".format(str(self.clamped_parts)))
         print("*FOS_Y:                      {0:^}".format(str(self.fos_y)))
         print("*FOS_U:                      {0:^}".format(str(self.fos_u)))

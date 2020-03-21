@@ -1,3 +1,4 @@
+import math
 """
 Bolt class
 """
@@ -11,11 +12,15 @@ class Bolt:
         self.d3 = 0.0 # minor diameter
         self.As = 0.0 # stress cross section
         self.dh = 0.0 # min dia. under head or head diameter
+        # calculated values
+        self.Ap = 0.0 # pitch cross section
+        self.A1 = 0.0 # nominal cross section
+        self.A3 = 0.0 # minor thread cross section
         # process splitted *.bolt row
-        self.__csv_line_to_bolt(splitted_row)
+        self._csv_line_to_bolt(splitted_row)
 
     # process csv-line out of bolt database file
-    def __csv_line_to_bolt(self, row):
+    def _csv_line_to_bolt(self, row):
         self.name = row[0].lstrip().rstrip()
         # geometrical properties
         self.d = float(row[1])
@@ -24,6 +29,10 @@ class Bolt:
         self.d3 = float(row[4])
         self.As = float(row[5])
         self.dh = float(row[6])
+        # calculated values
+        self.A1 = math.pow(self.d, 2.0)*math.pi/4.0
+        self.Ap = math.pow(self.d2, 2.0)*math.pi/4.0
+        self.A3 = math.pow(self.d3, 2.0)*math.pi/4.0
 
     # string output for print()
     def __str__(self):

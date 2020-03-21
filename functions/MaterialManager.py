@@ -1,19 +1,20 @@
 import csv
 import functions.Material as mat
+from pathlib import Path
 """
 Manage all materials: bolts and clamped-parts
 """
 class MaterialManager:
-    def __init__(self, cp_mat, bolt_mat):
+    def __init__(self, materials_file):
+        self._mat_file = Path(materials_file)
         # clamped-parts and bolts material dict for all materials
-        self.cp_mat = self.__import_mat_db(cp_mat)
-        self.bolt_mat = self.__import_mat_db(bolt_mat)
+        self.materials = self._import_mat_db()
 
-    # import mat-files and return material-dict
-    def __import_mat_db(self, db_file):
-        print("Read material database file: {0:^}".format(db_file))
+    # import mat-file and return material-dict
+    def _import_mat_db(self):
+        print("Read material database file:  {0:^}".format(str(self._mat_file.absolute())))
         tmp_dict = {}
-        with open(db_file) as csvfile:
+        with open(self._mat_file) as csvfile:
             readCSV = csv.reader(csvfile, delimiter=';')
             for row in readCSV:
                 if row[0].strip()[0] != '#': # ignore comments
@@ -24,7 +25,5 @@ class MaterialManager:
     # print both material dicts
     # DEBUGGING function
     def print(self):
-        print("Clamped-Parts materials DICT:")
-        print(str(self.cp_mat))
-        print("Bolt materials DICT:")
-        print(str(self.bolt_mat))
+        print("Materials DICT:")
+        print(str(self.materials))

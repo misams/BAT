@@ -9,10 +9,10 @@ class Washer:
         self.pmaj = 0.0
         self.h = 0.0
         # process splitted *.wshr row
-        self.__csv_line_to_washer(splitted_row)
+        self._csv_line_to_washer(splitted_row)
 
     # process csv-line out of washer database file
-    def __csv_line_to_washer(self, row):
+    def _csv_line_to_washer(self, row):
         self.name = row[0].lstrip().rstrip()
         # geometrical properties
         self.dmin = float(row[1])

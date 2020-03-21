@@ -16,7 +16,7 @@
     *COF_BOLT = [0.12, 0.12, 0.09, 0.09] # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
     *TIGHT_TORQUE = 1.2 # also use "STD" --> standard tightening torque table
     *BOLT_HEAD_TYPE = socket # or hexagon
-    *TORQUE_TOL_TIGHT_DEVICE = 0.1 # optional
+    *TORQUE_TOL_TIGHT_DEVICE = 0.1 # torque wrench tolerance 
     *LOCKING_MECHANISM = no # e.g. Helicoil
     *PREVAILING_TORQUE = 0.6 # only used if *LOCKING_MECHANISM = yes
     *LOADING_PLANE_FACTOR = 0.5
@@ -25,7 +25,9 @@
 # Definition of clamped parts
 *CLAMPED_PARTS_DEFINITION
     *NMBR_SHEAR_PLANES = 1
-    *USE_SHIM = M3 # also use "no" or shim out of database
+    *USE_SHIM = [1.4305, M3] # also use "no" or shim out of database
+    *THROUGH_HOLE_DIAMETER = 3.2 # D_B, drilled hole diameter of clamped parts
+    *SUBST_DA = no # substitutional outside diameter of of the basic solid at the interface
     # define n-clamped parts
     *CLAMPED_PART(1) = [Titan, 2.25]
     *CLAMPED_PART(2) = [15-5PH, 3]

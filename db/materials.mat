@@ -1,0 +1,29 @@
+#
+# BAT Materials File
+#
+# Name-ID; Youngs Modulus E; Ultimate sig_u; Yield sig_y; CTE alpha; Remark
+# -      ; MPa             ; MPa           ; MPa        ; 1/K      ; -
+#
+# bolt materials
+A2-70; 200000; 700; 450; 1.26e-5; X10CrNi18-8, 1.4301, bolt
+A4-80; 200000; 800; 600; 1.26e-5; X10CrNi18-8, 1.4303, bolt
+8.8; 210000; 800; 640; 1.05e-5; bolt
+10.9; 210000; 1000; 900; 1.05e-5; bolt
+12.9; 210000; 1200; 1080; 1.05e-5; bolt
+14.9; 210000; 1400; 1260; 1.05e-5; bolt
+Ti>m4; 110000; 1100; 1030; 9.0e-6; 3.7164.7, bolt
+Ti<m5; 110000; 900; 830; 9.0e-6; 3.7164.1, bolt
+Inconel 718; 205000; 1240; 1040; 1.23e-5; bolt
+# clamped part materials
+Titan; 110000; 920; 870; 9E-06; Ti6Al4V, 3.7164
+Titan ELI; 105000; 825; 760; 9E-06; Ti6Al4V ELI
+Vetronite; 20000; 400; 300; 1.5E-05; -
+1.4401; 200000; 520; 220; 1.65E-05; X5CrNiMo17, stainless steel
+1.4305; 200000; 500; 190; 1.6E-05; X10CrNiS18-9, stainless steel
+AL5754; 70000; 240; 180; 2.37E-05; AlMg3, 3.3535, EN AW-5754 H14
+AL6060; 70000; 170; 140; 2.34E-05; AlMgSi, 3.3206, EN AW-6060 T6
+AL7075; 71000; 475; 390; 2.33E-05; AlZn5.5MgCu, 3.4365, EN AW-7075 T7351
+AL6061; 68300;290;240;2.34E-05; AlMg1SiCu, 3.3211, EN AW-6061 T651
+Vespel SP1; 2413; 86; 51; 4.5E-05; values not checked
+Invar 36; 137000; 537; 317; 1.64E-06; values not checked
+15-5PH; 196500; 1069; 1000; 1.5E-05; CTE not checked

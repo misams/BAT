@@ -12,10 +12,10 @@ class Material:
         self.tau_y = 0.0
         self.tau_u = 0.0
         # fill entries in Material-class
-        self.__csv_line_to_material(row)
+        self._csv_line_to_material(row)
 
     # process csv-line out of material database file
-    def __csv_line_to_material(self, row):
+    def _csv_line_to_material(self, row):
         self.name = row[0].lstrip().rstrip()
         # material properties
         self.E = float(row[1])
