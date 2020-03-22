@@ -16,6 +16,7 @@ class Bolt:
         self.Ap = 0.0 # pitch cross section
         self.A1 = 0.0 # nominal cross section
         self.A3 = 0.0 # minor thread cross section
+        self.slope = 0.0 # slope, phi
         # process splitted *.bolt row
         self._csv_line_to_bolt(splitted_row)
 
@@ -33,6 +34,7 @@ class Bolt:
         self.A1 = math.pow(self.d, 2.0)*math.pi/4.0
         self.Ap = math.pow(self.d2, 2.0)*math.pi/4.0
         self.A3 = math.pow(self.d3, 2.0)*math.pi/4.0
+        self.slope = math.atan(self.p/(self.d2*math.pi)) # phi
 
     # string output for print()
     def __str__(self):

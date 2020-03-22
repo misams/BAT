@@ -14,10 +14,10 @@
     *BOLT_MATERIAL = Ti<m5
     *COF_CLAMP = 0.3 # min. coefficient of friction between clamped parts
     *COF_BOLT = [0.12, 0.12, 0.09, 0.09] # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
-    *TIGHT_TORQUE = 1.2 # also use "STD" --> standard tightening torque table
+    *TIGHT_TORQUE = 1.2 # also use "STD" --> standard tightening torque table, incl. prevailing torque
     *BOLT_HEAD_TYPE = socket # or hexagon
     *TORQUE_TOL_TIGHT_DEVICE = 0.1 # torque wrench tolerance 
-    *LOCKING_MECHANISM = no # e.g. Helicoil
+    *LOCKING_MECHANISM = no # or "yes", e.g. Helicoil
     *PREVAILING_TORQUE = 0.6 # only used if *LOCKING_MECHANISM = yes
     *LOADING_PLANE_FACTOR = 0.5
 *BOLT_DEFINITION_END
@@ -42,9 +42,10 @@
 *FOS_DEFINITION_END
 
 # Definition of bolt loads
-# load-ID, axial-force, lateral-force-1, lateral-force-2 (optional)
+# load/bolt-ID, axial-force, lateral-force-1, lateral-force-2 (optional)
 *BOLT_LOAD_DEFINITION
  LC1	4	846	0
+ LC2 50 500 300
 *BOLT_LOAD_DEFINITION_END
 
 # Definition of temperature environment
