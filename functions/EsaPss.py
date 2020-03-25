@@ -25,6 +25,7 @@ class EsaPss:
         else:
             print("No shim used.")
         # calculated variables
+        self.Tp = 0.0 # prevailing torque
         self.lk = 0.0 # clamped length
         self.DA = 0.0 # 
         self.Asub = 0.0 # substitution area of clamped parts
@@ -42,7 +43,16 @@ class EsaPss:
         self.FPreMean = 0.0
         self.FPreMinServ = 0.0
         self.FPreMaxServ = 0.0
+        self.FPreMeanServ = 0.0
         self.alpha_A = 0.0
+        self.tau_min = 0.0
+        self.tau_max = 0.0
+        self.sig_n_min = 0.0
+        self.sig_n_max = 0.0
+        self.sig_v_min = 0.0
+        self.sig_v_max = 0.0
+        self.nue_min = 0.0
+        self.nue_max = 0.0
         # calculate clamped-part stiffness
         self._calc_joint_stiffness()
         # calculate embedding losses of joint
@@ -165,9 +175,9 @@ class EsaPss:
     # calculate joint properties
     def _calc_joint_properties(self):
         # check if prevailing torque is defined (e.g. helicoils used)
-        Tp = 0.0 # prevailing torque
+        # prevailing torque if locking mechanism defined
         if self.inp_file.locking_mechanism == "yes":
-            Tp = self.inp_file.prevailing_torque
+            self.Tp = self.inp_file.prevailing_torque
         #NOTE: friction angle valid ONLY for 60deg threads!! (metric + unified threads)
         # COF_BOLT = [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min] 
         mu_uhmax = self.inp_file.cof_bolt[0]
@@ -189,16 +199,17 @@ class EsaPss:
         TAmin = TA - Tscatter
         TAmax = TA + Tscatter
         # min / max init. preload after tightening (*1000 to get N)
-        self.FPreMin = (TAmin-Tp)/(Kmax*self.used_bolt.d)*1000
-        self.FPreMax = (TAmax-Tp)/(Kmin*self.used_bolt.d)*1000
+        self.FPreMin = (TAmin-self.Tp)/(Kmax*self.used_bolt.d)*1000
+        self.FPreMax = (TAmax-self.Tp)/(Kmin*self.used_bolt.d)*1000
         self.FPreMean = (self.FPreMax+self.FPreMin)/2
         # calculate tightening factor (preload scatter incl. friction and tight. dev. tolerance)
         self.alpha_A = self.FPreMax/self.FPreMin
         # service preload with embedding
         self.FPreMinServ = self.FPreMin-self.FZ
         self.FPreMaxServ = self.FPreMax-self.FZ
+        self.FPreMeanServ = (self.FPreMinServ+self.FPreMaxServ)/2
         # mean preload in the complete joint (incl. all bolts)
-        sum_FPreMeanServ = self.nmbr_of_bolts*(self.FPreMinServ+self.FPreMaxServ)*0.5
+        sum_FPreMeanServ = self.nmbr_of_bolts*self.FPreMeanServ
 
         # perform calculation for all loadcases
         sum_FPA = 0.0
@@ -214,7 +225,7 @@ class EsaPss:
             FM_min = max(FM_minslip,FM_mingap)
             # required torque for mu_max (1/1000 to get Nm)
             Treq = (FM_min*(self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_max)+\
-                mu_uhmax*Dkm/2)+Tp)/1000
+                mu_uhmax*Dkm/2)+self.Tp)/1000
             #
             # local slippage margin
             FKr = self.FPreMinServ-FA*(1-self.phi_n)
@@ -225,31 +236,100 @@ class EsaPss:
             # calc for global slippage margin
             sum_FPA += FA*(1-self.phi_n)
             sum_FQ += FQ
+
         # calculate global slippage margin
         # total lateral joint force which can be transmitted via friction
         F_tot_lat = (sum_FPreMeanServ-sum_FPA)*self.inp_file.cof_clamp*self.inp_file.nmbr_shear_planes
         MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
 
+        # Calculate stresses
+        # max. torsional stress after tightening - see VDI2230 p.24
+        Wp = (self.used_bolt.ds**3)*math.pi/16
+        #NOTE: only applicable for metric threads
+        MG_max = self.FPreMax*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
+            1.155*mu_thmin)
+        MG_min = self.FPreMin*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
+            1.155*mu_thmax)
+        self.tau_min = MG_min/Wp
+        self.tau_max = MG_max/Wp # max. torsional stress aft. tightening
+        # max. normal stress after tightening
+        self.sig_n_min = self.FPreMin/self.used_bolt.As
+        self.sig_n_max = self.FPreMax/self.used_bolt.As
+        # von-Mises equivalent stress in bolt
+        self.sig_v_min = math.sqrt(self.sig_n_min**2 + 3*(self.tau_min)**2)
+        self.sig_v_max = math.sqrt(self.sig_n_max**2 + 3*(self.tau_max)**2)
+        # degree of utilization (utilization of the minimum yield point)
+        self.nue_min = self.sig_v_min/self.used_bolt_mat.sig_y
+        self.nue_max = self.sig_v_max/self.used_bolt_mat.sig_y
+
+    # print joint inputs
+    def print_input(self):
+        #TODO: provide print of input-parameters of joint analysis
+        pass
+
     # print analysis results
     def print_results(self):
-        print("Clamped length lk:         {0:.2f}".format(self.lk))
-        print("Subst. outside dia. DA:    {0:.2f}".format(self.DA))
-        print("Subst. area of CP Asub:    {0:.2f}".format(self.Asub))
-        print("Subst. dia. of CP Dsub:    {0:.2f}".format(self.Dsub))
-        print("Bolt stiffness cB:         {0:.4g}".format(self.cB))
-        print("Clamped part stiffness cP: {0:.4g}".format(self.cP))
-        print("Load factor Phi_K :        {0:.4f}".format(self.phi_K))
-        print("Load factor Phi_n :        {0:.4f}".format(self.phi_n))
-        print("Number of interfaces:      {0:d}".format(self.nmbr_interf))
-        print("Embedding [micron]:        {0:.2f}".format(self.emb_micron))
-        print("Preload loss due emb. FZ:  {0:.2f}".format(self.FZ))
-        print("{0:-^95}".format('-'))
+        print("{0:=^95}".format('=')) # global splitter
+        print("| {0:^91} |".format("ESA PSS-03-208 Issue 1 ANALYSIS RESULTS"))
+        print("{0:=^95}".format('='))
+        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+            "Tightening torque w/o prevailing torque [Nm]:", self.inp_file.tight_torque, ""))
+        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+            "Prevailing torque [Nm]:", self.Tp, ""))
+        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+            "Tightening torque with prevailing torque [Nm]:", \
+                self.inp_file.tight_torque+self.Tp, ""))
+        print("|{0: ^93}|".format(' ')) # empty line within section
+        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+            "Clamped length lk [mm]:", self.lk, ""))
+        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+            "Subst. outside diameter DA [mm]:", self.DA, ""))
+        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+            "Subst. area of cP Asub [mm^2]:", self.Asub, ""))
+        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+            "Subst. diameter of cP Dsub [mm]:", self.Dsub, ""))
+        print("| {0:<50} {1:^20.4g} {2:^20}|".format(\
+            "Bolt stiffness cB [N/mm]:", self.cB, ""))
+        print("| {0:<50} {1:^20.4g} {2:^20}|".format(\
+            "Clamped part stiffness cP [N/mm]:", self.cP, ""))
+        print("| {0:<50} {1:^20.4f} {2:^20}|".format(\
+            "Load factor Phi_K [-]:", self.phi_K, ""))
+        print("| {0:<50} {1:^20.4f} {2:^20}|".format(\
+            "Load factor Phi_n [-]:", self.phi_n, ""))
+        print("| {0:<50} {1:^20d} {2:^20}|".format(\
+            "Number of interfaces for embedding [-]:", self.nmbr_interf, ""))
+        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+            "Embedding [micron]:", self.emb_micron, ""))
+        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+            "Preload loss due embedding FZ [N]:", self.FZ, ""))
+        print("|{0: ^93}|".format(' ')) # empty line within section
+        print("{0:=^95}".format('=')) # global splitter
         print("| {0:^50}|{1:^20}|{2:^20}|".format("", "MIN (mu_max)", "MAX (mu_min)"))
-        print("{0:-^95}".format('-'))
+        print("{0:=^95}".format('='))
+        print("| {0:<50}|{1:^20.2f}|{2:^20.2f}|".format(\
+            "Coefficient of friction under bolt head:", self.inp_file.cof_bolt[2],\
+                self.inp_file.cof_bolt[0]))
+        print("| {0:<50}|{1:^20.2f}|{2:^20.2f}|".format(\
+            "Coefficient of friction in thread:", self.inp_file.cof_bolt[3],\
+                self.inp_file.cof_bolt[1]))
+        print("|-{0:-^50}+{1:-^20}+{2:-^20}|".format("-", "-", "-")) # empty line in table
         print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
-            "Bolt preload:", self.FPreMin, self.FPreMax))
+            "Bolt preload after tightening [N]:", self.FPreMin, self.FPreMax))
         print("| {0:<50}|{1:^41.1f}|".format(\
-            "MEAN Bolt preload:", self.FPreMean))
+            "MEAN Bolt preload after tightening [N]:", self.FPreMean))
+        print("| {0:<50}|{1:^41.2f}|".format(\
+            "Preload Scatter Alpha_A [-]:", self.alpha_A))
         print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
-            "Bolt preload at service incl. embedding:", self.FPreMinServ, self.FPreMaxServ))
-        print("{0:-^95}".format('-'))
+            "Bolt preload at service incl. embedding [N]:", self.FPreMinServ, self.FPreMaxServ))
+        print("| {0:<50}|{1:^41.1f}|".format(\
+            "MEAN Bolt preload at service incl. embedding [N]:", self.FPreMeanServ))
+        print("|-{0:-^50}+{1:-^20}+{2:-^20}|".format("-", "-", "-"))
+        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
+            "Torsional stress after tightening [MPa]:", self.tau_min, self.tau_max))
+        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
+            "Normal stress after tightening [MPa]:", self.sig_n_min, self.sig_n_max))
+        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
+            "Von-Mises equiv. stress aft. tightening [MPa]:", self.sig_v_min, self.sig_v_max))
+        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
+            "Bolt utilization [%]:", self.nue_min*100, self.nue_max*100))
+        print("{0:=^95}".format('='))

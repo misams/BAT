@@ -35,6 +35,7 @@ class Bolt:
         self.Ap = math.pow(self.d2, 2.0)*math.pi/4.0
         self.A3 = math.pow(self.d3, 2.0)*math.pi/4.0
         self.slope = math.atan(self.p/(self.d2*math.pi)) # phi
+        self.ds = math.sqrt(4*self.As/math.pi) # stress diameter
 
     # string output for print()
     def __str__(self):
