@@ -1,6 +1,7 @@
 from .InputFileParser import InputFileParser
 from .MaterialManager import MaterialManager
 from .BoltManager import BoltManager
+from pathlib import Path
 import math
 """
 Bolt analysis according to ESA PSS-03-208 Issue 1, December 1989
@@ -279,73 +280,122 @@ class EsaPss:
         #TODO: provide print of input-parameters of joint analysis
         pass
 
-    # print global analysis results
-    def print_global_results(self):
-        print("{0:=^95}".format('=')) # global splitter
-        print("| {0:^91} |".format("ESA PSS-03-208 Issue 1 ANALYSIS RESULTS"))
-        print("{0:=^95}".format('='))
-        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
-            "Tightening torque w/o prevailing torque [Nm]:", self.inp_file.tight_torque, ""))
-        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
-            "Prevailing torque [Nm]:", self.Tp, ""))
-        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
+    # get global analysis results string
+    def _get_global_result_str(self):
+        output_str = "" # use output_str for print() or print-to-file
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        output_str += "| {0:^91} |\n".format("ESA PSS-03-208 Issue 1 ANALYSIS RESULTS")
+        output_str += "{0:=^95}\n".format('=')
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Tightening torque w/o prevailing torque [Nm]:", self.inp_file.tight_torque, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Prevailing torque [Nm]:", self.Tp, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
             "Tightening torque with prevailing torque [Nm]:", \
-                self.inp_file.tight_torque+self.Tp, ""))
-        print("|{0: ^93}|".format(' ')) # empty line within section
-        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
-            "Clamped length lk [mm]:", self.lk, ""))
-        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
-            "Subst. outside diameter DA [mm]:", self.DA, ""))
-        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
-            "Subst. area of cP Asub [mm^2]:", self.Asub, ""))
-        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
-            "Subst. diameter of cP Dsub [mm]:", self.Dsub, ""))
-        print("| {0:<50} {1:^20.4g} {2:^20}|".format(\
-            "Bolt stiffness cB [N/mm]:", self.cB, ""))
-        print("| {0:<50} {1:^20.4g} {2:^20}|".format(\
-            "Clamped part stiffness cP [N/mm]:", self.cP, ""))
-        print("| {0:<50} {1:^20.4f} {2:^20}|".format(\
-            "Load factor Phi_K [-]:", self.phi_K, ""))
-        print("| {0:<50} {1:^20.4f} {2:^20}|".format(\
-            "Load factor Phi_n [-]:", self.phi_n, ""))
-        print("| {0:<50} {1:^20d} {2:^20}|".format(\
-            "Number of interfaces for embedding [-]:", self.nmbr_interf, ""))
-        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
-            "Embedding [micron]:", self.emb_micron, ""))
-        print("| {0:<50} {1:^20.2f} {2:^20}|".format(\
-            "Preload loss due embedding FZ [N]:", self.FZ, ""))
-        print("|{0: ^93}|".format(' ')) # empty line within section
-        print("{0:=^95}".format('=')) # global splitter
-        print("| {0:^50}|{1:^20}|{2:^20}|".format("", "MIN (mu_max)", "MAX (mu_min)"))
-        print("{0:=^95}".format('='))
-        print("| {0:<50}|{1:^20.2f}|{2:^20.2f}|".format(\
+                self.inp_file.tight_torque+self.Tp, "")
+        output_str += "|{0:-^93}|\n".format('-') # empty line within section
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Clamped length lk [mm]:", self.lk, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Subst. outside diameter DA [mm]:", self.DA, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Subst. area of cP Asub [mm^2]:", self.Asub, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Subst. diameter of cP Dsub [mm]:", self.Dsub, "")
+        output_str += "| {0:<50} {1:^20.4g} {2:^20}|\n".format(\
+            "Bolt stiffness cB [N/mm]:", self.cB, "")
+        output_str += "| {0:<50} {1:^20.4g} {2:^20}|\n".format(\
+            "Clamped part stiffness cP [N/mm]:", self.cP, "")
+        output_str += "| {0:<50} {1:^20.4f} {2:^20}|\n".format(\
+            "Load factor Phi_K [-]:", self.phi_K, "")
+        output_str += "| {0:<50} {1:^20.4f} {2:^20}|\n".format(\
+            "Load factor Phi_n [-]:", self.phi_n, "")
+        output_str += "| {0:<50} {1:^20d} {2:^20}|\n".format(\
+            "Number of interfaces for embedding [-]:", self.nmbr_interf, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Embedding [micron]:", self.emb_micron, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Preload loss due embedding FZ [N]:", self.FZ, "")
+        #output_str += "|{0: ^93}|\n".format(' ') # empty line within section
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("", "MIN (mu_max)", "MAX (mu_min)")
+        output_str += "{0:=^95}\n".format('=')
+        output_str += "| {0:<50}|{1:^20.2f}|{2:^20.2f}|\n".format(\
             "Coefficient of friction under bolt head:", self.inp_file.cof_bolt[2],\
-                self.inp_file.cof_bolt[0]))
-        print("| {0:<50}|{1:^20.2f}|{2:^20.2f}|".format(\
+                self.inp_file.cof_bolt[0])
+        output_str += "| {0:<50}|{1:^20.2f}|{2:^20.2f}|\n".format(\
             "Coefficient of friction in thread:", self.inp_file.cof_bolt[3],\
-                self.inp_file.cof_bolt[1]))
-        print("|-{0:-^50}+{1:-^20}+{2:-^20}|".format("-", "-", "-")) # empty line in table
-        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
-            "Bolt preload after tightening [N]:", self.FPreMin, self.FPreMax))
-        print("| {0:<50}|{1:^41.1f}|".format(\
-            "MEAN Bolt preload after tightening [N]:", self.FPreMean))
-        print("| {0:<50}|{1:^41.2f}|".format(\
-            "Preload Scatter Alpha_A [-]:", self.alpha_A))
-        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
-            "Bolt preload at service incl. embedding [N]:", self.FPreMinServ, self.FPreMaxServ))
-        print("| {0:<50}|{1:^41.1f}|".format(\
-            "MEAN Bolt preload at service incl. embedding [N]:", self.FPreMeanServ))
-        print("|-{0:-^50}+{1:-^20}+{2:-^20}|".format("-", "-", "-"))
-        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
-            "Torsional stress after tightening [MPa]:", self.tau_min, self.tau_max))
-        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
-            "Normal stress after tightening [MPa]:", self.sig_n_min, self.sig_n_max))
-        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
-            "Von-Mises equiv. stress aft. tightening [MPa]:", self.sig_v_min, self.sig_v_max))
-        print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
-            "Bolt utilization [%]:", self.nue_min*100, self.nue_max*100))
-        print("{0:=^95}".format('='))
+                self.inp_file.cof_bolt[1])
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-") # empty line in table
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Bolt preload after tightening [N]:", self.FPreMin, self.FPreMax)
+        output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
+            "MEAN Bolt preload after tightening [N]:", self.FPreMean)
+        output_str += "| {0:<50}|{1:^41.2f}|\n".format(\
+            "Preload Scatter Alpha_A [-]:", self.alpha_A)
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Bolt preload at service incl. embedding [N]:", self.FPreMinServ, self.FPreMaxServ)
+        output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
+            "MEAN Bolt preload at service incl. embedding [N]:", self.FPreMeanServ)
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-")
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Torsional stress after tightening [MPa]:", self.tau_min, self.tau_max)
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Normal stress after tightening [MPa]:", self.sig_n_min, self.sig_n_max)
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Von-Mises equiv. stress aft. tightening [MPa]:", self.sig_v_min, self.sig_v_max)
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Bolt utilization [%]:", self.nue_min*100, self.nue_max*100)
+        output_str += "{0:=^95}\n".format('=')
+        # return output_str
+        return output_str
 
     # print analysis results per bolt/loadcase
-    def print_bolt_results(self):
-        pass
+    def _get_bolt_result_str(self):
+        output_str = "" # use output_str for print() or print-to-file
+        # define header
+        output_str += "{0:=^127}\n".format('=')
+        # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u]
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
+            .format("Number", "Bolt /", "Axial Bolt", "Shear Bolt", "Add. Bolt", "Red. Clmp.", \
+            "Slippage", "Gapping", "Yield", "Ultimate")
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
+            .format("#", "Loadcase", "Force", "Force", "Force", "Force", "MoS", "MoS", "MoS", "MoS")
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
+            .format("", "", "FA [N]", "FQ [N]", "FSA [N]", "FPA [N]", "FoS="+str(self.inp_file.fos_slip),\
+            "FoS="+str(self.inp_file.fos_gap), "FoS="+str(self.inp_file.fos_y), "FoS="+str(self.inp_file.fos_u))
+        output_str += "{0:=^127}\n".format('=')
+        # loop through bolts / loadcases
+        bolt_nmbr = 0 # to fill Number-# column
+        min_mos = [math.inf, math.inf, math.inf, math.inf]
+        for lc_name, lc in self.bolt_results.items():
+            bolt_nmbr += 1 # count bolts / loadcases
+            #         lc[0   1   2     3   4             5        6       7   ]
+            # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u]
+            output_str += "|{0:^8d}|{1:^12}|{2:^12.1f}|{3:^12.1f}|{4:^12.1f}|{5:^12.1f}|{6:^12.0%}|{7:^12.0%}|{8:^12.0%}|{9:^12.0%}|\n"\
+                .format(bolt_nmbr, lc_name, lc[0], lc[1], lc[2], lc[3], lc[4], lc[5], lc[6], lc[7])
+            # get mininum margins of safety
+            min_mos = [min(min_mos[0], lc[4]), min(min_mos[1], lc[5]), \
+                min(min_mos[2], lc[6]), min(min_mos[3], lc[7])]
+        output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
+        output_str += "|{0:>73}|{1:^12.0%}|{2:^12.0%}|{3:^12.0%}|{4:^12.0%}|\n".format(\
+                "Minimum Margins of Safety: ", min_mos[0], min_mos[1], min_mos[2], min_mos[3])
+        output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
+        output_str += "|{0:>73}|{1:^12.0%}|{2:^12}|{3:^12}|{4:^12}|\n".format(\
+                "Global Slippage Margin: ", self.MOS_glob_slip, "-", "-", "-")
+        output_str += "{0:=^127}\n".format('=')
+        # return output_str
+        return output_str
+
+    # print results to terminal and/or file
+    def print_results(self, output_file=None):
+        # print results to terminal
+        print(self._get_global_result_str())
+        print(self._get_bolt_result_str())
+        # print results to output_file
+        if output_file != None:
+            with open(output_file, 'w') as fid:
+                # write global results to file
+                fid.write(self._get_global_result_str())
+                # write bolts results to file
+                fid.write(self._get_bolt_result_str())
