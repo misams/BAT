@@ -38,27 +38,29 @@ class EsaPss:
         self.emb_micron = 0.0 # delta_l_Z of embedding
         self.FZ = 0.0 # preload loss due to embedding
         self.nmbr_of_bolts = len(self.inp_file.bolt_loads)
-        self.FPreMin = 0.0
+        self.FPreMin = 0.0 # preload after tightening
         self.FPreMax = 0.0
         self.FPreMean = 0.0
-        self.FPreMinServ = 0.0
+        self.FPreMinServ = 0.0 # service preload (incl. embedding)
         self.FPreMaxServ = 0.0
         self.FPreMeanServ = 0.0
-        self.alpha_A = 0.0
-        self.tau_min = 0.0
+        self.alpha_A = 0.0 # preload scatter
+        self.tau_min = 0.0 # 100% torsional stress aft. tightening
         self.tau_max = 0.0
-        self.sig_n_min = 0.0
+        self.sig_n_min = 0.0 # normal stress aft. tightening
         self.sig_n_max = 0.0
-        self.sig_v_min = 0.0
+        self.sig_v_min = 0.0 # von-Mises stress aft. tightening
         self.sig_v_max = 0.0
-        self.nue_min = 0.0
+        self.nue_min = 0.0 # bolt utilization
         self.nue_max = 0.0
+        self.bolt_results = {} # results per bolt / loadcase
+        self.MOS_glob_slip = 0.0 # global slippage margin
         # calculate clamped-part stiffness
         self._calc_joint_stiffness()
         # calculate embedding losses of joint
         self._calc_embedding()
         # calculate joint properties
-        self._calc_joint_properties()
+        self._calc_joint_results()
 
     # joint stiffness for bolt and clamped parts
     def _calc_joint_stiffness(self):
@@ -172,8 +174,8 @@ class EsaPss:
     def _embedding_6_to_7(self, lkd):
         return -0.0053*lkd**2+0.12*lkd+0.4333
 
-    # calculate joint properties
-    def _calc_joint_properties(self):
+    # calculate joint results 
+    def _calc_joint_results(self):
         # check if prevailing torque is defined (e.g. helicoils used)
         # prevailing torque if locking mechanism defined
         if self.inp_file.locking_mechanism == "yes":
@@ -211,37 +213,6 @@ class EsaPss:
         # mean preload in the complete joint (incl. all bolts)
         sum_FPreMeanServ = self.nmbr_of_bolts*self.FPreMeanServ
 
-        # perform calculation for all loadcases
-        sum_FPA = 0.0
-        sum_FQ = 0.0
-        for lc_name, lc in self.inp_file.bolt_loads.items():
-            print("Process Loadcase: {0:^}".format(lc_name))
-            FA = lc[0] # axial bolt force
-            FQ = math.sqrt(lc[1]**2+lc[2]**2) # shear bolt force
-            # required clamping force for friction grip
-            FKreq = FQ/(self.inp_file.nmbr_shear_planes*self.inp_file.cof_clamp)
-            FM_minslip = FKreq*self.inp_file.fos_slip+FA*(1-self.phi_n)*self.inp_file.fos_y+self.FZ
-            FM_mingap = FA*(1-self.phi_n)*self.inp_file.fos_gap+self.FZ
-            FM_min = max(FM_minslip,FM_mingap)
-            # required torque for mu_max (1/1000 to get Nm)
-            Treq = (FM_min*(self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_max)+\
-                mu_uhmax*Dkm/2)+self.Tp)/1000
-            #
-            # local slippage margin
-            FKr = self.FPreMinServ-FA*(1-self.phi_n)
-            MOS_loc_slip = FKr/(FKreq*self.inp_file.fos_slip)-1
-            # local gapping margin
-            MOS_gap = self.FPreMinServ/(self.inp_file.fos_gap*FA*(1-self.phi_n))-1
-            #
-            # calc for global slippage margin
-            sum_FPA += FA*(1-self.phi_n)
-            sum_FQ += FQ
-
-        # calculate global slippage margin
-        # total lateral joint force which can be transmitted via friction
-        F_tot_lat = (sum_FPreMeanServ-sum_FPA)*self.inp_file.cof_clamp*self.inp_file.nmbr_shear_planes
-        MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
-
         # Calculate stresses
         # max. torsional stress after tightening - see VDI2230 p.24
         Wp = (self.used_bolt.ds**3)*math.pi/16
@@ -262,13 +233,54 @@ class EsaPss:
         self.nue_min = self.sig_v_min/self.used_bolt_mat.sig_y
         self.nue_max = self.sig_v_max/self.used_bolt_mat.sig_y
 
+        # perform calculation for all bolts / loadcases
+        sum_FPA = 0.0
+        sum_FQ = 0.0
+        for lc_name, lc in self.inp_file.bolt_loads.items():
+            FA = lc[0] # axial bolt force
+            FQ = math.sqrt(lc[1]**2+lc[2]**2) # shear bolt force
+            FPA = FA*(1-self.phi_n) # reduction in clamping force
+            FSA = FA*self.phi_n # additional bolt force
+            # required clamping force for friction grip
+            FKreq = FQ/(self.inp_file.nmbr_shear_planes*self.inp_file.cof_clamp)
+            ##FM_minslip = FKreq*self.inp_file.fos_slip+FPA*self.inp_file.fos_y+self.FZ
+            ##FM_mingap = FPA*self.inp_file.fos_gap+self.FZ
+            ##FM_min = max(FM_minslip,FM_mingap)
+            ### required torque for mu_max (1/1000 to get Nm)
+            ##Treq = (FM_min*(self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_max)+\
+            ##    mu_uhmax*Dkm/2)+self.Tp)/1000
+            # calc sums for global slippage margin
+            sum_FPA += FPA
+            sum_FQ += FQ
+            #
+            # local slippage margin
+            MOS_loc_slip = (self.FPreMinServ-FPA)/(FKreq*self.inp_file.fos_slip)-1
+            # local gapping margin
+            MOS_gap = self.FPreMinServ/(self.inp_file.fos_gap*FPA)-1
+            # yield bolt margin
+            MOS_y = self.used_bolt_mat.sig_y/math.sqrt( ((self.FPreMaxServ+\
+                FSA*self.inp_file.fos_y)/self.used_bolt.As)**2 +\
+                    3*(0.5*self.tau_max)**2 )-1
+            # ultimate bolt margin
+            MOS_u = self.used_bolt_mat.sig_u/math.sqrt( ((self.FPreMaxServ+\
+                FSA*self.inp_file.fos_u)/self.used_bolt.As)**2 +\
+                    3*(0.5*self.tau_max)**2 )-1
+            # save data for each bolt/loadcase to result dict
+            # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u]
+            self.bolt_results.update({lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u]})
+
+        # calculate global slippage margin
+        # total lateral joint force which can be transmitted via friction
+        F_tot_lat = (sum_FPreMeanServ-sum_FPA)*self.inp_file.cof_clamp*self.inp_file.nmbr_shear_planes
+        self.MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
+
     # print joint inputs
     def print_input(self):
         #TODO: provide print of input-parameters of joint analysis
         pass
 
-    # print analysis results
-    def print_results(self):
+    # print global analysis results
+    def print_global_results(self):
         print("{0:=^95}".format('=')) # global splitter
         print("| {0:^91} |".format("ESA PSS-03-208 Issue 1 ANALYSIS RESULTS"))
         print("{0:=^95}".format('='))
@@ -333,3 +345,7 @@ class EsaPss:
         print("| {0:<50}|{1:^20.1f}|{2:^20.1f}|".format(\
             "Bolt utilization [%]:", self.nue_min*100, self.nue_max*100))
         print("{0:=^95}".format('='))
+
+    # print analysis results per bolt/loadcase
+    def print_bolt_results(self):
+        pass

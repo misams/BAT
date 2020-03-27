@@ -22,7 +22,7 @@ def main():
 
     # calc ESA-PSS
     ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
-    ana_esapss.print_results()
+    ana_esapss.print_global_results()
 
 if __name__ == '__main__':
     main()

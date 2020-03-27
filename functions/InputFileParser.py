@@ -9,7 +9,7 @@ class InputFileParser:
         self.project_name = ""
         self.method = ""
         # bolts-definition-block
-        self.joint_type= 0 # really neccessary??
+        self.joint_mos_type = "" # use min or mean preload for slippage MOS calculation
         self.bolt_size = "" # e.g. M8f
         self.bolt_material = ""
         self.cof_clamp = 0.0 # min. coefficient of friction between clamped parts
@@ -51,8 +51,8 @@ class InputFileParser:
                     # loop through bolt-definition block
                     while line.lstrip()[0:20]!="*BOLT_DEFINITION_END":
                         tmp_line = self._proc_line(line) # process inp-file line
-                        if tmp_line[0]=="*JOINT_TYPE":
-                            self.joint_type = int(tmp_line[1])
+                        if tmp_line[0]=="*JOINT_MOS_TYPE":
+                            self.joint_mos_type = tmp_line[1]
                         elif tmp_line[0]=="*BOLT_SIZE":
                             self.bolt_size = tmp_line[1]
                         elif tmp_line[0]=="*BOLT_MATERIAL":
@@ -146,7 +146,7 @@ class InputFileParser:
     def print(self):
         print("*PROJECT_NAME:               {0:^}".format(self.project_name))
         print("*METHOD:                     {0:^}".format(self.method))
-        print("*JOINT_TYPE:                 {0:^}".format(str(self.joint_type)))
+        print("*JOINT_MOS_TYPE:             {0:^}".format(self.joint_mos_type))
         print("*BOLT_SIZE:                  {0:^}".format(self.bolt_size))
         print("*BOLT_MATERIAL:              {0:^}".format(self.bolt_material))
         print("*COF_CLAMP:                  {0:^}".format(str(self.cof_clamp)))

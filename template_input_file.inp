@@ -5,11 +5,11 @@
 #########################
 
 *PROJECT_NAME = first bolt analysis
-*METHOD = ESAPSS # ECSS or VDI2230
+*METHOD = ESAPSS # ECSS or VDI2230 (not implemented)
 
 # Definition of used bolt
 *BOLT_DEFINITION
-    *JOINT_TYPE = 3 # really neccessary??
+    *JOINT_MOS_TYPE = min # min (STD) or mean: use min or mean preload for slippage MOS calculation
     *BOLT_SIZE = M3 # or e.g. M8f for fine thread
     *BOLT_MATERIAL = Ti<m5
     *COF_CLAMP = 0.3 # min. coefficient of friction between clamped parts
