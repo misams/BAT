@@ -25,7 +25,7 @@
 # Definition of clamped parts
 *CLAMPED_PARTS_DEFINITION
     *NMBR_SHEAR_PLANES = 1
-    *USE_SHIM = [1.4305, M3] # also use "no" or shim out of database
+    *USE_SHIM = [Ti<m5, M3] # also use "no" or shim out of database
     *THROUGH_HOLE_DIAMETER = 3.2 # D_B, drilled hole diameter of clamped parts
     *SUBST_DA = no # substitutional outside diameter of of the basic solid at the interface
     # define n-clamped parts

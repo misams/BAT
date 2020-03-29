@@ -56,6 +56,7 @@ class EsaPss:
         self.nue_max = 0.0
         self.bolt_results = {} # results per bolt / loadcase
         self.MOS_glob_slip = 0.0 # global slippage margin
+        self.MOS_pres = 0.0 # yield check under bolt head 
         # calculate clamped-part stiffness
         self._calc_joint_stiffness()
         # calculate embedding losses of joint
@@ -208,6 +209,7 @@ class EsaPss:
         # calculate tightening factor (preload scatter incl. friction and tight. dev. tolerance)
         self.alpha_A = self.FPreMax/self.FPreMin
         # service preload with embedding
+        # TODO thermal effects missing!
         self.FPreMinServ = self.FPreMin-self.FZ
         self.FPreMaxServ = self.FPreMax-self.FZ
         self.FPreMeanServ = (self.FPreMinServ+self.FPreMaxServ)/2
@@ -233,6 +235,9 @@ class EsaPss:
         # degree of utilization (utilization of the minimum yield point)
         self.nue_min = self.sig_v_min/self.used_bolt_mat.sig_y
         self.nue_max = self.sig_v_max/self.used_bolt_mat.sig_y
+        #
+        # calculate yield MOS under bolt head / first clamped part after tightening
+        self.MOS_pres = self._mos_pres(self.FPreMax)
 
         # perform calculation for all bolts / loadcases
         sum_FPA = 0.0
@@ -266,14 +271,41 @@ class EsaPss:
             MOS_u = self.used_bolt_mat.sig_u/math.sqrt( ((self.FPreMaxServ+\
                 FSA*self.inp_file.fos_u)/self.used_bolt.As)**2 +\
                     3*(0.5*self.tau_max)**2 )-1
+            # yield margin for pressure under bolt head
+            MOS_loc_pres = self._mos_pres(self.FPreMaxServ+FSA*self.inp_file.fos_y)
             # save data for each bolt/loadcase to result dict
-            # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u]
-            self.bolt_results.update({lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u]})
+            # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
+            self.bolt_results.update({lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap,\
+                MOS_y, MOS_u, MOS_loc_pres]})
 
         # calculate global slippage margin
         # total lateral joint force which can be transmitted via friction
         F_tot_lat = (sum_FPreMeanServ-sum_FPA)*self.inp_file.cof_clamp*self.inp_file.nmbr_shear_planes
         self.MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
+
+    # check yield MoS under bolt head and between washer and first clamped part
+    def _mos_pres(self, F_axial):
+        MOS_pres = 0.0 # return value
+        # yield strength of first clamped part (under washer)
+        sig_y_pres = self.materials.materials[self.inp_file.clamped_parts[1][0]].sig_y
+        if self.inp_file.use_shim != "no": # with washer
+            # minimal area under bolt head
+            A_pres_1 = (self.used_bolt.dh**2)*math.pi/4 - \
+                (self.used_washer.dmin**2)*math.pi/4
+            # yield strength of first washer (under bolt head)
+            MOS_pres_1 = self.used_washer_material.sig_y / (F_axial/A_pres_1) - 1
+            # minimal area under washer and first clamped part
+            A_pres_2 = (self.used_washer.dmaj**2)*math.pi/4 - \
+                (self.inp_file.through_hole_diameter**2)*math.pi/4
+            MOS_pres_2 = sig_y_pres / (F_axial/A_pres_2) - 1
+            # minimum MOS_pres
+            MOS_pres = min(MOS_pres_1, MOS_pres_2)
+        else: # without washer
+            # minimal area under bolt head
+            A_pres = (self.used_bolt.dh**2)*math.pi/4 - \
+                (self.inp_file.through_hole_diameter**2)*math.pi/4
+            MOS_pres = sig_y_pres / (F_axial/A_pres) - 1
+        return MOS_pres
 
     # print joint inputs
     def print_input(self):
@@ -316,7 +348,10 @@ class EsaPss:
             "Embedding [micron]:", self.emb_micron, "")
         output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
             "Preload loss due embedding FZ [N]:", self.FZ, "")
-        #output_str += "|{0: ^93}|\n".format(' ') # empty line within section
+        output_str += "|{0:-^93}|\n".format('-') # empty line within section
+        output_str += "| {0:<50} {1:^20.1%} {2:^20}|\n".format(\
+            "Min. MoS (yield) under bolt head / washer [%]:", self.MOS_pres, "")
+        # min / max table
         output_str += "{0:=^95}\n".format('=') # global splitter
         output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("", "MIN (mu_max)", "MAX (mu_min)")
         output_str += "{0:=^95}\n".format('=')
@@ -331,8 +366,9 @@ class EsaPss:
             "Bolt preload after tightening [N]:", self.FPreMin, self.FPreMax)
         output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
             "MEAN Bolt preload after tightening [N]:", self.FPreMean)
-        output_str += "| {0:<50}|{1:^41.2f}|\n".format(\
-            "Preload Scatter Alpha_A [-]:", self.alpha_A)
+        output_str += "| {0:<50}|{1:>19.2f} / \u00B1{2:<18.1%}|\n".format(\
+            "Preload Scatter / Tightening Factor Alpha_A [-]:",\
+                self.alpha_A, (self.alpha_A-1)/(self.alpha_A+1))
         output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
             "Bolt preload at service incl. embedding [N]:", self.FPreMinServ, self.FPreMaxServ)
         output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
@@ -344,8 +380,8 @@ class EsaPss:
             "Normal stress after tightening [MPa]:", self.sig_n_min, self.sig_n_max)
         output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
             "Von-Mises equiv. stress aft. tightening [MPa]:", self.sig_v_min, self.sig_v_max)
-        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
-            "Bolt utilization [%]:", self.nue_min*100, self.nue_max*100)
+        output_str += "| {0:<50}|{1:^20.1%}|{2:^20.1%}|\n".format(\
+            "Bolt utilization [%]:", self.nue_min, self.nue_max)
         output_str += "{0:=^95}\n".format('=')
         # return output_str
         return output_str
@@ -355,7 +391,7 @@ class EsaPss:
         output_str = "" # use output_str for print() or print-to-file
         # define header
         output_str += "{0:=^127}\n".format('=')
-        # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u]
+        # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
         output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
             .format("Number", "Bolt /", "Axial Bolt", "Shear Bolt", "Add. Bolt", "Red. Clmp.", \
             "Slippage", "Gapping", "Yield", "Ultimate")
@@ -367,22 +403,25 @@ class EsaPss:
         output_str += "{0:=^127}\n".format('=')
         # loop through bolts / loadcases
         bolt_nmbr = 0 # to fill Number-# column
-        min_mos = [math.inf, math.inf, math.inf, math.inf]
+        min_mos = [math.inf, math.inf, math.inf, math.inf, math.inf]
         for lc_name, lc in self.bolt_results.items():
             bolt_nmbr += 1 # count bolts / loadcases
-            #         lc[0   1   2     3   4             5        6       7   ]
-            # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u]
+            #         lc[0   1   2     3   4             5        6       7     8           ]
+            # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
             output_str += "|{0:^8d}|{1:^12}|{2:^12.1f}|{3:^12.1f}|{4:^12.1f}|{5:^12.1f}|{6:^12.0%}|{7:^12.0%}|{8:^12.0%}|{9:^12.0%}|\n"\
                 .format(bolt_nmbr, lc_name, lc[0], lc[1], lc[2], lc[3], lc[4], lc[5], lc[6], lc[7])
             # get mininum margins of safety
             min_mos = [min(min_mos[0], lc[4]), min(min_mos[1], lc[5]), \
-                min(min_mos[2], lc[6]), min(min_mos[3], lc[7])]
+                min(min_mos[2], lc[6]), min(min_mos[3], lc[7]), min(min_mos[4], lc[8])]
         output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
         output_str += "|{0:>73}|{1:^12.0%}|{2:^12.0%}|{3:^12.0%}|{4:^12.0%}|\n".format(\
                 "Minimum Margins of Safety: ", min_mos[0], min_mos[1], min_mos[2], min_mos[3])
         output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
         output_str += "|{0:>73}|{1:^12.0%}|{2:^12}|{3:^12}|{4:^12}|\n".format(\
                 "Global Slippage Margin: ", self.MOS_glob_slip, "-", "-", "-")
+        output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
+        output_str += "|{0:>73}|{1:^12}|{2:^12}|{3:^12.0%}|{4:^12}|\n".format(\
+                "Minimum MoS against Yield under bolt head / first clamp part: ", "-", "-", min_mos[4], "-")
         output_str += "{0:=^127}\n".format('=')
         # return output_str
         return output_str
