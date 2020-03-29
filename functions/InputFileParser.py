@@ -33,6 +33,8 @@ class InputFileParser:
         self.fos_gap = 0.0
         # bolt-loads
         self.bolt_loads = {}
+        # temperature input
+        self.delta_t = 0.0
         # read input file and process
         self._read_input_file()
 
@@ -132,6 +134,14 @@ class InputFileParser:
                         elif len(tmp_line)==3: # optional lat-force-2 NOT used
                             self.bolt_loads.update({tmp_line[0] : (float(tmp_line[1]), float(tmp_line[2]), 0.0)})
                         line = fid.readline()
+                elif line.lstrip()[0:16]=="*TEMP_DEFINITION":
+                    line = fid.readline()
+                    # loop through bolt-load-definition block
+                    while line.lstrip()[0:20]!="*TEMP_DEFINITION_END":
+                        tmp_line = self._proc_line(line) # process inp-file line
+                        if tmp_line[0]=="*DELTA_T":
+                            self.delta_t = float(tmp_line[1])
+                        line = fid.readline()
 
                 line = fid.readline()
 
@@ -167,3 +177,4 @@ class InputFileParser:
         print("*FOS_SLIP:                   {0:^}".format(str(self.fos_slip)))
         print("*FOS_GAP:                    {0:^}".format(str(self.fos_gap)))
         print("BOLT-LOADS:                  {0:^}".format(str(self.bolt_loads)))
+        print("*DELTA_T:                    {0:^}".format(str(self.delta_t)))

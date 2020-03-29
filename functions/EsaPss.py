@@ -38,6 +38,7 @@ class EsaPss:
         self.nmbr_interf = 0 # number of interfaces for embedding
         self.emb_micron = 0.0 # delta_l_Z of embedding
         self.FZ = 0.0 # preload loss due to embedding
+        self.Ft = 0.0 # preload loss due to CTE missmatch
         self.nmbr_of_bolts = len(self.inp_file.bolt_loads)
         self.FPreMin = 0.0 # preload after tightening
         self.FPreMax = 0.0
@@ -60,7 +61,7 @@ class EsaPss:
         # calculate clamped-part stiffness
         self._calc_joint_stiffness()
         # calculate embedding losses of joint
-        self._calc_embedding()
+        self._calc_preload_loss()
         # calculate joint properties
         self._calc_joint_results()
 
@@ -108,10 +109,14 @@ class EsaPss:
         self.Dsub = math.sqrt(4*self.Asub/math.pi + self.inp_file.through_hole_diameter**2)
 
         # Asub (SHM)
-        #Asub = math.pi/4*(self.used_bolt.dh**2-self.inp_file.through_hole_diameter**2+math.pi/8*\
+        #self.lk = self.lk - self.used_washer.h
+        #self.used_bolt.dh = 12.3
+        #self.used_washer.dmaj = 16
+        #self.inp_file.through_hole_diameter = 8.4
+        #self.Asub = math.pi/4*(self.used_bolt.dh**2-self.inp_file.through_hole_diameter**2+math.pi/8*\
         #    (self.used_washer.dmaj/self.used_bolt.dh-1)*(self.used_bolt.dh*self.lk/5+\
         #        self.lk**2/100)) # with wront parentheses 
-        #Asub = math.pi/4*( self.used_bolt.dh**2-self.inp_file.through_hole_diameter**2 ) +\
+        #self.Asub = math.pi/4*( self.used_bolt.dh**2-self.inp_file.through_hole_diameter**2 ) +\
         #    math.pi/8*( self.used_washer.dmaj/self.used_bolt.dh-1 ) *\
         #        ( self.used_bolt.dh*self.lk/5+self.lk**2/100 ) # with corrected parentheses
 
@@ -126,8 +131,8 @@ class EsaPss:
         self.phi_K = self.cB/(self.cB+self.cP) # load factor - load under bolt head
         self.phi_n = self.inp_file.loading_plane_factor*self.phi_K # load factor - load at n*lk
 
-    # calculate embedding of joint 
-    def _calc_embedding(self):
+    # calculate embedding and thermal loss of joint 
+    def _calc_preload_loss(self):
         # calculate number of interfaces, incl. threads (#cl_parts + 1 + 1xthread)
         self.nmbr_interf = len(self.inp_file.clamped_parts) + 2
         if self.inp_file.use_shim != "no":
@@ -166,6 +171,9 @@ class EsaPss:
         self.emb_micron *= self.nmbr_interf
         # calculate preload loss due to embedding (micron to mm: 1/1000)
         self.FZ = self.emb_micron*self.phi_K*self.cP/1000
+        # calculate preload loss due to temperature effects (CTE missmatch), p.5-29
+        #TODO: implement CTE effects
+        #self.Ft = 
 
     # fitted embedding Table 18.4, p.18-7
     # valid quadratic fit between values: 1.0 < ldk < 11.0
@@ -260,7 +268,10 @@ class EsaPss:
             sum_FQ += FQ
             #
             # local slippage margin
-            MOS_loc_slip = (self.FPreMinServ-FPA)/(FKreq*self.inp_file.fos_slip)-1
+            if FKreq==0:
+                MOS_loc_slip = math.inf # set to "inf" if no shear load defined
+            else:
+                MOS_loc_slip = (self.FPreMinServ-FPA)/(FKreq*self.inp_file.fos_slip)-1
             # local gapping margin
             MOS_gap = self.FPreMinServ/(self.inp_file.fos_gap*FPA)-1
             # yield bolt margin
@@ -318,11 +329,11 @@ class EsaPss:
         output_str += "{0:=^95}\n".format('=') # global splitter
         output_str += "| {0:^91} |\n".format("ESA PSS-03-208 Issue 1 ANALYSIS RESULTS")
         output_str += "{0:=^95}\n".format('=')
-        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
             "Tightening torque w/o prevailing torque [Nm]:", self.inp_file.tight_torque, "")
-        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
             "Prevailing torque [Nm]:", self.Tp, "")
-        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
             "Tightening torque with prevailing torque [Nm]:", \
                 self.inp_file.tight_torque+self.Tp, "")
         output_str += "|{0:-^93}|\n".format('-') # empty line within section
@@ -355,10 +366,10 @@ class EsaPss:
         output_str += "{0:=^95}\n".format('=') # global splitter
         output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("", "MIN (mu_max)", "MAX (mu_min)")
         output_str += "{0:=^95}\n".format('=')
-        output_str += "| {0:<50}|{1:^20.2f}|{2:^20.2f}|\n".format(\
+        output_str += "| {0:<50}|{1:^20.3f}|{2:^20.3f}|\n".format(\
             "Coefficient of friction under bolt head:", self.inp_file.cof_bolt[2],\
                 self.inp_file.cof_bolt[0])
-        output_str += "| {0:<50}|{1:^20.2f}|{2:^20.2f}|\n".format(\
+        output_str += "| {0:<50}|{1:^20.3f}|{2:^20.3f}|\n".format(\
             "Coefficient of friction in thread:", self.inp_file.cof_bolt[3],\
                 self.inp_file.cof_bolt[1])
         output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-") # empty line in table

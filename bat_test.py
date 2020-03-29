@@ -8,7 +8,7 @@ def main():
     #TODO: Linux vs. Windows file path mess?!
     os.chdir("./BAT")
     # read and process input file
-    inp_file = fp.InputFileParser("./template_input_file.inp")
+    inp_file = fp.InputFileParser("./input_test_1.inp")
     #inp_file.print() # debug
 
     # read and process material-database files
