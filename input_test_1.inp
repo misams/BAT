@@ -25,7 +25,7 @@
 # Definition of clamped parts
 *CLAMPED_PARTS_DEFINITION
     *NMBR_SHEAR_PLANES = 1
-    *USE_SHIM = [8.8, M8] # also use "no" or shim out of database
+    *USE_SHIM = [8.8, LNM8] # also use "no" or shim out of database
     *THROUGH_HOLE_DIAMETER = 8.4 # D_B, drilled hole diameter of clamped parts
     *SUBST_DA = no # substitutional outside diameter of of the basic solid at the interface
     # define n-clamped parts
@@ -55,7 +55,7 @@ Bolt-5  55	0	0
 # temperature difference defined in K or deg-C
 # reference temperature = assembly temperature
 *TEMP_DEFINITION
-    *DELTA_T = 50 # +K means higher temperature at service
+    *DELTA_T = 200 # +K means higher temperature at service
 *TEMP_DEFINITION_END
 
 # Definition of bolted flange

@@ -18,12 +18,11 @@ def main():
 
     # handle bolt db files - read all available bolts and washers
     bolts = bm.BoltManager("./db")
-    # TODO: add LN_washer usability!
     #print(bolts.bolts["M2"])
 
     # calc ESA-PSS
     ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
-    #ana_esapss.print_results("./output_test.out")
+    ana_esapss.print_results("./output_test.out")
 
 if __name__ == '__main__':
     main()

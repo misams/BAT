@@ -38,7 +38,7 @@ class EsaPss:
         self.nmbr_interf = 0 # number of interfaces for embedding
         self.emb_micron = 0.0 # delta_l_Z of embedding
         self.FZ = 0.0 # preload loss due to embedding
-        self.Ft = 0.0 # preload loss due to CTE missmatch
+        self.FT = 0.0 # preload loss due to CTE missmatch
         self.nmbr_of_bolts = len(self.inp_file.bolt_loads)
         self.FPreMin = 0.0 # preload after tightening
         self.FPreMax = 0.0
@@ -61,7 +61,8 @@ class EsaPss:
         # calculate clamped-part stiffness
         self._calc_joint_stiffness()
         # calculate embedding losses of joint
-        self._calc_preload_loss()
+        self._calc_embedding()
+        self._calc_thermal_loss()
         # calculate joint properties
         self._calc_joint_results()
 
@@ -131,8 +132,8 @@ class EsaPss:
         self.phi_K = self.cB/(self.cB+self.cP) # load factor - load under bolt head
         self.phi_n = self.inp_file.loading_plane_factor*self.phi_K # load factor - load at n*lk
 
-    # calculate embedding and thermal loss of joint 
-    def _calc_preload_loss(self):
+    # calculate embedding preload loss
+    def _calc_embedding(self):
         # calculate number of interfaces, incl. threads (#cl_parts + 1 + 1xthread)
         self.nmbr_interf = len(self.inp_file.clamped_parts) + 2
         if self.inp_file.use_shim != "no":
@@ -170,10 +171,26 @@ class EsaPss:
         # calculate complete embedding in micron = delta_l_Z
         self.emb_micron *= self.nmbr_interf
         # calculate preload loss due to embedding (micron to mm: 1/1000)
-        self.FZ = self.emb_micron*self.phi_K*self.cP/1000
-        # calculate preload loss due to temperature effects (CTE missmatch), p.5-29
-        #self.nmbr_interf: implement CTE effects
-        #self.Ft = 
+        # sigen-convention: minus (-) is loss in preload
+        self.FZ = -self.emb_micron*self.phi_K*self.cP/1000
+
+    # calculate thermal effects on preload (preload loss / increase)
+    def _calc_thermal_loss(self):
+        # thermal expansion of bolt
+        d_l_B = self.used_bolt_mat.alpha * self.lk * self.inp_file.delta_t
+        # thermal expansion of clamped parts (incl. washer if used)
+        if self.inp_file.use_shim != "no":
+            d_l_P = self.used_washer_material.alpha * self.inp_file.delta_t * self.used_washer.h
+        else:
+            d_l_P = 0.0
+        # add all clamped parts thermal expansions
+        for _, c in self.inp_file.clamped_parts.items():
+            d_l_P += self.materials.materials[c[0]].alpha * c[1] * self.inp_file.delta_t
+        # preload loss in bolt: clamped parts - bolts
+        d_l = d_l_P - d_l_B
+        # preload loss due to thermal effects
+        # sigen-convention: minus (-) is loss in preload
+        self.FT = d_l * (self.cB*self.cP)/(self.cB+self.cP)
 
     # fitted embedding Table 18.4, p.18-7
     # valid quadratic fit between values: 1.0 < ldk < 11.0
@@ -216,10 +233,9 @@ class EsaPss:
         self.FPreMean = (self.FPreMax+self.FPreMin)/2
         # calculate tightening factor (preload scatter incl. friction and tight. dev. tolerance)
         self.alpha_A = self.FPreMax/self.FPreMin
-        # service preload with embedding
-        # TODO thermal effects missing!
-        self.FPreMinServ = self.FPreMin-self.FZ
-        self.FPreMaxServ = self.FPreMax-self.FZ
+        # service preload with embedding and thermal loss
+        self.FPreMinServ = self.FPreMin + self.FZ + self.FT
+        self.FPreMaxServ = self.FPreMax + self.FZ + self.FT
         self.FPreMeanServ = (self.FPreMinServ+self.FPreMaxServ)/2
         # mean preload in the complete joint (incl. all bolts)
         sum_FPreMeanServ = self.nmbr_of_bolts*self.FPreMeanServ
@@ -357,11 +373,10 @@ class EsaPss:
             "Number of interfaces for embedding [-]:", self.nmbr_interf, "")
         output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
             "Embedding [micron]:", self.emb_micron, "")
-        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
             "Preload loss due embedding FZ [N]:", self.FZ, "")
-        output_str += "|{0:-^93}|\n".format('-') # empty line within section
-        output_str += "| {0:<50} {1:^20.1%} {2:^20}|\n".format(\
-            "Min. MoS (yield) under bolt head / washer [%]:", self.MOS_pres, "")
+        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
+            "Preload loss due thermal effects FT [N]:", self.FT, "")
         # min / max table
         output_str += "{0:=^95}\n".format('=') # global splitter
         output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("", "MIN (mu_max)", "MAX (mu_min)")
@@ -372,6 +387,8 @@ class EsaPss:
         output_str += "| {0:<50}|{1:^20.3f}|{2:^20.3f}|\n".format(\
             "Coefficient of friction in thread:", self.inp_file.cof_bolt[3],\
                 self.inp_file.cof_bolt[1])
+        output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
+            "Coefficient of friction between clamped parts:", self.inp_file.cof_clamp)
         output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-") # empty line in table
         output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
             "Bolt preload after tightening [N]:", self.FPreMin, self.FPreMax)
@@ -393,6 +410,9 @@ class EsaPss:
             "Von-Mises equiv. stress aft. tightening [MPa]:", self.sig_v_min, self.sig_v_max)
         output_str += "| {0:<50}|{1:^20.1%}|{2:^20.1%}|\n".format(\
             "Bolt utilization [%]:", self.nue_min, self.nue_max)
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-")
+        output_str += "| {0:<50}|{1:^20}|{2:^20.0%}|\n".format(\
+            "Min. MoS (yield) under bolt head / washer [%]:", "-", self.MOS_pres)
         output_str += "{0:=^95}\n".format('=')
         # return output_str
         return output_str
