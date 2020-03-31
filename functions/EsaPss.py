@@ -172,7 +172,7 @@ class EsaPss:
         # calculate preload loss due to embedding (micron to mm: 1/1000)
         self.FZ = self.emb_micron*self.phi_K*self.cP/1000
         # calculate preload loss due to temperature effects (CTE missmatch), p.5-29
-        #TODO: implement CTE effects
+        #self.nmbr_interf: implement CTE effects
         #self.Ft = 
 
     # fitted embedding Table 18.4, p.18-7

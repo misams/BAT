@@ -1,0 +1,17 @@
+# TODO file for BAT
+#
+- add LN-washer usability
+- add thermal effects (preload reduction)
+- LINUX vs. Windows file stuff
+- check different cB values for result impact; cB SHM conservative??
+- print input data (summary of input file) for result file / output
+
+- error handling??
+- input / output file handling
+
+
+
+# Future tasks
+- bending loads / eccentric loadings?
+- ECCS / VDI2230
+- GUI --> always happy to find GUI developers! ;-)
