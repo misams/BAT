@@ -1,5 +1,6 @@
 import csv
 from pathlib import Path
+import logging
 
 class InputFileParser:
     def __init__(self, input_file):
@@ -40,7 +41,9 @@ class InputFileParser:
 
     # read input file and process data
     def _read_input_file(self):
-        print("Read and process input file:  {0:^}".format(str(self.input_file.absolute())))
+        log_str = "Read and process input file:  {0:^}".format(str(self.input_file.absolute()))
+        print(log_str)
+        logging.info(log_str)
         with open(self.input_file) as fid:
             line = fid.readline() # first line in file
             while line: # loop through input-file

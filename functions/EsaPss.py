@@ -60,7 +60,7 @@ class EsaPss:
         self.MOS_pres = 0.0 # yield check under bolt head 
         # calculate clamped-part stiffness
         self._calc_joint_stiffness()
-        # calculate embedding losses of joint
+        # calculate embedding and thermal losses of joint
         self._calc_embedding()
         self._calc_thermal_loss()
         # calculate joint properties

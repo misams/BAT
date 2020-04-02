@@ -1,0 +1,4 @@
+2020-04-02 22:28:36 INFO     first log info message
+2020-04-02 22:28:36 DEBUG    first debug message
+2020-04-02 22:28:36 CRITICAL bla
+2020-04-02 22:28:36 INFO     Read and process input file:  /home/sams/git/BAT/input_test_1.inp
