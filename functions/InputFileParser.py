@@ -41,9 +41,11 @@ class InputFileParser:
 
     # read input file and process data
     def _read_input_file(self):
-        log_str = "Read and process input file:  {0:^}".format(str(self.input_file.absolute()))
+        # log
+        log_str = "Read and process input file: {0:^}".format(str(self.input_file.absolute()))
         print(log_str)
         logging.info(log_str)
+        # process data
         with open(self.input_file) as fid:
             line = fid.readline() # first line in file
             while line: # loop through input-file
@@ -72,7 +74,8 @@ class InputFileParser:
                                     float(tmp_cof_bolt_str[2]), float(tmp_cof_bolt_str[3]))
                             else:
                                 #TODO: error handling
-                                print("ERROR: 4 input parameters (COF_BOLT) neccessary!")
+                                logging.error("ERROR: 4 input parameters (COF_BOLT) neccessary!",\
+                                    exc_info=True)
                         elif tmp_line[0]=="*TIGHT_TORQUE":
                             self.tight_torque = float(tmp_line[1])
                         elif tmp_line[0]=="*BOLT_HEAD_TYPE":
@@ -145,7 +148,6 @@ class InputFileParser:
                         if tmp_line[0]=="*DELTA_T":
                             self.delta_t = float(tmp_line[1])
                         line = fid.readline()
-
                 line = fid.readline()
 
     # process commented input file line

@@ -18,9 +18,9 @@ def main():
         format="%(asctime)s %(levelname)-8s %(message)s",
         level=logging.DEBUG,
         datefmt="%Y-%m-%d %H:%M:%S")
-    logging.info("first log info message")
-    logging.debug("first debug message")
-    logging.critical("bla")
+    log_header_str = "BAT run started\n#\n# Bolt Analysis Tool (BAT) Log-File\n"\
+        "#\n# BAT-Version: {0:^}\n#".format(__version__)
+    logging.info(log_header_str)
 
     # define command line argument handling
     arg_parser = argparse.ArgumentParser(description="Bolt Analysis Tool (BAT)")
@@ -40,22 +40,26 @@ def main():
     # parse command line arguments
     args = arg_parser.parse_args()
 
+    # print header
+    print("#\n# Bolt Analysis Tool (BAT: {0:^})\n#".format(__version__))
+
     # read and process input file
     inp_file = fp.InputFileParser(args.Input)
     #inp_file.print() # debug
 
     # read and process material-database files
     materials = mat.MaterialManager("./db/materials.mat")
-    #bolt_mat = inp_file.bolt_material
-    #print(materials.bolt_mat[bolt_mat])
 
     # handle bolt db files - read all available bolts and washers
     bolts = bm.BoltManager("./db")
-    #print(bolts.bolts["M2"])
 
     # calc ESA-PSS
     ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
-    #ana_esapss.print_results(args.Output)
+    ana_esapss.print_results(args.Output)
+
+    # print end of BAT analysis
+    print("\n#\n# END of BAT analysis")
+    logging.info("BAT run successfully finished")
 
 if __name__ == '__main__':
     main()

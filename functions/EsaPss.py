@@ -3,6 +3,8 @@ from .MaterialManager import MaterialManager
 from .BoltManager import BoltManager
 from pathlib import Path
 import math
+import logging
+from datetime import datetime
 """
 Bolt analysis according to ESA PSS-03-208 Issue 1, December 1989
 Guidelines for threaded fasteners, european space agency
@@ -12,6 +14,11 @@ Concentric axially loaded joints
 """
 class EsaPss:
     def __init__(self, inp_file : InputFileParser, materials : MaterialManager, bolts : BoltManager):
+        # logging
+        log_str = "ESA PSS-03-208 Issue 1 (December 1989) analysis executed."
+        print(log_str)
+        logging.info(log_str)
+        # EsaPss inputs
         self.inp_file = inp_file
         self.materials = materials
         self.bolts = bolts
@@ -24,7 +31,9 @@ class EsaPss:
             self.used_washer = bolts.washers[self.inp_file.use_shim[1]] # "no" or washer-id
             self.used_washer_material = self.materials.materials[self.inp_file.use_shim[0]]
         else:
-            print("No shim used.")
+            log_str = "No shim used."
+            print(log_str)
+            logging.warning(log_str)
         # calculated variables
         self.Tp = 0.0 # prevailing torque
         self.lk = 0.0 # clamped length
@@ -88,24 +97,26 @@ class EsaPss:
         # Joint elastic compliance for joints with large areas of contact, p.6-7ff.
         # calc substitutional area for clamped parts
         if self.lk/self.used_bolt.d >= 1.0 and self.lk/self.used_bolt.d <=2:
-            print("Calculate Asub acc. to case (ii)")
+            logging.info("Calculate Asub acc. to case (ii)")
             # if *SUBST_DA = no use rule of thumb for DA estimation, p.6-11
             if self.inp_file.subst_da != "no":
                 self.DA = float(self.inp_file.subst_da)
-                print("Substitutional diameter DA set: {0:.2f}".format(self.DA))
+                logging.info("Substitutional diameter DA set: {0:.2f}".format(self.DA))
             else:
                 self.DA = self.used_bolt.dh*(2.+3.)/2. # mean value betw. range 2-3 used, p.6-11
-                print("Mean substitutional diameter DA set (rule of thumb): {0:.2f}".format(self.DA))
+                logging.info("Mean substitutional diameter DA set (rule of thumb): {0:.2f}".format(self.DA))
             # calc subst. area for clamped parts
             self.Asub = math.pi/4*( self.used_bolt.dh**2-self.inp_file.through_hole_diameter**2 ) +\
                 math.pi/8*( self.DA/self.used_bolt.dh-1 ) *\
                 ( self.used_bolt.dh*self.lk/5+(self.lk**2)/100 )
         elif self.lk/self.used_bolt.d > 2.0:
-            print("Calculate Asub acc. to case (iii)")
+            logging.info("Calculate Asub acc. to case (iii)")
             self.Asub = math.pi/4*((self.used_bolt.dh+self.lk/10)**2 - \
                 self.inp_file.through_hole_diameter**2)
         else:
+            # TODO: error handling?
             print("Case i applicable - change DA!!")
+            logging.error("Casi i applicable - no equation implemented. Change DA to avoid case (i).")
         # calc Dsub out of Asub
         self.Dsub = math.sqrt(4*self.Asub/math.pi + self.inp_file.through_hole_diameter**2)
 
@@ -143,7 +154,7 @@ class EsaPss:
         # embedding table 18.4 fitted between ratios 1.0 < ldk < 11.0
         # above and below these values - limit values used
         if self.nmbr_interf==2 or self.nmbr_interf==3:
-            print("Embedding: 2 to 3 interfaces")
+            logging.info("Embedding: 2 to 3 interfaces")
             if lkd < 1.0:
                 self.emb_micron = self._embedding_2_to_3(1.0)
             elif lkd > 11.0:
@@ -151,7 +162,7 @@ class EsaPss:
             else:
                 self.emb_micron = self._embedding_2_to_3(lkd)
         elif self.nmbr_interf==4 or self.nmbr_interf==5:
-            print("Embedding: 4 to 5 interfaces")
+            logging.info("Embedding: 4 to 5 interfaces")
             if lkd < 1.0:
                 self.emb_micron = self._embedding_4_to_5(1.0)
             elif lkd > 11.0:
@@ -159,7 +170,7 @@ class EsaPss:
             else:
                 self.emb_micron = self._embedding_4_to_5(lkd)
         elif self.nmbr_interf==6 or self.nmbr_interf==7:
-            print("Embedding: 6 to 7 interfaces")
+            logging.info("Embedding: 6 to 7 interfaces")
             if lkd < 1.0:
                 self.emb_micron = self._embedding_6_to_7(1.0)
             elif lkd > 11.0:
@@ -167,7 +178,10 @@ class EsaPss:
             else:
                 self.emb_micron = self._embedding_6_to_7(lkd)
         else:
-            print("Number of interfaces out of tabled range")
+            # TODO: error handling?
+            log_str = "Number of interfaces out of tabled range"
+            print(log_str)
+            logging.error(log_str)
         # calculate complete embedding in micron = delta_l_Z
         self.emb_micron *= self.nmbr_interf
         # calculate preload loss due to embedding (micron to mm: 1/1000)
@@ -460,12 +474,21 @@ class EsaPss:
     # print results to terminal and/or file
     def print_results(self, output_file=None):
         # print results to terminal
+        print() # print empty line
         print(self._get_global_result_str())
         print(self._get_bolt_result_str())
         # print results to output_file
         if output_file != None:
+            log_str = "Output file written: {0:^}".format(output_file)
+            print(log_str)
+            logging.info(log_str)
+            # write output file
             with open(output_file, 'w') as fid:
                 # write global results to file
                 fid.write(self._get_global_result_str())
                 # write bolts results to file
                 fid.write(self._get_bolt_result_str())
+                # write timestamp to output file
+                fid.write("BAT Analysis Timestamp: {0:^}\n".format(\
+                    str(datetime.now().strftime("%d-%m-%Y %H:%M:%S"))))
+

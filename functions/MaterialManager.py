@@ -1,6 +1,7 @@
 import csv
 import functions.Material as mat
 from pathlib import Path
+import logging
 """
 Manage all materials: bolts and clamped-parts
 """
@@ -12,7 +13,8 @@ class MaterialManager:
 
     # import mat-file and return material-dict
     def _import_mat_db(self):
-        print("Read material database file:  {0:^}".format(str(self._mat_file.absolute())))
+        logging.info("Read material database file:  {0:^}".format(str(self._mat_file.absolute())))
+        # read materal db-file
         tmp_dict = {}
         with open(self._mat_file) as csvfile:
             readCSV = csv.reader(csvfile, delimiter=';')

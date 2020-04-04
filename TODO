@@ -5,14 +5,13 @@
 - LINUX vs. Windows file stuff
 - check different cB values for result impact; cB SHM conservative??
 - print input data (summary of input file) for result file / output
-
-- error handling??
+- error handling / exceptions??
 - input / output file handling
-- log file?
 - visualization?
 
 
 # Future tasks
+
 - more bolts in bolt pattern (flange and shear pattern)
 - bending loads / eccentric loadings?
 - ECCS / VDI2230

@@ -1,4 +1,25 @@
-2020-04-02 22:28:36 INFO     first log info message
-2020-04-02 22:28:36 DEBUG    first debug message
-2020-04-02 22:28:36 CRITICAL bla
-2020-04-02 22:28:36 INFO     Read and process input file:  /home/sams/git/BAT/input_test_1.inp
+2020-04-04 20:24:55 INFO     BAT run started
+#
+# Bolt Analysis Tool (BAT) Log-File
+#
+# BAT-Version: 0.1(beta)
+#
+2020-04-04 20:24:55 INFO     Read and process input file: /home/sams/git/BAT/input_test_1.inp
+2020-04-04 20:24:55 INFO     Read material database file:  /home/sams/git/BAT/db/materials.mat
+2020-04-04 20:24:55 INFO     Process and add bolt db-file: db/ISO4014_4017_hex_metric.bolt
+2020-04-04 20:24:55 INFO      -> Hexagon bolt with metric standard thread ISO4014/4017
+2020-04-04 20:24:55 INFO     Process and add bolt db-file: db/ISO4762_socket_metric.bolt
+2020-04-04 20:24:55 INFO      -> Hexagon socket bolt with metric standard thread ISO4762 (former DIN912)
+2020-04-04 20:24:55 INFO     Process and add bolt db-file: db/ISO8765_8676_hex_metric_fine.bolt
+2020-04-04 20:24:55 INFO      -> Hexagon bolt with metric fine thread ISO8765/8676
+2020-04-04 20:24:55 INFO     Process and add bolt db-file: db/ISO12474_socket_metric_fine.bolt
+2020-04-04 20:24:55 INFO      -> Hexagon socket bolt with metric fine thread ISO12474 (former DIN912)
+2020-04-04 20:24:55 INFO     Process and add washer db-file: db/LN9016.wshr
+2020-04-04 20:24:55 INFO      -> LN 9016 washers (Scheiben angesenkt)
+2020-04-04 20:24:55 INFO     Process and add washer db-file: db/DIN125_p1.wshr
+2020-04-04 20:24:55 INFO      -> DIN 125 part 1 washer for metric threaded bolts
+2020-04-04 20:24:55 INFO     ESA PSS-03-208 Issue 1 (December 1989) analysis executed.
+2020-04-04 20:24:55 INFO     Calculate Asub acc. to case (iii)
+2020-04-04 20:24:55 INFO     Embedding: 4 to 5 interfaces
+2020-04-04 20:24:55 INFO     Output file written: ./output_test.out
+2020-04-04 20:24:55 INFO     BAT run successfully finished
