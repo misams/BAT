@@ -178,7 +178,8 @@ class EsaPss:
             else:
                 self.emb_micron = self._embedding_6_to_7(lkd)
         else:
-            # TODO: error handling?
+            # TODO: error handling --> use WARNING and use largest embedding!?
+            #
             log_str = "Number of interfaces out of tabled range"
             print(log_str)
             logging.error(log_str)

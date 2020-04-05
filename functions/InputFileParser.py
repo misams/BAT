@@ -1,6 +1,7 @@
 import csv
 from pathlib import Path
 import logging
+from functions.exceptions import InputCofError
 
 class InputFileParser:
     def __init__(self, input_file):
@@ -74,8 +75,8 @@ class InputFileParser:
                                     self.cof_bolt = (float(tmp_cof_bolt_str[0]), float(tmp_cof_bolt_str[1]), \
                                         float(tmp_cof_bolt_str[2]), float(tmp_cof_bolt_str[3]))
                                 else:
-                                    # raise error
-                                    raise ValueError("ERROR: 4 input parameters (COF_BOLT) neccessary! "+\
+                                    # raise exception: InputCofError
+                                    raise InputCofError("4 input parameters (*COF_BOLT) neccessary! "+\
                                         "Check syntax in input (*.inp) file.")
                             elif tmp_line[0]=="*TIGHT_TORQUE":
                                 self.tight_torque = float(tmp_line[1])
@@ -150,17 +151,24 @@ class InputFileParser:
                                 self.delta_t = float(tmp_line[1])
                             line = fid.readline()
                     line = fid.readline()
-        # catch exceptions
+        # catch exceptions and re-throw
         except FileNotFoundError as fnf_error:
             logging.error(fnf_error, exc_info=True)
-        except ValueError as val_error:
-            logging.error(val_error, exc_info=True)
+            raise
+        except InputCofError as inp_cof_error:
+            logging.error(inp_cof_error, exc_info=True)
+            raise
 
     # process commented input file line
     def _proc_line(self, line):
         # delete preceding whitespaces; replace comment chr and split string
         tmp = line.lstrip().replace('#', '=').split('=')
         return [tmp[0].strip(), tmp[1].strip()]
+
+    # check processed input file that all required inputs are correctly set
+    def _check_processed_input(self):
+        # TODO: implement! --> how to handle different input-file options (e.g. multi-bols?)
+        pass
 
     # print function of input file
     # DEBUGGING function

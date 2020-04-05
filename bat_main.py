@@ -2,6 +2,7 @@ import functions.InputFileParser as fp
 import functions.MaterialManager as mat
 import functions.BoltManager as bm
 import functions.EsaPss as esapss
+import functions.exceptions as ex
 import os
 import argparse
 import logging
@@ -43,23 +44,31 @@ def main():
     # print header
     print("#\n# Bolt Analysis Tool (BAT: {0:^})\n#".format(__version__))
 
-    # read and process input file
-    inp_file = fp.InputFileParser(args.Input)
-    #inp_file.print() # debug
+    # run BAT analysis
+    try:
+        # read and process input file
+        inp_file = fp.InputFileParser(args.Input)
+        #inp_file.print() # debug
 
-    # read and process material-database files
-    materials = mat.MaterialManager("./db/materials.mat")
+        # read and process material-database files
+        materials = mat.MaterialManager("./db/materials.mat")
 
-    # handle bolt db files - read all available bolts and washers
-    bolts = bm.BoltManager("./db")
+        # handle bolt db files - read all available bolts and washers
+        bolts = bm.BoltManager("./db")
 
-    # calc ESA-PSS
-    ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
-    ana_esapss.print_results(args.Output)
+        # calc ESA-PSS
+        ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
+        ana_esapss.print_results(args.Output)
 
-    # print end of BAT analysis
-    print("\n#\n# END of BAT analysis")
-    logging.info("BAT run successfully finished")
+    # handle exceptions
+    except (ex.Error, ValueError, IndexError, FileNotFoundError) as e:
+        # print successful end of BAT analysis
+        print("#\n# ERROR --> go to \"bat.log\" file\n# BAT analysis terminated: " + str(e))
+        logging.error("BAT run terminated due to fatal error: " + str(e))
+    else:
+        # print successful end of BAT analysis
+        print("\n#\n# END of BAT analysis")
+        logging.info("BAT run successfully finished")
 
 if __name__ == '__main__':
     main()

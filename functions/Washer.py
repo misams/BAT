@@ -13,11 +13,15 @@ class Washer:
 
     # process csv-line out of washer database file
     def _csv_line_to_washer(self, row):
-        self.name = row[0].lstrip().rstrip()
-        # geometrical properties
-        self.dmin = float(row[1])
-        self.dmaj = float(row[2])
-        self.h = float(row[3])
+        try:
+            self.name = row[0].lstrip().rstrip()
+            # geometrical properties
+            self.dmin = float(row[1])
+            self.dmaj = float(row[2])
+            self.h = float(row[3])
+        # excepton handling - catch ValueError --> incorrect syntax in washer file
+        except ValueError:
+            raise
 
     # string output for print()
     def __str__(self):

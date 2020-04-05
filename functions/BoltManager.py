@@ -22,34 +22,53 @@ class BoltManager:
         for f in db_dir.rglob('*.bolt'):
             logging.info("Process and add bolt db-file: {0:^}".format(str(f)))
             # read csv 
-            with open(f) as fid:
-                line = fid.readline() # first line in file
-                while line:
-                    if line[0:7]=="BOLT_ID":
-                        logging.info(" -> " + line.split('=')[1].lstrip().rstrip())
-                    elif line[0]=='#':
-                        pass # ignore comment lines --> more elegant version of while/if??
-                    else:
-                        csv_row = line.strip().split(';')
-                        # read all bolts of file and save it to dict
-                        self.bolts.update( { csv_row[0] : bolt.Bolt(csv_row)} )
-                    line = fid.readline()
+            try:
+                with open(f) as fid:
+                    line = fid.readline() # first line in file
+                    while line:
+                        if line[0:7]=="BOLT_ID":
+                            logging.info(" -> " + line.split('=')[1].lstrip().rstrip())
+                        elif line[0]=='#':
+                            pass # ignore comment lines --> more elegant version of while/if??
+                        else:
+                            csv_row = line.strip().split(';')
+                            # read all bolts of file and save it to dict
+                            self.bolts.update( { csv_row[0] : bolt.Bolt(csv_row)} )
+                        line = fid.readline()
+            # exception handling
+            except (ValueError, IndexError) as e:
+                logging.error("Bolt database file ({0:^}) read error --> check correct syntax!\n{1:^}"\
+                    .format(str(f), str(e)), exc_info=True)
+                raise
+            except FileNotFoundError as fnf_error:
+                logging.error(fnf_error, exc_info=True)
+                raise
+
         # process only *.wshr files
         for f in db_dir.rglob('*.wshr'):
             logging.info("Process and add washer db-file: {0:^}".format(str(f)))
             # read csv 
-            with open(f) as fid:
-                line = fid.readline() # first line in file
-                while line:
-                    if line[0:9]=="WASHER_ID":
-                        logging.info(" -> " + line.split('=')[1].lstrip().rstrip())
-                    elif line[0]=='#':
-                        pass # ignore comment lines --> more elegant version of while/if??
-                    else:
-                        csv_row = line.strip().split(';')
-                        # read all bolts of file and save it to dict
-                        self.washers.update( { csv_row[0] : washer.Washer(csv_row)} )
-                    line = fid.readline()
+            try:
+                with open(f) as fid:
+                    line = fid.readline() # first line in file
+                    while line:
+                        if line[0:9]=="WASHER_ID":
+                            logging.info(" -> " + line.split('=')[1].lstrip().rstrip())
+                        elif line[0]=='#':
+                            pass # ignore comment lines --> more elegant version of while/if??
+                        else:
+                            csv_row = line.strip().split(';')
+                            # read all bolts of file and save it to dict
+                            self.washers.update( { csv_row[0] : washer.Washer(csv_row)} )
+                        line = fid.readline()
+            # exception handling
+            except (ValueError, IndexError) as e:
+                logging.error("Washer database file ({0:^}) read error --> check correct syntax!\n{1:^}"\
+                    .format(str(f), str(e)), exc_info=True)
+                raise
+            except FileNotFoundError as fnf_error:
+                logging.error(fnf_error, exc_info=True)
+                raise
 
     # print bolts and washers dicts
     # DEBUGGING function

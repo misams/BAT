@@ -22,20 +22,24 @@ class Bolt:
 
     # process csv-line out of bolt database file
     def _csv_line_to_bolt(self, row):
-        self.name = row[0].lstrip().rstrip()
-        # geometrical properties
-        self.d = float(row[1])
-        self.p = float(row[2])
-        self.d2 = float(row[3])
-        self.d3 = float(row[4])
-        self.As = float(row[5])
-        self.dh = float(row[6])
-        # calculated values
-        self.A1 = math.pow(self.d, 2.0)*math.pi/4.0
-        self.Ap = math.pow(self.d2, 2.0)*math.pi/4.0
-        self.A3 = math.pow(self.d3, 2.0)*math.pi/4.0
-        self.slope = math.atan(self.p/(self.d2*math.pi)) # phi
-        self.ds = math.sqrt(4*self.As/math.pi) # stress diameter
+        try:
+            self.name = row[0].lstrip().rstrip()
+            # geometrical properties
+            self.d = float(row[1])
+            self.p = float(row[2])
+            self.d2 = float(row[3])
+            self.d3 = float(row[4])
+            self.As = float(row[5])
+            self.dh = float(row[6])
+            # calculated values
+            self.A1 = math.pow(self.d, 2.0)*math.pi/4.0
+            self.Ap = math.pow(self.d2, 2.0)*math.pi/4.0
+            self.A3 = math.pow(self.d3, 2.0)*math.pi/4.0
+            self.slope = math.atan(self.p/(self.d2*math.pi)) # phi
+            self.ds = math.sqrt(4*self.As/math.pi) # stress diameter
+        # excepton handling - catch ValueError --> incorrect syntax in bolt db-file
+        except ValueError:
+            raise
 
     # string output for print()
     def __str__(self):

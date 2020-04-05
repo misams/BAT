@@ -16,14 +16,18 @@ class Material:
 
     # process csv-line out of material database file
     def _csv_line_to_material(self, row):
-        self.name = row[0].lstrip().rstrip()
-        # material properties
-        self.E = float(row[1])
-        self.sig_y = float(row[3])
-        self.sig_u = float(row[2])
-        self.alpha = float(row[4]) # CTE
-        self.tau_y = self.sig_y*0.577
-        self.tau_u = self.sig_u*0.577
+        try:
+            self.name = row[0].lstrip().rstrip()
+            # material properties
+            self.E = float(row[1])
+            self.sig_y = float(row[3])
+            self.sig_u = float(row[2])
+            self.alpha = float(row[4]) # CTE
+            self.tau_y = self.sig_y*0.577
+            self.tau_u = self.sig_u*0.577
+        # excepton handling - catch ValueError --> incorrect syntax in material db-file
+        except ValueError:
+            raise
 
     # string output for print()
     def __str__(self):
