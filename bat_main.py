@@ -59,7 +59,7 @@ def main():
         # calc ESA-PSS
         ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
         ana_esapss.calc_thermal_loss_VDI(ana_esapss.FPreMax)
-        ana_esapss.print_results(args.Output)
+        #ana_esapss.print_results(args.Output)
 
     # handle exceptions
     except (ex.Error, ValueError, IndexError, FileNotFoundError) as e:
