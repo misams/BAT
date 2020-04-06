@@ -10,3 +10,11 @@ class InputCofError(Error):
 class InputCheckParameterMissing(Error):
     """ during check of processed input file a required parameter is missing - check input file """
     pass
+
+class AsubError(Error):
+    """ error occured during calculation of Asub for clamped part stiffness """
+    pass
+
+class EmbeddingInterfacesError(Error):
+    """ number of interfaces out of definition range """
+    pass

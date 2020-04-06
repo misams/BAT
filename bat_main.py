@@ -58,6 +58,7 @@ def main():
 
         # calc ESA-PSS
         ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
+        ana_esapss.calc_thermal_loss_VDI(ana_esapss.FPreMax)
         ana_esapss.print_results(args.Output)
 
     # handle exceptions
@@ -67,7 +68,7 @@ def main():
         logging.error("BAT run terminated due to fatal error: " + str(e))
     else:
         # print successful end of BAT analysis
-        print("\n#\n# END of BAT analysis")
+        print("#\n# END of BAT analysis")
         logging.info("BAT run successfully finished")
 
 if __name__ == '__main__':

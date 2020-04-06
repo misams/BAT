@@ -27,10 +27,11 @@
     *NMBR_SHEAR_PLANES = 1
     *USE_SHIM = [8.8, LNM8] # also use "no" or shim out of database
     *THROUGH_HOLE_DIAMETER = 8.4 # D_B, drilled hole diameter of clamped parts
-    *SUBST_DA = no # substitutional outside diameter of of the basic solid at the interface
-    # define n-clamped parts
-    *CLAMPED_PART(1) = [Titan, 10]
+    *SUBST_DA = no # "no" or define substitutional outside diameter of of the basic solid at the interface
+    # define n-clamped parts; use ascending index and start at (1)
+    *CLAMPED_PART(1) = [Titan, 100]
     *CLAMPED_PART(2) = [S355, 5]
+    *CLAMPED_PART(3) = [S355, 5]
 *CLAMPED_PARTS_DEFINITION_END
 
 # Definition of factors of safety
@@ -56,6 +57,14 @@ Bolt-5  55	0	0
 # reference temperature = assembly temperature
 *TEMP_DEFINITION
     *DELTA_T = 200 # +K means higher temperature at service
+    #
+    # VDI method takes Young's Modulus into account
+    # define material properties at temp T
+    *TEMP_BOLT_MATERIAL = A4-80
+    *TEMP_USE_SHIM = [8.8, LNM8] # also use "no" or shim out of database
+    *TEMP_CLAMPED_PART(1) = [Titan, 100]
+    *TEMP_CLAMPED_PART(2) = [S355, 5]
+    *TEMP_CLAMPED_PART(3) = [S355, 5]
 *TEMP_DEFINITION_END
 
 # Definition of bolted flange

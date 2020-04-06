@@ -37,6 +37,9 @@ class InputFileParser:
         self.bolt_loads = {}
         # temperature input
         self.delta_t = 0.0
+        self.temp_bolt_material = "" # for VDI method
+        self.temp_use_shim = None # for VDI method
+        self.temp_clamped_parts = {} # for VDI method
         # read input file and process
         self._read_input_file()
 
@@ -149,6 +152,23 @@ class InputFileParser:
                             tmp_line = self._proc_line(line) # process inp-file line
                             if tmp_line[0]=="*DELTA_T":
                                 self.delta_t = float(tmp_line[1])
+                            # VDI method for thermal preload loss with E
+                            elif tmp_line[0]=="*TEMP_BOLT_MATERIAL":
+                                self.temp_bolt_material = tmp_line[1]
+                            elif tmp_line[0]=="*TEMP_USE_SHIM":
+                                if tmp_line[1] == "no":
+                                    self.use_shim = "no"
+                                else:
+                                    # get (shim-material, shim-type) or no
+                                    tmp_shim_str = tmp_line[1].replace('[','').replace(']','').split(',')
+                                    self.temp_use_shim = (tmp_shim_str[0].lstrip().rstrip(), \
+                                        tmp_shim_str[1].lstrip().rstrip())
+                            elif tmp_line[0][:-3]=="*TEMP_CLAMPED_PART":
+                                # get clamped-part number (inside brackets) and save n-CP to dict
+                                cp_nmbr = int(tmp_line[0][tmp_line[0].find("(")+1:tmp_line[0].find(")")])
+                                # get (clamped_part_material, thickness)
+                                tmp_cp_str = tmp_line[1].replace('[','').replace(']','').split(',')
+                                self.temp_clamped_parts.update({cp_nmbr : (tmp_cp_str[0].strip(), float(tmp_cp_str[1]))})
                             line = fid.readline()
                     line = fid.readline()
         # catch exceptions and re-throw
@@ -197,3 +217,8 @@ class InputFileParser:
         print("*FOS_GAP:                    {0:^}".format(str(self.fos_gap)))
         print("BOLT-LOADS:                  {0:^}".format(str(self.bolt_loads)))
         print("*DELTA_T:                    {0:^}".format(str(self.delta_t)))
+        print("# VDI method for thermal preload loss with E")
+        print("*TEMP_BOLT_MATERIAL:         {0:^}".format(str(self.temp_bolt_material)))
+        print("*TEMP_USE_SHIM:              {0:^}".format(str(self.temp_use_shim)))
+        print("*TEMP_CLAMPED_PARTS(i):      {0:^}".format(str(self.temp_clamped_parts)))
+        print()

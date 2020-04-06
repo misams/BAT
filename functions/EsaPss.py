@@ -1,6 +1,7 @@
-from .InputFileParser import InputFileParser
-from .MaterialManager import MaterialManager
-from .BoltManager import BoltManager
+from functions.InputFileParser import InputFileParser
+from functions.MaterialManager import MaterialManager
+from functions.BoltManager import BoltManager
+from functions.exceptions import EmbeddingInterfacesError
 from pathlib import Path
 import math
 import logging
@@ -9,8 +10,7 @@ from datetime import datetime
 Bolt analysis according to ESA PSS-03-208 Issue 1, December 1989
 Guidelines for threaded fasteners, european space agency
 
-Concentric axially loaded joints
-
+Concentric axially loaded joints (slightly modified and adopted)
 """
 class EsaPss:
     def __init__(self, inp_file : InputFileParser, materials : MaterialManager, bolts : BoltManager):
@@ -25,15 +25,17 @@ class EsaPss:
         # used variables for analysis
         self.used_bolt = bolts.bolts[self.inp_file.bolt_size] # used bolt
         self.used_bolt_mat = self.materials.materials[self.inp_file.bolt_material]
-        self.used_washer = ""
-        self.used_washer_material = ""
+        # if washer used --> add washer to clamped parts
         if self.inp_file.use_shim != "no":
-            self.used_washer = bolts.washers[self.inp_file.use_shim[1]] # "no" or washer-id
-            self.used_washer_material = self.materials.materials[self.inp_file.use_shim[0]]
+            self.inp_file.clamped_parts.update( \
+                {0 : (self.inp_file.use_shim[0], self.bolts.washers[self.inp_file.use_shim[1]].h) })
+            log_str = "Shim added to clamped materials --> {0:^}".format(str(self.inp_file.clamped_parts[0]))
+            print(log_str)
+            logging.info(log_str)
         else:
             log_str = "No shim used."
             print(log_str)
-            logging.warning(log_str)
+            logging.info(log_str)
         # calculated variables
         self.Tp = 0.0 # prevailing torque
         self.lk = 0.0 # clamped length
@@ -80,9 +82,6 @@ class EsaPss:
         # calc clamping length of all clamped parts
         for _, c in self.inp_file.clamped_parts.items():
             self.lk += c[1] # add thickness of clamped parts to lk
-        # incl. washer if defined
-        if self.used_washer.name.lower() != "no":
-            self.lk += self.used_washer.h
         # add length for bolt head + nut for stiffness
         lB = self.lk + 0.8*self.used_bolt.d
         # stiffness of bolt - cB
@@ -114,9 +113,10 @@ class EsaPss:
             self.Asub = math.pi/4*((self.used_bolt.dh+self.lk/10)**2 - \
                 self.inp_file.through_hole_diameter**2)
         else:
-            # TODO: error handling?
-            print("Case i applicable - change DA!!")
-            logging.error("Casi i applicable - no equation implemented. Change DA to avoid case (i).")
+            self.Asub = math.pi/4*(self.used_bolt.dh**2 - self.inp_file.through_hole_diameter**2)
+            warn_str = "WARNING: Asub acc. to case (i). DA == dK --> use with caution!"
+            print(warn_str)
+            logging.warning(warn_str)
         # calc Dsub out of Asub
         self.Dsub = math.sqrt(4*self.Asub/math.pi + self.inp_file.through_hole_diameter**2)
 
@@ -133,8 +133,6 @@ class EsaPss:
         #        ( self.used_bolt.dh*self.lk/5+self.lk**2/100 ) # with corrected parentheses
 
         # calculate stiffness of clamped parts - cP
-        if self.inp_file.use_shim != "no":
-            self.cP += 1./(self.Asub*self.used_washer_material.E/self.used_washer.h)
         for _, c in self.inp_file.clamped_parts.items():
             self.cP += 1./(self.Asub*self.materials.materials[c[0]].E/c[1])
         self.cP = 1./self.cP # clamped part stiffness' in series
@@ -146,9 +144,7 @@ class EsaPss:
     # calculate embedding preload loss
     def _calc_embedding(self):
         # calculate number of interfaces, incl. threads (#cl_parts + 1 + 1xthread)
-        self.nmbr_interf = len(self.inp_file.clamped_parts) + 2
-        if self.inp_file.use_shim != "no":
-            self.nmbr_interf += 1 # add interface if shim is used
+        self.nmbr_interf = len(self.inp_file.clamped_parts) + 1
         # Table 18.4, p.18-7
         lkd = self.lk/self.used_bolt.d # ratio for embedding lookup
         # embedding table 18.4 fitted between ratios 1.0 < ldk < 11.0
@@ -169,7 +165,7 @@ class EsaPss:
                 self.emb_micron = self._embedding_4_to_5(11.0)
             else:
                 self.emb_micron = self._embedding_4_to_5(lkd)
-        elif self.nmbr_interf==6 or self.nmbr_interf==7:
+        elif self.nmbr_interf >= 6:
             logging.info("Embedding: 6 to 7 interfaces")
             if lkd < 1.0:
                 self.emb_micron = self._embedding_6_to_7(1.0)
@@ -177,12 +173,17 @@ class EsaPss:
                 self.emb_micron = self._embedding_6_to_7(11.0)
             else:
                 self.emb_micron = self._embedding_6_to_7(lkd)
+            # if nmbr_interf > 7 --> warning (result not correct)
+            if self.nmbr_interf > 7:
+                warn_str = "WARNING: Number of embedding interfaces > 7 "\
+                    + "--> out of tables range. Embedding preload loss NOT corrrect!"
+                print(warn_str)
+                logging.warning(warn_str)
         else:
-            # TODO: error handling --> use WARNING and use largest embedding!?
-            #
-            log_str = "Number of interfaces out of tabled range"
-            print(log_str)
-            logging.error(log_str)
+            # number of interfaces too large
+            err_str = "Number of interfaces out of tabled range"
+            logging.error(err_str)
+            raise EmbeddingInterfacesError(err_str)
         # calculate complete embedding in micron = delta_l_Z
         self.emb_micron *= self.nmbr_interf
         # calculate preload loss due to embedding (micron to mm: 1/1000)
@@ -193,12 +194,8 @@ class EsaPss:
     def _calc_thermal_loss(self):
         # thermal expansion of bolt
         d_l_B = self.used_bolt_mat.alpha * self.lk * self.inp_file.delta_t
-        # thermal expansion of clamped parts (incl. washer if used)
-        if self.inp_file.use_shim != "no":
-            d_l_P = self.used_washer_material.alpha * self.inp_file.delta_t * self.used_washer.h
-        else:
-            d_l_P = 0.0
         # add all clamped parts thermal expansions
+        d_l_P = 0.0
         for _, c in self.inp_file.clamped_parts.items():
             d_l_P += self.materials.materials[c[0]].alpha * c[1] * self.inp_file.delta_t
         # preload loss in bolt: clamped parts - bolts
@@ -206,6 +203,73 @@ class EsaPss:
         # preload loss due to thermal effects
         # sigen-convention: minus (-) is loss in preload
         self.FT = d_l * (self.cB*self.cP)/(self.cB+self.cP)
+
+    # VDI method for thermal preload loss (Young's Modulus variation taken into account)
+    # NOTE: not the most beautiful implementation...I know - but it works and you do not need it that often
+    def calc_thermal_loss_VDI(self, F_V_th):
+        print("#\n# VDI thermal preload method excecuted")
+        # if washer used --> add washer to clamped parts
+        if self.inp_file.temp_use_shim != "no":
+            self.inp_file.temp_clamped_parts.update( \
+                {0 : (self.inp_file.temp_use_shim[0], self.bolts.washers[self.inp_file.temp_use_shim[1]].h) })
+        # calculate clamped part stiffness cPT at temperature T
+        # --> for Young's Modulus E_PT calculation only
+        cPT = 0.0
+        for _, c in self.inp_file.temp_clamped_parts.items():
+            cPT += 1./(self.Asub*self.materials.materials[c[0]].E/c[1])
+        cPT = 1./cPT # clamped part stiffness' in series
+        # get material properties at correct temperatures
+        E_SRT = self.used_bolt_mat.E # E of bolt at RT
+        E_ST = self.materials.materials[self.inp_file.temp_bolt_material].E
+        E_PRT = self.cP*self.lk/self.Asub # E_overall_mean of clamped parts at RT
+        E_PT = cPT*self.lk/self.Asub
+        alpha_SRT = self.used_bolt_mat.alpha
+        alpha_ST = self.materials.materials[self.inp_file.temp_bolt_material].alpha
+        # add all clamped parts thermal expansions
+        d_l_P = 0.0 # at RT
+        for _, c in self.inp_file.clamped_parts.items():
+            d_l_P += self.materials.materials[c[0]].alpha * c[1] * self.inp_file.delta_t
+        d_l_P_T = 0.0 # at T
+        for _, c in self.inp_file.temp_clamped_parts.items():
+            d_l_P_T += self.materials.materials[c[0]].alpha * c[1] * self.inp_file.delta_t
+        # overall/mean alpha of clamped parts
+        alpha_PRT = d_l_P/(self.inp_file.delta_t*self.lk)
+        alpha_PT = d_l_P_T/(self.inp_file.delta_t*self.lk)
+        # print parameters
+        output_str = "" # use output_str for print() or print-to-file
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("", "Room-Temp (ref)", "defined Temp.")
+        output_str += "{0:=^95}\n".format('=')
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Young's Modulus of bolt [MPa]:", E_SRT, E_ST)
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Young's Modulus of clamped parts [MPa]:", E_PRT, E_PT)
+        output_str += "| {0:<50}|{1:^20.3e}|{2:^20.3e}|\n".format(\
+            "CTE of bolt [1/K]:", alpha_SRT, alpha_ST)
+        output_str += "| {0:<50}|{1:^20.3e}|{2:^20.3e}|\n".format(\
+            "CTE of clamped parts [1/K]:", alpha_PRT, alpha_PT)
+        output_str += "| {0:<50}|{1:^20.3e}|{2:^20}|\n".format(\
+            "Stiffness of bolt [N/mm]:", self.cB, '-')
+        output_str += "| {0:<50}|{1:^20.3e}|{2:^20}|\n".format(\
+            "Stiffness of clamped parts [N/mm]:", self.cP, '-')
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Clamped length lk [mm]:", self.lk, "")
+        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
+            "Temperature difference delta_T [K]:", self.inp_file.delta_t, "")
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        print(output_str)
+        # check all alpha-combinations
+        a_S_combi = [alpha_SRT, alpha_SRT, alpha_ST, alpha_ST]
+        a_P_combi = [alpha_PRT, alpha_PT, alpha_PRT, alpha_PT]
+        # calculate preload loss with E taken into account
+        dS = 1./self.cB # compliance of bolt
+        dP = 1./self.cP # compliance of clamped parts
+        denom = dS*E_SRT/E_ST + dP*E_PRT/E_PT # denominator
+        # TODO: finish method
+        for a_S, a_P in zip(a_S_combi, a_P_combi):
+            d_F_th = F_V_th * (1 - (dS+dP)/denom) + self.lk*(a_S-a_P)*self.inp_file.delta_t/denom
+            print(d_F_th)
 
     # fitted embedding Table 18.4, p.18-7
     # valid quadratic fit between values: 1.0 < ldk < 11.0
@@ -333,11 +397,11 @@ class EsaPss:
         if self.inp_file.use_shim != "no": # with washer
             # minimal area under bolt head
             A_pres_1 = (self.used_bolt.dh**2)*math.pi/4 - \
-                (self.used_washer.dmin**2)*math.pi/4
+                (self.bolts.washers[self.inp_file.use_shim[1]].dmin**2)*math.pi/4
             # yield strength of first washer (under bolt head)
-            MOS_pres_1 = self.used_washer_material.sig_y / (F_axial/A_pres_1) - 1
+            MOS_pres_1 = self.materials.materials[self.inp_file.use_shim[0]].sig_y / (F_axial/A_pres_1) - 1
             # minimal area under washer and first clamped part
-            A_pres_2 = (self.used_washer.dmaj**2)*math.pi/4 - \
+            A_pres_2 = (self.bolts.washers[self.inp_file.use_shim[1]].dmaj**2)*math.pi/4 - \
                 (self.inp_file.through_hole_diameter**2)*math.pi/4
             MOS_pres_2 = sig_y_pres / (F_axial/A_pres_2) - 1
             # minimum MOS_pres
