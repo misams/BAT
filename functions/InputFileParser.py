@@ -37,6 +37,7 @@ class InputFileParser:
         self.bolt_loads = {}
         # temperature input
         self.delta_t = 0.0
+        self.temp_use_vdi_method = ""
         self.temp_bolt_material = "" # for VDI method
         self.temp_use_shim = None # for VDI method
         self.temp_clamped_parts = {} # for VDI method
@@ -153,6 +154,8 @@ class InputFileParser:
                             if tmp_line[0]=="*DELTA_T":
                                 self.delta_t = float(tmp_line[1])
                             # VDI method for thermal preload loss with E
+                            elif tmp_line[0]=="*TEMP_USE_VDI_METHOD":
+                                self.temp_use_vdi_method = tmp_line[1]
                             elif tmp_line[0]=="*TEMP_BOLT_MATERIAL":
                                 self.temp_bolt_material = tmp_line[1]
                             elif tmp_line[0]=="*TEMP_USE_SHIM":
@@ -217,7 +220,8 @@ class InputFileParser:
         print("*FOS_GAP:                    {0:^}".format(str(self.fos_gap)))
         print("BOLT-LOADS:                  {0:^}".format(str(self.bolt_loads)))
         print("*DELTA_T:                    {0:^}".format(str(self.delta_t)))
-        print("# VDI method for thermal preload loss with E")
+        print("#\n# VDI method for thermal preload loss with E\n#")
+        print("*TEMP_USE_VDI_METHOD:        {0:^}".format(self.temp_use_vdi_method))
         print("*TEMP_BOLT_MATERIAL:         {0:^}".format(str(self.temp_bolt_material)))
         print("*TEMP_USE_SHIM:              {0:^}".format(str(self.temp_use_shim)))
         print("*TEMP_CLAMPED_PARTS(i):      {0:^}".format(str(self.temp_clamped_parts)))

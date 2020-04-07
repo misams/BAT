@@ -49,7 +49,8 @@ class EsaPss:
         self.nmbr_interf = 0 # number of interfaces for embedding
         self.emb_micron = 0.0 # delta_l_Z of embedding
         self.FZ = 0.0 # preload loss due to embedding
-        self.FT = 0.0 # preload loss due to CTE missmatch
+        self.FT = None # preload loss due to CTE missmatch [FT_min, FT_max]
+        self.FT_outp_str = "" # only used for VDI method
         self.nmbr_of_bolts = len(self.inp_file.bolt_loads)
         self.FPreMin = 0.0 # preload after tightening
         self.FPreMax = 0.0
@@ -73,7 +74,7 @@ class EsaPss:
         self._calc_joint_stiffness()
         # calculate embedding and thermal losses of joint
         self._calc_embedding()
-        self._calc_thermal_loss()
+        self._calc_thermal_loss() # default: standard thermal method
         # calculate joint properties
         self._calc_joint_results()
 
@@ -202,18 +203,21 @@ class EsaPss:
         d_l = d_l_P - d_l_B
         # preload loss due to thermal effects
         # sigen-convention: minus (-) is loss in preload
-        self.FT = d_l * (self.cB*self.cP)/(self.cB+self.cP)
+        FT_res = d_l * (self.cB*self.cP)/(self.cB+self.cP)
+        self.FT = [FT_res, FT_res] # save FT for FPreMin & FPreMax
 
     # VDI method for thermal preload loss (Young's Modulus variation taken into account)
     # NOTE: not the most beautiful implementation...I know - but it works and you do not need it that often
-    def calc_thermal_loss_VDI(self, F_V_th):
-        print("#\n# VDI thermal preload method excecuted")
-        # if washer used --> add washer to clamped parts
+    def calc_thermal_loss_VDI(self, F_VRT_min, F_VRT_max):
+        log_str = "VDI thermal preload method used for analysis"
+        print(log_str)
+        logging.info(log_str)
+        # if washer used --> add washer to clamped parts for ###
         if self.inp_file.temp_use_shim != "no":
             self.inp_file.temp_clamped_parts.update( \
                 {0 : (self.inp_file.temp_use_shim[0], self.bolts.washers[self.inp_file.temp_use_shim[1]].h) })
         # calculate clamped part stiffness cPT at temperature T
-        # --> for Young's Modulus E_PT calculation only
+        # --> used for Young's Modulus E_PT calculation only
         cPT = 0.0
         for _, c in self.inp_file.temp_clamped_parts.items():
             cPT += 1./(self.Asub*self.materials.materials[c[0]].E/c[1])
@@ -235,10 +239,21 @@ class EsaPss:
         # overall/mean alpha of clamped parts
         alpha_PRT = d_l_P/(self.inp_file.delta_t*self.lk)
         alpha_PT = d_l_P_T/(self.inp_file.delta_t*self.lk)
-        # print parameters
+        # calculate preload loss with E taken into account
+        # reduction of preload (alpha_ST and alpha_PT used acc. to VDI2230)
+        # sign (-) is loss in preload
+        dS = 1./self.cB # compliance of bolt
+        dP = 1./self.cP # compliance of clamped parts
+        denom = dS*E_SRT/E_ST + dP*E_PRT/E_PT # denominator
+        d_F_th_min = F_VRT_min * (1 - (dS+dP)/denom) \
+            + self.lk*(alpha_ST - alpha_PT)*self.inp_file.delta_t/denom
+        d_F_th_max = F_VRT_max * (1 - (dS+dP)/denom) \
+            + self.lk*(alpha_ST - alpha_PT)*self.inp_file.delta_t/denom
+        # generate output string
         output_str = "" # use output_str for print() or print-to-file
         output_str += "{0:=^95}\n".format('=') # global splitter
-        output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("", "Room-Temp (ref)", "defined Temp.")
+        output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("VDI 2230 Thermal Preload Method",\
+            "Room-Temp (ref)", "defined Temp.")
         output_str += "{0:=^95}\n".format('=')
         output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
             "Young's Modulus of bolt [MPa]:", E_SRT, E_ST)
@@ -253,23 +268,23 @@ class EsaPss:
         output_str += "| {0:<50}|{1:^20.3e}|{2:^20}|\n".format(\
             "Stiffness of clamped parts [N/mm]:", self.cP, '-')
         output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-")
-        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
-            "Clamped length lk [mm]:", self.lk, "")
-        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
-            "Temperature difference delta_T [K]:", self.inp_file.delta_t, "")
+        output_str += "| {0:<64} {1:^27.2f}|\n".format(\
+            "Clamped length lk [mm]:", self.lk)
+        output_str += "| {0:<64} {1:^27.1f}|\n".format(\
+            "Temperature difference delta_T [K]:", self.inp_file.delta_t)
+        output_str += "|-{0:-^50}-{1:-^20}-{2:-^20}|\n".format("-", "-", "-")
+        output_str += "| {0:<64} {1:>12.1f} / {2:<12.1f}|\n".format(\
+            "Term-1 preload loss based on FVmin / FVmax [N]:",\
+            F_VRT_min*(1-(dS+dP)/denom), F_VRT_max*(1-(dS+dP)/denom))
+        output_str += "| {0:<64} {1:^27.1f}|\n".format(\
+            "Term-2 Preload loss based on CTE [N]:",\
+                self.lk*(alpha_ST-alpha_PT)*self.inp_file.delta_t/denom)
+        output_str += "| {0:<64} {1:>12.1f} / {2:<12.1f}|\n".format(\
+            "Preload loss due to thermal effects based on FVmin / FVmax [N]:",\
+                d_F_th_min, d_F_th_max)
         output_str += "{0:=^95}\n".format('=') # global splitter
-        print(output_str)
-        # check all alpha-combinations
-        a_S_combi = [alpha_SRT, alpha_SRT, alpha_ST, alpha_ST]
-        a_P_combi = [alpha_PRT, alpha_PT, alpha_PRT, alpha_PT]
-        # calculate preload loss with E taken into account
-        dS = 1./self.cB # compliance of bolt
-        dP = 1./self.cP # compliance of clamped parts
-        denom = dS*E_SRT/E_ST + dP*E_PRT/E_PT # denominator
-        # TODO: finish method
-        for a_S, a_P in zip(a_S_combi, a_P_combi):
-            d_F_th = F_V_th * (1 - (dS+dP)/denom) + self.lk*(a_S-a_P)*self.inp_file.delta_t/denom
-            print(d_F_th)
+        # return tuple (d_F_th_min, d_F_th_max, output_str)
+        return (d_F_th_min, d_F_th_max, output_str)
 
     # fitted embedding Table 18.4, p.18-7
     # valid quadratic fit between values: 1.0 < ldk < 11.0
@@ -312,9 +327,14 @@ class EsaPss:
         self.FPreMean = (self.FPreMax+self.FPreMin)/2
         # calculate tightening factor (preload scatter incl. friction and tight. dev. tolerance)
         self.alpha_A = self.FPreMax/self.FPreMin
+        # check if VDI thermal method is used
+        if self.inp_file.temp_use_vdi_method == "yes":
+            temp_res = self.calc_thermal_loss_VDI(self.FPreMin, self.FPreMax)
+            self.FT = [temp_res[0], temp_res[1]] # safe FT for FPreMin & FPreMax
+            self.FT_outp_str = temp_res[2]
         # service preload with embedding and thermal loss
-        self.FPreMinServ = self.FPreMin + self.FZ + self.FT
-        self.FPreMaxServ = self.FPreMax + self.FZ + self.FT
+        self.FPreMinServ = self.FPreMin + self.FZ + self.FT[0]
+        self.FPreMaxServ = self.FPreMax + self.FZ + self.FT[1]
         self.FPreMeanServ = (self.FPreMinServ+self.FPreMaxServ)/2
         # mean preload in the complete joint (incl. all bolts)
         sum_FPreMeanServ = self.nmbr_of_bolts*self.FPreMeanServ
@@ -454,8 +474,15 @@ class EsaPss:
             "Embedding [micron]:", self.emb_micron, "")
         output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
             "Preload loss due embedding FZ [N]:", self.FZ, "")
-        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
-            "Preload loss due thermal effects FT [N]:", self.FT, "")
+        # if VDI method used
+        if self.inp_file.temp_use_vdi_method == "yes":
+            output_str += "| Preload loss due to thermal effects {0:^56}|\n".format(" ")
+            output_str += "| {0:<50} {1:>14.1f} / {2:<24.1f}|\n".format(\
+                "  based on FVmin / FVmax [N] (VDI method):",\
+                    self.FT[0], self.FT[1])
+        else:
+            output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
+                "Preload loss due thermal effects FT [N]:", self.FT[0], "")
         # min / max table
         output_str += "{0:=^95}\n".format('=') # global splitter
         output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("", "MIN (mu_max)", "MAX (mu_min)")
@@ -476,10 +503,17 @@ class EsaPss:
         output_str += "| {0:<50}|{1:>19.2f} / \u00B1{2:<18.1%}|\n".format(\
             "Preload Scatter / Tightening Factor Alpha_A [-]:",\
                 self.alpha_A, (self.alpha_A-1)/(self.alpha_A+1))
+        # if VDI method is used
+        if self.inp_file.temp_use_vdi_method == "yes":
+            output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+                "Total preload loss incl. emb. & temp. [N]:", self.FT[0]+self.FZ, self.FT[1]+self.FZ)
+        else:
+            output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
+                "Total preload loss incl. emb. & temp. [N]:", self.FT[0]+self.FZ)
         output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
-            "Bolt preload at service incl. embedding [N]:", self.FPreMinServ, self.FPreMaxServ)
+            "Bolt preload at service incl. emb. & temp. [N]:", self.FPreMinServ, self.FPreMaxServ)
         output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
-            "MEAN Bolt preload at service incl. embedding [N]:", self.FPreMeanServ)
+            "MEAN Bolt preload at serv. incl. emb. & temp. [N]:", self.FPreMeanServ)
         output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-")
         output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
             "Torsional stress after tightening [MPa]:", self.tau_min, self.tau_max)
@@ -541,6 +575,8 @@ class EsaPss:
         # print results to terminal
         print() # print empty line
         print(self._get_global_result_str())
+        if self.inp_file.temp_use_vdi_method == "yes":
+            print(self.FT_outp_str)
         print(self._get_bolt_result_str())
         # print results to output_file
         if output_file != None:
@@ -551,6 +587,9 @@ class EsaPss:
             with open(output_file, 'w') as fid:
                 # write global results to file
                 fid.write(self._get_global_result_str())
+                # if VDI method used write to file
+                if self.inp_file.temp_use_vdi_method == "yes":
+                    fid.write(self.FT_outp_str)
                 # write bolts results to file
                 fid.write(self._get_bolt_result_str())
                 # write timestamp to output file
