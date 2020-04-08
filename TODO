@@ -1,14 +1,13 @@
 # TODO file for BAT
 #
+- readme and docu ;-)
 - check global slippage margin
 - check Asub with newer SHM-Excel!
-- LINUX vs. Windows file stuff
+- LINUX vs. Windows file stuff / cross platform support
 - check different cB values for result impact; cB SHM conservative??
 - print input data (summary of input file) for result file / output
-- error handling / exceptions??
-- input / output file handling
-- visualization?
-
+- visualization? (bolt diagram?)
+- Base Class for analysis methods?
 
 # Future tasks
 

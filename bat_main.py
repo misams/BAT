@@ -7,7 +7,15 @@ import os
 import argparse
 import logging
 
-__version__ = "0.1(beta)"
+__version__ = "0.2(beta)"
+"""
+Change Log:
+
+v0.1(beta) - April 2020
+- first revision of beta software status
+v0.2(beta) - 08.04.2020
+- VDI 2230 thermal method added (takes Young's Modulus temperature dependance into account)
+"""
 
 def main():
     #TODO: Linux vs. Windows file path mess?!

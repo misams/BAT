@@ -208,7 +208,7 @@ class EsaPss:
 
     # VDI method for thermal preload loss (Young's Modulus variation taken into account)
     # NOTE: not the most beautiful implementation...I know - but it works and you do not need it that often
-    def calc_thermal_loss_VDI(self, F_VRT_min, F_VRT_max):
+    def _calc_thermal_loss_VDI(self, F_VRT_min, F_VRT_max):
         log_str = "VDI thermal preload method used for analysis"
         print(log_str)
         logging.info(log_str)
@@ -329,7 +329,7 @@ class EsaPss:
         self.alpha_A = self.FPreMax/self.FPreMin
         # check if VDI thermal method is used
         if self.inp_file.temp_use_vdi_method == "yes":
-            temp_res = self.calc_thermal_loss_VDI(self.FPreMin, self.FPreMax)
+            temp_res = self._calc_thermal_loss_VDI(self.FPreMin, self.FPreMax)
             self.FT = [temp_res[0], temp_res[1]] # safe FT for FPreMin & FPreMax
             self.FT_outp_str = temp_res[2]
         # service preload with embedding and thermal loss
@@ -389,16 +389,30 @@ class EsaPss:
                 MOS_loc_slip = (self.FPreMinServ-FPA)/(FKreq*self.inp_file.fos_slip)-1
             # local gapping margin
             MOS_gap = self.FPreMinServ/(self.inp_file.fos_gap*FPA)-1
+            # if VDI thermal method used, use temp. dependent sig_y and sig_u for MOS evaluation
+            if self.inp_file.temp_use_vdi_method == "yes":
+                bolt_sig_y = self.materials.materials[self.inp_file.temp_bolt_material].sig_y
+                bolt_sig_u = self.materials.materials[self.inp_file.temp_bolt_material].sig_u
+                log_str = "Temperature dependent yield and ultimate bolt strength used for MOS"
+                print(log_str)
+                logging.info(log_str)
+            else:
+                bolt_sig_y = self.materials.materials[self.inp_file.bolt_material].sig_y
+                bolt_sig_u = self.materials.materials[self.inp_file.bolt_material].sig_u
+                log_str = "Yield and ultimate bolt strength at RT used for MOS"
+                print(log_str)
+                logging.info(log_str)
             # yield bolt margin
-            MOS_y = self.used_bolt_mat.sig_y/math.sqrt( ((self.FPreMaxServ+\
+            MOS_y = bolt_sig_y/math.sqrt( ((self.FPreMaxServ+\
                 FSA*self.inp_file.fos_y)/self.used_bolt.As)**2 +\
                     3*(0.5*self.tau_max)**2 )-1
             # ultimate bolt margin
-            MOS_u = self.used_bolt_mat.sig_u/math.sqrt( ((self.FPreMaxServ+\
+            MOS_u = bolt_sig_u/math.sqrt( ((self.FPreMaxServ+\
                 FSA*self.inp_file.fos_u)/self.used_bolt.As)**2 +\
                     3*(0.5*self.tau_max)**2 )-1
             # yield margin for pressure under bolt head
-            MOS_loc_pres = self._mos_pres(self.FPreMaxServ+FSA*self.inp_file.fos_y)
+            MOS_loc_pres = self._mos_pres(self.FPreMaxServ+FSA*self.inp_file.fos_y,\
+                self.inp_file.temp_use_vdi_method)
             # save data for each bolt/loadcase to result dict
             # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
             self.bolt_results.update({lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap,\
@@ -410,16 +424,30 @@ class EsaPss:
         self.MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
 
     # check yield MoS under bolt head and between washer and first clamped part
-    def _mos_pres(self, F_axial):
+    def _mos_pres(self, F_axial, use_temp_mat_props="no"):
         MOS_pres = 0.0 # return value
         # yield strength of first clamped part (under washer)
-        sig_y_pres = self.materials.materials[self.inp_file.clamped_parts[1][0]].sig_y
+        # if VDI thermal method used, use temp. dependent sig_y and sig_u for MOS evaluation
+        if use_temp_mat_props == "yes":
+            sig_y_pres = self.materials.materials[self.inp_file.temp_clamped_parts[1][0]].sig_y
+            sig_y_pres_shim = self.materials.materials[self.inp_file.temp_use_shim[0]].sig_y
+            log_str = "Temperature dependent yield strength of shim and first "\
+                + "clamped part used for MOS_pres, F_axial = {0:.1f}".format(F_axial)
+            print(log_str)
+            logging.info(log_str)
+        else:
+            sig_y_pres = self.materials.materials[self.inp_file.clamped_parts[1][0]].sig_y
+            sig_y_pres_shim = self.materials.materials[self.inp_file.use_shim[0]].sig_y
+            log_str = "Yield strength at RT of shim and first clamped part "\
+                + "used for MOS_pres, F_axial = {0:.1f}".format(F_axial)
+            print(log_str)
+            logging.info(log_str)
         if self.inp_file.use_shim != "no": # with washer
             # minimal area under bolt head
             A_pres_1 = (self.used_bolt.dh**2)*math.pi/4 - \
                 (self.bolts.washers[self.inp_file.use_shim[1]].dmin**2)*math.pi/4
             # yield strength of first washer (under bolt head)
-            MOS_pres_1 = self.materials.materials[self.inp_file.use_shim[0]].sig_y / (F_axial/A_pres_1) - 1
+            MOS_pres_1 = sig_y_pres_shim / (F_axial/A_pres_1) - 1
             # minimal area under washer and first clamped part
             A_pres_2 = (self.bolts.washers[self.inp_file.use_shim[1]].dmaj**2)*math.pi/4 - \
                 (self.inp_file.through_hole_diameter**2)*math.pi/4

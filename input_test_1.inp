@@ -59,6 +59,7 @@ Bolt-5  55	0	0
     *DELTA_T = 0 # +K means higher temperature at service
     #
     # VDI method takes Young's Modulus into account
+    *TEMP_USE_VDI_METHOD = yes # no or yes
     # define material properties at temp T
     *TEMP_BOLT_MATERIAL = A4-80
     *TEMP_USE_SHIM = [8.8, LNM8] # also use "no" or shim out of database
