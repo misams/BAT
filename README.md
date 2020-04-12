@@ -23,10 +23,12 @@ $ python bat_main.py -i input_test_1.inp -o output_test_1.out
 ```
 ## Changelog
 
-### [v0.2(beta)] - 08.04.2020
+### v0.2(beta)
+>08.04.2020
 - VDI 2230 thermal method added (takes Young's modulus temperature dependance into account)
 
-### [v0.1(beta)] - April 2020
+### v0.1(beta)
+>April 2020
 - first revision of beta software status
 
 ## License
