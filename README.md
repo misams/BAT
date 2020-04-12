@@ -12,8 +12,8 @@ It supports Python 3.0+ and uses standard libraries only.
 
 ## Run BAT
  
-- Simply download or clone the repository `https://github.com/misams/BAT.git`
-- Run the BAT software with the included test input file `input_test_1.inp`
+- Simply download or clone the repository `https://github.com/misams/BAT.git`.
+- Run the BAT software with the included test input file `input_test_1.inp`.
 ```shell
 $ python bat_main.py -i input_test_1.inp
 ```
@@ -21,6 +21,13 @@ $ python bat_main.py -i input_test_1.inp
 ```shell
 $ python bat_main.py -i input_test_1.inp -o output_test_1.out
 ```
+## Changelog
+
+### [v0.2(beta)] - 08.04.2020
+- VDI 2230 thermal method added (takes Young's modulus temperature dependance into account)
+
+### [v0.1(beta)] - April 2020
+- first revision of beta software status
 
 ## License
 
