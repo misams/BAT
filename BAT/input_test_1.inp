@@ -10,12 +10,11 @@
 # Definition of used bolt
 *BOLT_DEFINITION
     *JOINT_MOS_TYPE = min # min (STD) or mean: use min or mean preload for slippage MOS calculation
-    *BOLT_SIZE = M8 # or e.g. M8f for fine thread
+    *BOLT = H_M8 # or e.g. M8f for fine thread
     *BOLT_MATERIAL = A4-80
     *COF_CLAMP = 0.34 # min. coefficient of friction between clamped parts
     *COF_BOLT = [0.125, 0.22, 0.075, 0.132] # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
     *TIGHT_TORQUE = 15 # also use "STD" --> standard tightening torque table, incl. prevailing torque
-    *BOLT_HEAD_TYPE = socket # or hexagon
     *TORQUE_TOL_TIGHT_DEVICE = 1.0 # torque wrench tolerance 
     *LOCKING_MECHANISM = no # or "yes", e.g. Helicoil
     *PREVAILING_TORQUE = 0.6 # only used if *LOCKING_MECHANISM = yes
@@ -25,7 +24,7 @@
 # Definition of clamped parts
 *CLAMPED_PARTS_DEFINITION
     *NMBR_SHEAR_PLANES = 1
-    *USE_SHIM = [8.8, LNM8] # also use "no" or shim out of database
+    *USE_SHIM = [8.8, LN_M8] # also use "no" or shim out of database
     *THROUGH_HOLE_DIAMETER = 8.4 # D_B, drilled hole diameter of clamped parts
     *SUBST_DA = no # "no" or define substitutional outside diameter of of the basic solid at the interface
     # define n-clamped parts; use ascending index and start at (1)
@@ -59,7 +58,7 @@ Bolt-5  55	0	0
     *DELTA_T = 0 # +K means higher temperature at service
     #
     # VDI method takes Young's Modulus into account
-    *TEMP_USE_VDI_METHOD = yes # no or yes
+    *TEMP_USE_VDI_METHOD = no # no or yes
     # define material properties at temp T
     *TEMP_BOLT_MATERIAL = A4-80
     *TEMP_USE_SHIM = [8.8, LNM8] # also use "no" or shim out of database

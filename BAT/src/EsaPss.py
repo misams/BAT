@@ -1,7 +1,7 @@
-from functions.InputFileParser import InputFileParser
-from functions.MaterialManager import MaterialManager
-from functions.BoltManager import BoltManager
-from functions.exceptions import EmbeddingInterfacesError
+from src.functions.InputFileParser import InputFileParser
+from src.functions.MaterialManager import MaterialManager
+from src.functions.BoltManager import BoltManager
+from src.functions.exceptions import EmbeddingInterfacesError
 from pathlib import Path
 import math
 import logging
@@ -23,7 +23,7 @@ class EsaPss:
         self.materials = materials
         self.bolts = bolts
         # used variables for analysis
-        self.used_bolt = bolts.bolts[self.inp_file.bolt_size] # used bolt
+        self.used_bolt = bolts.bolts[self.inp_file.bolt] # used bolt
         self.used_bolt_mat = self.materials.materials[self.inp_file.bolt_material]
         # if washer used --> add washer to clamped parts
         if self.inp_file.use_shim != "no":
@@ -608,7 +608,8 @@ class EsaPss:
         print(self._get_bolt_result_str())
         # print results to output_file
         if output_file != None:
-            log_str = "Output file written: {0:^}".format(output_file)
+            output_file = Path(output_file)
+            log_str = "Output file written: {0:^}".format(str(output_file.absolute()))
             print(log_str)
             logging.info(log_str)
             # write output file

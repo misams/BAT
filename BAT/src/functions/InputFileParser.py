@@ -1,7 +1,7 @@
 import csv
 from pathlib import Path
 import logging
-from functions.exceptions import InputCofError
+from src.functions.exceptions import InputCofError
 
 class InputFileParser:
     def __init__(self, input_file):
@@ -12,12 +12,11 @@ class InputFileParser:
         self.method = ""
         # bolts-definition-block
         self.joint_mos_type = "" # use min or mean preload for slippage MOS calculation
-        self.bolt_size = "" # e.g. M8f
+        self.bolt = "" # e.g. S_M4x0.5 - socket M4 fine thread
         self.bolt_material = ""
         self.cof_clamp = 0.0 # min. coefficient of friction between clamped parts
         self.cof_bolt = None # optional [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
         self.tight_torque = 0.0 # also use "STD"
-        self.bolt_head_type = "" # or hexagon
         self.torque_tol_tight_device = 0.0 # optional
         self.locking_mechanism = "" # e.g. Helicoil
         self.prevailing_torque = 0.0 # only used if *LOCKING_MECHANISM = yes
@@ -66,8 +65,8 @@ class InputFileParser:
                             tmp_line = self._proc_line(line) # process inp-file line
                             if tmp_line[0]=="*JOINT_MOS_TYPE":
                                 self.joint_mos_type = tmp_line[1]
-                            elif tmp_line[0]=="*BOLT_SIZE":
-                                self.bolt_size = tmp_line[1]
+                            elif tmp_line[0]=="*BOLT":
+                                self.bolt = tmp_line[1]
                             elif tmp_line[0]=="*BOLT_MATERIAL":
                                 self.bolt_material = tmp_line[1]
                             elif tmp_line[0]=="*COF_CLAMP":
@@ -84,8 +83,6 @@ class InputFileParser:
                                         "Check syntax in input (*.inp) file.")
                             elif tmp_line[0]=="*TIGHT_TORQUE":
                                 self.tight_torque = float(tmp_line[1])
-                            elif tmp_line[0]=="*BOLT_HEAD_TYPE":
-                                self.bolt_head_type = tmp_line[1]
                             elif tmp_line[0]=="*TORQUE_TOL_TIGHT_DEVICE":
                                 self.torque_tol_tight_device = float(tmp_line[1])
                             elif tmp_line[0]=="*LOCKING_MECHANISM":
@@ -199,12 +196,11 @@ class InputFileParser:
         print("*PROJECT_NAME:               {0:^}".format(self.project_name))
         print("*METHOD:                     {0:^}".format(self.method))
         print("*JOINT_MOS_TYPE:             {0:^}".format(self.joint_mos_type))
-        print("*BOLT_SIZE:                  {0:^}".format(self.bolt_size))
+        print("*BOLT:                       {0:^}".format(self.bolt_size))
         print("*BOLT_MATERIAL:              {0:^}".format(self.bolt_material))
         print("*COF_CLAMP:                  {0:^}".format(str(self.cof_clamp)))
         print("*COF_BOLT:                   {0:^}".format(str(self.cof_bolt)))
         print("*TIGHT_TORQUE:               {0:^}".format(str(self.tight_torque)))
-        print("*BOLT_HEAD_TYPE:             {0:^}".format(self.bolt_head_type))
         print("*TORQUE_TOL_TIGHT_DEVICE:    {0:^}".format(str(self.torque_tol_tight_device)))
         print("*LOCKING_MECHANISM:          {0:^}".format(self.locking_mechanism))
         print("*PREVAILING_TORQUE:          {0:^}".format(str(self.prevailing_torque)))

@@ -1,8 +1,8 @@
-import functions.InputFileParser as fp
-import functions.MaterialManager as mat
-import functions.BoltManager as bm
-import functions.EsaPss as esapss
-import functions.exceptions as ex
+import src.functions.InputFileParser as fp
+import src.functions.MaterialManager as mat
+import src.functions.BoltManager as bm
+import src.EsaPss as esapss
+import src.functions.exceptions as ex
 import os
 import argparse
 import logging
@@ -19,7 +19,7 @@ v0.2(beta) - 08.04.2020
 
 def main():
     #TODO: Linux vs. Windows file path mess?!
-    os.chdir("./BAT")
+    os.chdir("./BAT/BAT")
 
     # define logging config (overwrite log file 'w')
     # DEBUG, INFO, WARNING, ERROR, and CRITICAL
@@ -63,6 +63,7 @@ def main():
 
         # handle bolt db files - read all available bolts and washers
         bolts = bm.BoltManager("./db")
+        #bolts.print()
 
         # calc ESA-PSS
         ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
