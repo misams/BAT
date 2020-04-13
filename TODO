@@ -1,11 +1,10 @@
 # TODO file for BAT
 #
-- readme and docu ;-)
+- docu ;-)
 - check global slippage margin
 - check Asub with newer SHM-Excel!
 - LINUX vs. Windows file stuff / cross platform support
 - check different cB values for result impact; cB SHM conservative??
-- print input data (summary of input file) for result file / output
 - visualization? (bolt diagram?)
 - Base Class for analysis methods?
 
@@ -15,4 +14,4 @@
 - bending loads / eccentric loadings?
 - ECCS / VDI2230
 - GUI --> always happy to find GUI developers! ;-)
-- output: print directly to a PDF page / or PIC?
+- output: print directly to a PDF / or PIC for easy and beautiful reporting

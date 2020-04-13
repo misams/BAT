@@ -7,14 +7,17 @@ import os
 import argparse
 import logging
 
-__version__ = "0.2(beta)"
+__version__ = "0.3(beta)"
 """
 Change Log:
 
-v0.1(beta) - April 2020
-- first revision of beta software status
+v0.3(beta) - 13.04.2020
+- BAT input printed to output
+- error corrected if *USE_SHIM = no
 v0.2(beta) - 08.04.2020
 - VDI 2230 thermal method added (takes Young's modulus temperature dependance into account)
+v0.1(beta) - April 2020
+- first revision of beta software status
 """
 
 def main():

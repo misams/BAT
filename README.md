@@ -1,5 +1,5 @@
 # BAT - Bolt Analysis Tool
-> Easy to use bolt analysis
+> Easy High Duty Bolted Joint Analyses
 
 The bolt analysis tool (BAT) is an input file based Python command line tool for multi-bolt analyses. It is designed primarily for the space industry (ESA), but of course it can be used for all kinds of high duty bolted joint analyses.
 
@@ -22,6 +22,11 @@ $ python bat_main.py -i input_test_1.inp
 $ python bat_main.py -i input_test_1.inp -o output_test_1.out
 ```
 ## Changelog
+
+### v0.3(beta)
+>13.04.2020
+- BAT input printed to output
+- error corrected if *USE_SHIM = no
 
 ### v0.2(beta)
 >08.04.2020

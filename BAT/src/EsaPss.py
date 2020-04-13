@@ -430,14 +430,16 @@ class EsaPss:
         # if VDI thermal method used, use temp. dependent sig_y and sig_u for MOS evaluation
         if use_temp_mat_props == "yes":
             sig_y_pres = self.materials.materials[self.inp_file.temp_clamped_parts[1][0]].sig_y
-            sig_y_pres_shim = self.materials.materials[self.inp_file.temp_use_shim[0]].sig_y
+            sig_y_pres_shim = self.materials.materials[self.inp_file.temp_use_shim[0]].sig_y \
+                if self.inp_file.use_shim!="no" else 0.0
             log_str = "Temperature dependent yield strength of shim and first "\
                 + "clamped part used for MOS_pres, F_axial = {0:.1f}".format(F_axial)
             print(log_str)
             logging.info(log_str)
         else:
             sig_y_pres = self.materials.materials[self.inp_file.clamped_parts[1][0]].sig_y
-            sig_y_pres_shim = self.materials.materials[self.inp_file.use_shim[0]].sig_y
+            sig_y_pres_shim = self.materials.materials[self.inp_file.use_shim[0]].sig_y \
+                if self.inp_file.use_shim!="no" else 0.0
             log_str = "Yield strength at RT of shim and first clamped part "\
                 + "used for MOS_pres, F_axial = {0:.1f}".format(F_axial)
             print(log_str)
@@ -461,10 +463,66 @@ class EsaPss:
             MOS_pres = sig_y_pres / (F_axial/A_pres) - 1
         return MOS_pres
 
-    # print joint inputs
-    def print_input(self):
-        #TODO: provide print of input-parameters of joint analysis
-        pass
+    # get analysis input (file) string for printout
+    def _get_input_str(self):
+        output_str = "" # use output_str for print() or print-to-file
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        output_str += "| {0:^91} |\n".format("BAT Bolt Analysis Input")
+        output_str += "| {0:^91} |\n".format(" ")
+        output_str += "| {0:^91} |\n".format(self.inp_file.project_name)
+        output_str += "{0:=^95}\n".format('=')
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "BAT method:", self.inp_file.method, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Joint MoS type:", self.inp_file.joint_mos_type, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Bolt:", self.inp_file.bolt, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Bolt material:", self.inp_file.bolt_material, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Torque tolerance of tight. device [Nm]:", self.inp_file.torque_tol_tight_device, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Locking mechanism used:", self.inp_file.locking_mechanism, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Loading plane factor - n:", self.inp_file.loading_plane_factor, "")
+        output_str += "| {0:<50} {1:^20d} {2:^20}|\n".format(\
+            "Number of shear planes:", self.inp_file.nmbr_shear_planes, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Through hole diameter [mm]:", self.inp_file.through_hole_diameter, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Shim used:", "yes" if self.inp_file.use_shim!="no" else "no", "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Substitutional diameter DA defined:",\
+                "yes" if self.inp_file.subst_da!="no" else "no (calulated)", "")
+        output_str += "|{0:-^93}|\n".format('-') # empty line within section
+        # factors of safety
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Factor of safety yield", "FOS_y:", self.inp_file.fos_y)
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Factor of safety ultimate", "FOS_u:", self.inp_file.fos_u)
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Factor of safety slippage", "FOS_slip:", self.inp_file.fos_slip)
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Factor of safety gapping", "FOS_gap:", self.inp_file.fos_gap)
+        output_str += "|{0:-^93}|\n".format('-') # empty line within section
+        # list clamped parts with properties
+        cp = self.inp_file.clamped_parts
+        for i in range(len(self.inp_file.clamped_parts)):
+            if self.inp_file.use_shim == "no": i += 1 # add 1 if no shim is used; shim is always [0]
+            output_str += "| {0:<40} {1:<30} {2:^20}|\n".format(\
+                "Clamped-Part ("+str(i)+")", "Material:", cp[i][0])
+            output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+                " ", "Thickness [mm]:", cp[i][1])
+            output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
+                " ", "Young's modulus [MPa]:", self.materials.materials[cp[i][0]].E)
+            output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
+                " ", "Yield strength [MPa]:", self.materials.materials[cp[i][0]].sig_y)
+            output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
+                " ", "Ultimate strength [MPa]:", self.materials.materials[cp[i][0]].sig_u)
+            output_str += "| {0:<40} {1:<30} {2:^20.3e}|\n".format(\
+                " ", "CTE [1/K]:", self.materials.materials[cp[i][0]].alpha)
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        return output_str
 
     # get global analysis results string
     def _get_global_result_str(self):
@@ -600,8 +658,10 @@ class EsaPss:
 
     # print results to terminal and/or file
     def print_results(self, output_file=None):
-        # print results to terminal
         print() # print empty line
+        # print BAT input
+        print(self._get_input_str())
+        # print results to terminal
         print(self._get_global_result_str())
         if self.inp_file.temp_use_vdi_method == "yes":
             print(self.FT_outp_str)
@@ -614,6 +674,8 @@ class EsaPss:
             logging.info(log_str)
             # write output file
             with open(output_file, 'w') as fid:
+                # wirte BAT input to file
+                fid.write(self._get_input_str())
                 # write global results to file
                 fid.write(self._get_global_result_str())
                 # if VDI method used write to file
