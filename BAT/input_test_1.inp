@@ -12,7 +12,6 @@
     *JOINT_MOS_TYPE = min # min (STD) or mean: use min or mean preload for slippage MOS calculation
     *BOLT = H_M8 # or e.g. M8f for fine thread
     *BOLT_MATERIAL = A4-80
-    *COF_CLAMP = 0.34 # min. coefficient of friction between clamped parts
     *COF_BOLT = [0.125, 0.22, 0.075, 0.132] # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
     *TIGHT_TORQUE = 15 # also use "STD" --> standard tightening torque table, incl. prevailing torque
     *TORQUE_TOL_TIGHT_DEVICE = 1.0 # torque wrench tolerance 
@@ -23,6 +22,7 @@
 
 # Definition of clamped parts
 *CLAMPED_PARTS_DEFINITION
+    *COF_CLAMP = 0.34 # min. coefficient of friction between clamped parts
     *NMBR_SHEAR_PLANES = 1
     *USE_SHIM = [8.8, LN_M8] # also use "no" or shim out of database
     *THROUGH_HOLE_DIAMETER = 8.4 # D_B, drilled hole diameter of clamped parts

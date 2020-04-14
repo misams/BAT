@@ -14,7 +14,6 @@ class InputFileParser:
         self.joint_mos_type = "" # use min or mean preload for slippage MOS calculation
         self.bolt = "" # e.g. S_M4x0.5 - socket M4 fine thread
         self.bolt_material = ""
-        self.cof_clamp = 0.0 # min. coefficient of friction between clamped parts
         self.cof_bolt = None # optional [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
         self.tight_torque = 0.0 # also use "STD"
         self.torque_tol_tight_device = 0.0 # optional
@@ -22,6 +21,7 @@ class InputFileParser:
         self.prevailing_torque = 0.0 # only used if *LOCKING_MECHANISM = yes
         self.loading_plane_factor = 0.0
         # clamped-parts-definition-block
+        self.cof_clamp = 0.0 # min. coefficient of friction between clamped parts
         self.nmbr_shear_planes = 0
         self.use_shim = None
         self.through_hole_diameter = 0.0
@@ -69,8 +69,6 @@ class InputFileParser:
                                 self.bolt = tmp_line[1]
                             elif tmp_line[0]=="*BOLT_MATERIAL":
                                 self.bolt_material = tmp_line[1]
-                            elif tmp_line[0]=="*COF_CLAMP":
-                                self.cof_clamp = float(tmp_line[1])
                             elif tmp_line[0]=="*COF_BOLT":
                                 # get (mu_head_max, mu_thread_max, mu_head_min, mu_thread_min)
                                 tmp_cof_bolt_str = tmp_line[1].replace('[','').replace(']','').split(',')
@@ -99,6 +97,8 @@ class InputFileParser:
                             tmp_line = self._proc_line(line) # process inp-file line
                             if tmp_line[0]=="*NMBR_SHEAR_PLANES":
                                 self.nmbr_shear_planes = int(tmp_line[1])
+                            elif tmp_line[0]=="*COF_CLAMP":
+                                self.cof_clamp = float(tmp_line[1])
                             elif tmp_line[0]=="*USE_SHIM":
                                 if tmp_line[1] == "no":
                                     self.use_shim = "no"
@@ -196,7 +196,7 @@ class InputFileParser:
         print("*PROJECT_NAME:               {0:^}".format(self.project_name))
         print("*METHOD:                     {0:^}".format(self.method))
         print("*JOINT_MOS_TYPE:             {0:^}".format(self.joint_mos_type))
-        print("*BOLT:                       {0:^}".format(self.bolt_size))
+        print("*BOLT:                       {0:^}".format(self.bolt))
         print("*BOLT_MATERIAL:              {0:^}".format(self.bolt_material))
         print("*COF_CLAMP:                  {0:^}".format(str(self.cof_clamp)))
         print("*COF_BOLT:                   {0:^}".format(str(self.cof_bolt)))
