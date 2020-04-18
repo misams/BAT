@@ -22,6 +22,9 @@ $ python bat_main.py -i input_test_1.inp
 $ python bat_main.py -i input_test_1.inp -o output_test_1.out
 ```
 ## Changelog
+### v0.3.1(beta)
+>18.04.2020
+- GUI development started (--gui option added to launch BAT GUI)
 
 ### v0.3(beta)
 >13.04.2020

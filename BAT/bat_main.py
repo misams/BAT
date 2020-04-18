@@ -3,6 +3,7 @@ import src.functions.MaterialManager as mat
 import src.functions.BoltManager as bm
 import src.EsaPss as esapss
 import src.functions.exceptions as ex
+import src.bat_gui as bat_gui
 import os
 import argparse
 import logging
@@ -11,6 +12,8 @@ __version__ = "0.3(beta)"
 """
 Change Log:
 
+v0.3.1(beta) - 18.04.2020
+- GUI development started (--gui option added to launch BAT GUI)
 v0.3(beta) - 13.04.2020
 - BAT input printed to output
 - error corrected if *USE_SHIM = no
@@ -46,6 +49,9 @@ def main():
         type=str,
         default="./output_test.out",
         help="define output result file (default: ./output_test.out)")
+    arg_parser.add_argument("--gui",
+        action="store_true",
+        help="use BAT GUI")
     arg_parser.add_argument("--version", 
         action="version",
         version="BAT Version: %(prog)s "+__version__)
@@ -68,9 +74,14 @@ def main():
         bolts = bm.BoltManager("./db")
         #bolts.print()
 
-        # calc ESA-PSS
-        ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
-        ana_esapss.print_results(args.Output)
+        # use GUI or command-line
+        if args.gui is True:
+            print("BAT GUI initialized...rock it!")
+            bat_gui.vp_start_gui(materials, bolts)
+        else:
+            # calc ESA-PSS
+            ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
+            ana_esapss.print_results(args.Output)
 
     # handle exceptions
     except (ex.Error, ValueError, IndexError, FileNotFoundError) as e:
