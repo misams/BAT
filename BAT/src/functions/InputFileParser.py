@@ -185,11 +185,6 @@ class InputFileParser:
         tmp = line.lstrip().replace('#', '=').split('=')
         return [tmp[0].strip(), tmp[1].strip()]
 
-    # check processed input file that all required inputs are correctly set
-    def _check_processed_input(self):
-        # TODO: implement! --> how to handle different input-file options (e.g. multi-bols?)
-        pass
-
     # print function of input file
     # DEBUGGING function
     def print(self):
