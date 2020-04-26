@@ -91,8 +91,13 @@ def init_config():
     for key in bolts.washers:
         shim_combo.append(key)
     w.TCombobox_shim["value"] = shim_combo
+    # deactivate up and down button
+    w.Button_cp_down.configure(state="disabled")
+    w.Button_cp_up.configure(state="disabled")
+
 
 # method selection radio-buttons
+# not implemented yet
 def radio_ecss(p1): pass
 def radio_esapss(p1): pass
 def radio_vdi2230(p1): pass
@@ -100,7 +105,6 @@ def radio_vdi2230(p1): pass
 # locking device radio-buttons
 def locking_device_no(p1):
     w.Entry_Prevailing_Torque.configure(state = "disabled")
-    #print(w.TCombobox_Bolt.get())
 def locking_device_yes(p1):
     w.Entry_Prevailing_Torque.configure(state = "normal")
 
@@ -113,7 +117,7 @@ def quit_menu():
 def info_menu():
     messagebox.showinfo("BAT GUI Info",\
         "BAT GUI designed with Tkinter\nand PAGE version 5.0.3\n\n" +\
-        "Works only with Python 3.0+\n\nby Michael Sams")
+        "Works only with Python 3.0+\n\nGUI v0.1 by Michael Sams")
 
 # erase all entry fields - reset
 # execute before reading input file
@@ -214,7 +218,7 @@ def open_inp_menu():
 
     else:
         # fpath is empty string
-        print('cancelled')
+        print("No BAT input file opened.")
 
 # handle auto-DA checkbox
 def auto_da_checkbox(p1):
@@ -273,24 +277,42 @@ def button_add_cp(p1):
 
 # delete listbox entry / clamped-part
 def button_delete_cp(p1):
-    # check if listbox is NOT empty
-    # TODO: reorder list before delete
-    if w.Listbox_clamped_parts.get(0, "end"):
-        w.Listbox_clamped_parts.delete(w.Listbox_clamped_parts.curselection())
-        for cp in w.Listbox_clamped_parts.get(0, "end"):
-            print(cp)
+    # check if listbox is NOT empty and any selection is active
+    if w.Listbox_clamped_parts.get(0, "end") and w.Listbox_clamped_parts.curselection():
+        # current selection
+        sel_cp = w.Listbox_clamped_parts.get(w.Listbox_clamped_parts.curselection())
+        # check if shim is in list
+        if "Shim" in sel_cp and cheVal_use_shim.get()==1:
+            print("Shim cannot be deleted!")
+        else:
+            # get all clamped parts (complete list)
+            all_cps = w.Listbox_clamped_parts.get(0, "end")
+            # erase listbox
+            w.Listbox_clamped_parts.delete(0, "end")
+            # modified clamp-part list and delete selcted entry
+            id_chg = 0 # id-changer
+            for cp in all_cps:
+                # use if CP(0) not selected
+                if cp == sel_cp and "Shim" not in sel_cp:
+                    id_chg = 1
+                    continue
+                # use if CP(0) selected and checkbox inactive
+                elif cp == sel_cp and "Shim" in sel_cp:
+                    continue
+                # clamp-part id
+                cp_nmbr = int(cp[cp.find("(")+1:cp.find(")")]) - id_chg
+                cp_first = cp.split('(')[0]
+                cp_last = cp.split(')')[1]
+                cp_text = cp_first + '(' + str(cp_nmbr) + ')' + cp_last
+                # add clamped-parts (w/o deleted entry) and modified id
+                w.Listbox_clamped_parts.insert("end", cp_text)
 
-def button_down_cp(p1):
-    print('bat_gui_support.button_down_cp')
-    sys.stdout.flush()
-
-def button_up_cp(p1):
-    print('bat_gui_support.button_up_cp')
-    sys.stdout.flush()
+# not implemented yet
+def button_down_cp(p1): pass
+def button_up_cp(p1): pass
 
 def destroy_window():
     # Function which closes the window.
     global top_level
     top_level.destroy()
     top_level = None
-

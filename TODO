@@ -8,10 +8,18 @@
 - visualization? (bolt diagram?)
 - Base Class for analysis methods?
 
+# GUI
+- loads
+- calculate
+- save and save as --> write BAT input file
+- clamp-part add-button --> improve logic with shim?!
+- logging for GUI
+
+
 # Future tasks
 
-- more bolts in bolt pattern (flange and shear pattern)
+- create better GUI!!
+- more bolts in bolt pattern (flange and shear pattern) --> EXTRA modes
 - bending loads / eccentric loadings?
 - ECCS / VDI2230
-- GUI --> always happy to find GUI developers! ;-)
 - output: print directly to a PDF / or PIC for easy and beautiful reporting
