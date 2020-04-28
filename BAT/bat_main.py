@@ -63,22 +63,21 @@ def main():
 
     # run BAT analysis
     try:
-        # read and process input file
-        inp_file = fp.InputFileParser(args.Input)
-        #inp_file.print() # debug
-
         # read and process material-database files
         materials = mat.MaterialManager("./db/materials.mat")
 
         # handle bolt db files - read all available bolts and washers
         bolts = bm.BoltManager("./db")
-        #bolts.print()
 
         # use GUI or command-line
         if args.gui is True:
             print("BAT GUI initialized...rock it!")
             bat_gui.vp_start_gui(materials, bolts)
         else:
+            # read and process input file
+            inp_file = fp.InputFileParser(args.Input)
+            #inp_file.print() # debug
+            #
             # calc ESA-PSS
             ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
             ana_esapss.print_results(args.Output)

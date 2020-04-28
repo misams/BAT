@@ -657,15 +657,16 @@ class EsaPss:
         return output_str
 
     # print results to terminal and/or file
-    def print_results(self, output_file=None):
-        print() # print empty line
-        # print BAT input
-        print(self._get_input_str())
-        # print results to terminal
-        print(self._get_global_result_str())
-        if self.inp_file.temp_use_vdi_method == "yes":
-            print(self.FT_outp_str)
-        print(self._get_bolt_result_str())
+    def print_results(self, output_file=None, print_to_cmd=True):
+        if print_to_cmd is True:
+            print() # print empty line
+            # print BAT input
+            print(self._get_input_str())
+            # print results to terminal
+            print(self._get_global_result_str())
+            if self.inp_file.temp_use_vdi_method == "yes":
+                print(self.FT_outp_str)
+            print(self._get_bolt_result_str())
         # print results to output_file
         if output_file != None:
             output_file = Path(output_file)
@@ -686,4 +687,6 @@ class EsaPss:
                 # write timestamp to output file
                 fid.write("BAT Analysis Timestamp: {0:^}\n".format(\
                     str(datetime.now().strftime("%d-%m-%Y %H:%M:%S"))))
+        # return string
+        return self._get_input_str() + self._get_global_result_str() + self._get_bolt_result_str()
 
