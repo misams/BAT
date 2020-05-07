@@ -1,12 +1,12 @@
+import os
+import argparse
+import logging
 import src.functions.InputFileParser as fp
 import src.functions.MaterialManager as mat
 import src.functions.BoltManager as bm
 import src.EsaPss as esapss
 import src.functions.exceptions as ex
 import src.bat_gui as bat_gui
-import os
-import argparse
-import logging
 
 __version__ = "0.3(beta)"
 """

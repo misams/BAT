@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>798</width>
+    <height>631</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Bolt Analysis Tool - BAT</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_4">
+    <item row="1" column="1" colspan="3">
+     <widget class="QLineEdit" name="lineEdit"/>
+    </item>
+    <item row="2" column="0" colspan="4">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab_bolt">
+       <attribute name="title">
+        <string>Bolt</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Bolt Definition</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>In Thread:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="text">
+              <string>Under Bolt Head:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QLineEdit" name="lineEdit_4"/>
+           </item>
+           <item row="11" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Tolerance of Tightening Device:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Bolt Material:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Joint MOS Type:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2" alignment="Qt::AlignHCenter">
+            <widget class="QRadioButton" name="radioButton_2">
+             <property name="text">
+              <string>MEAN</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">buttonGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="11" column="1">
+            <widget class="QLineEdit" name="lineEdit_7"/>
+           </item>
+           <item row="10" column="0">
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>Tightening Torque:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="2">
+            <widget class="QLineEdit" name="lineEdit_5"/>
+           </item>
+           <item row="10" column="2">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Nm</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="8" column="0" colspan="3">
+            <widget class="Line" name="line">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="1">
+            <widget class="QLineEdit" name="lineEdit_9"/>
+           </item>
+           <item row="5" column="2">
+            <widget class="QLineEdit" name="lineEdit_3"/>
+           </item>
+           <item row="1" column="1" colspan="2">
+            <widget class="QComboBox" name="comboBox"/>
+           </item>
+           <item row="13" column="0">
+            <widget class="QLabel" name="label_17">
+             <property name="text">
+              <string>Loading Plane Factor:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>MIN</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Bolt:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="1">
+            <widget class="QLineEdit" name="lineEdit_6"/>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_18">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Coefficient of Friction</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>MAX</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" alignment="Qt::AlignHCenter">
+            <widget class="QRadioButton" name="radioButton">
+             <property name="text">
+              <string>MIN (STD)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">buttonGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="2" column="1" colspan="2">
+            <widget class="QComboBox" name="comboBox_2"/>
+           </item>
+           <item row="9" column="0">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="5" column="1">
+            <widget class="QLineEdit" name="lineEdit_2"/>
+           </item>
+           <item row="11" column="2">
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string>Nm</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="0" colspan="2">
+            <widget class="QGroupBox" name="groupBox_2">
+             <property name="title">
+              <string>Locking Device</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_6">
+              <item row="1" column="1" colspan="2">
+               <widget class="QLineEdit" name="lineEdit_8">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" alignment="Qt::AlignHCenter">
+               <widget class="QRadioButton" name="radioButton_3">
+                <property name="text">
+                 <string>YES</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2" alignment="Qt::AlignHCenter">
+               <widget class="QRadioButton" name="radioButton_4">
+                <property name="text">
+                 <string>NO</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>Prevailing Torque:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_14">
+                <property name="text">
+                 <string>Use Locking Device:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QLabel" name="label_16">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Nm</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_clamped_parts">
+       <attribute name="title">
+        <string>Clamped Parts</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_fos">
+       <attribute name="title">
+        <string>FOS</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_loads">
+       <attribute name="title">
+        <string>Loads</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Method:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Project Name:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3" alignment="Qt::AlignHCenter">
+     <widget class="QRadioButton" name="radioButton_vdi2230">
+      <property name="text">
+       <string>VDI 2230</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" alignment="Qt::AlignHCenter">
+     <widget class="QRadioButton" name="radioButton_esa_pss">
+      <property name="text">
+       <string>ESA PSS-03</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2" alignment="Qt::AlignHCenter">
+     <widget class="QRadioButton" name="radioButton_ecss">
+      <property name="text">
+       <string>ECSS</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+   <zorder>label</zorder>
+   <zorder>lineEdit</zorder>
+   <zorder>label_2</zorder>
+   <zorder>radioButton_esa_pss</zorder>
+   <zorder>radioButton_ecss</zorder>
+   <zorder>radioButton_vdi2230</zorder>
+   <zorder>tabWidget</zorder>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>798</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen_inp_File"/>
+    <addaction name="separator"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen_inp_File">
+   <property name="text">
+    <string>Open *.inp File</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+ </buttongroups>
+</ui>
