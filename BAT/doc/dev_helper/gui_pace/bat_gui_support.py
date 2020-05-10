@@ -14,6 +14,7 @@ from tkinter import messagebox
 from tkinter import filedialog
 import tkinter.ttk as ttk
 from src.functions.InputFileParser import InputFileParser
+from src.EsaPss import EsaPss
 
 def set_Tk_var():
     global combo_clamp_mat
@@ -209,13 +210,22 @@ def open_inp_menu():
         for i, cp in inp_file_opened.clamped_parts.items():
             cp_text = "       CP({0:d}): {1:<20} thk. = {2:>10.2f} mm".format(i, cp[0], cp[1])
             w.Listbox_clamped_parts.insert(i, cp_text)
-
         # set Factors of Safety
         w.Entry_fos_y.insert(0, inp_file_opened.fos_y)
         w.Entry_fos_u.insert(0, inp_file_opened.fos_u)
         w.Entry_fos_slip.insert(0, inp_file_opened.fos_slip)
         w.Entry_fos_gap.insert(0, inp_file_opened.fos_gap)
-
+        # set delta_T and bolt loads
+        w.Entry_delta_T.insert(0, inp_file_opened.delta_t)
+        for key, value in inp_file_opened.bolt_loads.items():
+            bl_string = "{0:^}, {1:.2f}, {2:.2f}, {3:.2f}\n".format(\
+                key, value[0], value[1], value[2])
+            w.Text_Bolt_Loads.insert("end", bl_string)
+        # set input file
+        w.Entry_Input_File.insert(0, inp_path)
+        # set default output file
+        outp_path = inp_path.split('.')[0] + ".out"
+        w.Entry_Output_File.insert(0, outp_path)
     else:
         # fpath is empty string
         print("No BAT input file opened.")
@@ -312,8 +322,14 @@ def button_down_cp(p1): pass
 def button_up_cp(p1): pass
 
 def calculate(p1):
-    print('bat_gui_support.calculate')
-    sys.stdout.flush()
+    # check and open defined input file
+    inp_file = InputFileParser(w.Entry_Input_File.get())
+    out_file = w.Entry_Output_File.get()
+    # calc ESA-PSS
+    ana_esapss = EsaPss(inp_file, materials, bolts)
+    result_str = ana_esapss.print_results(out_file, False)
+    # fill result text window
+    w.Scrolledtext_Output.insert("end", result_str)
 
 def calculate_menu():
     print('bat_gui_support.calculate_menu')
@@ -340,8 +356,3 @@ def destroy_window():
     global top_level
     top_level.destroy()
     top_level = None
-
-
-
-
-

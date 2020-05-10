@@ -1,12 +1,14 @@
 import os
+import sys
 import argparse
 import logging
+from PyQt5 import QtWidgets
 import src.functions.InputFileParser as fp
 import src.functions.MaterialManager as mat
 import src.functions.BoltManager as bm
 import src.EsaPss as esapss
 import src.functions.exceptions as ex
-import src.bat_gui as bat_gui
+import src.bat_qt_gui as bat_qt_gui
 
 __version__ = "0.3(beta)"
 """
@@ -24,12 +26,13 @@ v0.1(beta) - April 2020
 """
 
 def main():
-    #TODO: Linux vs. Windows file path mess?!
-    os.chdir("./BAT/BAT")
+    # get file path of bat_main.py --> start here with relative file path
+    work_dir = os.path.dirname(os.path.realpath(__file__))
+    print("Working directory: " + work_dir)
 
     # define logging config (overwrite log file 'w')
     # DEBUG, INFO, WARNING, ERROR, and CRITICAL
-    logging.basicConfig(filename="./bat.log", filemode='w',
+    logging.basicConfig(filename=work_dir+"/bat.log", filemode='w',
         format="%(asctime)s %(levelname)-8s %(message)s",
         level=logging.DEBUG,
         datefmt="%Y-%m-%d %H:%M:%S")
@@ -42,12 +45,12 @@ def main():
     arg_parser.add_argument("-i",
         "--Input",
         type=str,
-        default="./input_test_1.inp",
+        default=work_dir+"/input_test_1.inp",
         help="define input file (default: ./input_test_1.inp)")
     arg_parser.add_argument("-o",
         "--Output",
         type=str,
-        default="./output_test.out",
+        default=work_dir+"/output_test.out",
         help="define output result file (default: ./output_test.out)")
     arg_parser.add_argument("--gui",
         action="store_true",
@@ -64,15 +67,18 @@ def main():
     # run BAT analysis
     try:
         # read and process material-database files
-        materials = mat.MaterialManager("./db/materials.mat")
+        materials = mat.MaterialManager(work_dir+"/db/materials.mat")
 
         # handle bolt db files - read all available bolts and washers
-        bolts = bm.BoltManager("./db")
+        bolts = bm.BoltManager(work_dir+"/db")
 
         # use GUI or command-line
         if args.gui is True:
             print("BAT GUI initialized...rock it!")
-            bat_gui.vp_start_gui(materials, bolts)
+            app = QtWidgets.QApplication(sys.argv)
+            window = bat_qt_gui.Ui(materials, bolts)
+            window.show()
+            sys.exit(app.exec_())
         else:
             # read and process input file
             inp_file = fp.InputFileParser(args.Input)

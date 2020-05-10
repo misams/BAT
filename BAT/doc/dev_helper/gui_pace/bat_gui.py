@@ -19,15 +19,15 @@ except ImportError:
     import tkinter.ttk as ttk
     py3 = True
 
-import bat_gui_support
+import src.functions.bat_gui_support as bat_gui_support
 
-def vp_start_gui():
+def vp_start_gui(materials, bolts):
     '''Starting point when module is the main routine.'''
     global val, w, root
     root = tk.Tk()
     bat_gui_support.set_Tk_var()
     top = Toplevel1 (root)
-    bat_gui_support.init(root, top)
+    bat_gui_support.init(root, top, materials, bolts)
     root.mainloop()
 
 w = None
@@ -962,11 +962,3 @@ def _on_shiftmouse(event, widget):
             widget.xview_scroll(-1, 'units')
         elif event.num == 5:
             widget.xview_scroll(1, 'units')
-
-if __name__ == '__main__':
-    vp_start_gui()
-
-
-
-
-

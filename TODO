@@ -3,22 +3,17 @@
 - docu ;-)
 - check global slippage margin
 - check Asub with newer SHM-Excel!
-- LINUX vs. Windows file stuff / cross platform support
 - check different cB values for result impact; cB SHM conservative??
 - visualization? (bolt diagram?)
 - Base Class for analysis methods?
 
 # GUI
-- loads
-- calculate
-- save and save as --> write BAT input file
-- clamp-part add-button --> improve logic with shim?!
+- pyQt gui...a lot of work
 - logging for GUI
 
 
 # Future tasks
 
-- create better GUI!!
 - more bolts in bolt pattern (flange and shear pattern) --> EXTRA modes
 - bending loads / eccentric loadings?
 - ECCS / VDI2230

@@ -1,16 +1,24 @@
 
 import sys
 import os
-
-from PyQt5 import QtWidgets, uic
-import sys
+from pathlib import Path
+from src.functions.InputFileParser import InputFileParser
+from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5.QtWidgets import QFileDialog
+from src.gui.table_models import LoadTableModel
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, materials=None, bolts=None):
         super(Ui, self).__init__()
-        # load *.ui file
-        uic.loadUi('BAT/BAT/src/gui/bat_gui.ui', self)
+        # load *.ui file (relative path to ./gui/bat_gui.ui from bat_qt_gui.py location)
+        ui_file = os.path.dirname(os.path.realpath(__file__)) + "/gui/bat_gui.ui"
+        uic.loadUi(ui_file, self)
+        #
+        # INIT variables
+        self.materials = materials
+        self.bolts = bolts
+        self.openedInputFile = None
         #
         # set widgets pointers and connections
         #
@@ -18,10 +26,10 @@ class Ui(QtWidgets.QMainWindow):
         self.statusbar = self.findChild(QtWidgets.QStatusBar, "statusbar")
         self.statusbar.showMessage("BAT initialized and ready.")
         # menu bar
-        #self.actionNew.triggered.connect()
-        #self.actionOpen.triggered.connect()
-        #self.actionSave.triggered.connect()
-        #self.actionSave_as.triggered.connect()
+        self.actionNew.triggered.connect(self.menuNew)
+        self.actionOpen.triggered.connect(self.menuOpenInput)
+        self.actionSave.triggered.connect(self.menuSave)
+        self.actionSave_as.triggered.connect(self.menuSaveAs)
         self.actionQuit.triggered.connect(self.close)
         # base options
         self.radioEsaPss = self.findChild(QtWidgets.QRadioButton, "radioEsaPss")
@@ -80,10 +88,18 @@ class Ui(QtWidgets.QMainWindow):
         self.saveOutputFileButton.clicked.connect(self.saveOutputFilePressed)
         self.calculateButton= self.findChild(QtWidgets.QPushButton, "calculateButton")
         self.calculateButton.clicked.connect(self.calculatePressed)
+        #
+        # INIT GUI
+        self.init_gui()
 
-    # test button function
-    def testButtonPressed(self):
-        print(self.cofBoltHeadMin.text())
+    # init gui
+    def init_gui(self):
+        # fill bolt combo-box
+        for key in self.bolts.bolts:
+            self.comboBolt.addItem(key)
+        # fill bolt-material combo-box
+        for key in self.materials.materials:
+            self.comboBoltMaterial.addItem(key)
 
     # use locking device radioButton logic for prevailing torque QLineEdit
     def lockRadioClicked(self):
@@ -113,6 +129,93 @@ class Ui(QtWidgets.QMainWindow):
     # calculate button pressed
     def calculatePressed(self):
         print("BAT Calculation Start")
+
+    # MENU - new
+    def menuNew(self):
+        print("new")
+
+    # MENU - open input file
+    def menuOpenInput(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        dialog = QFileDialog() # file-dialog
+        dialog.setOptions(options)
+        bat_home_dir = Path(os.path.dirname(os.path.realpath(__file__))).parents[0]
+        dialog.setDirectory(str(bat_home_dir))
+        openedFileName, _ = dialog.getOpenFileName(self,\
+            "QFileDialog.getOpenFileName()",\
+            "",\
+            "BAT Input Files (*.inp)")
+        if openedFileName:
+            # read and parse input file
+            self.openedInputFile = InputFileParser(openedFileName)
+            #
+            # fill gui
+            if self.openedInputFile.method == "ESAPSS":
+                self.radioEsaPss.setChecked(True)
+            else:
+                print("ERROR: ECSS/VDI method not implemented yet")
+            self.projectName.setText(self.openedInputFile.project_name)
+            if self.openedInputFile.joint_mos_type == "min":
+                self.radioJointMin.setChecked(True)
+            else:
+                print("ERROR: MEAN method not implemented yet")
+            # set bolt and bolt-material combo-box
+            index = self.comboBolt.findText(\
+                self.openedInputFile.bolt, QtCore.Qt.MatchFixedString)
+            if index >= 0:
+                self.comboBolt.setCurrentIndex(index)
+            index = self.comboBoltMaterial.findText(\
+                self.openedInputFile.bolt_material, QtCore.Qt.MatchFixedString)
+            if index >= 0:
+                self.comboBoltMaterial.setCurrentIndex(index)
+            # fill CoFs
+            # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
+            self.cofBoltHeadMax.setText(str(self.openedInputFile.cof_bolt[0]))
+            self.cofThreadMax.setText(str(self.openedInputFile.cof_bolt[1]))
+            self.cofBoltHeadMin.setText(str(self.openedInputFile.cof_bolt[2]))
+            self.cofThreadMin.setText(str(self.openedInputFile.cof_bolt[3]))
+            # fill torques etc
+            self.tightTorque.setText(str(self.openedInputFile.tight_torque))
+            self.tightTorqueTol.setText(str(self.openedInputFile.torque_tol_tight_device))
+            if self.openedInputFile.locking_mechanism == "yes":
+                self.radioLockYes.setChecked(True)
+                self.prevailingTorque.setText(str(self.openedInputFile.prevailing_torque))
+            else:
+                self.radioLockNo.setChecked(True)
+                self.prevailingTorque.setEnabled(False)
+            self.loadingPlaneFactor.setText(str(self.openedInputFile.loading_plane_factor))
+            # clamped parts tab
+            self.cofClampedParts.setText(str(self.openedInputFile.cof_clamp))
+            self.numberOfShearPlanes.setValue(self.openedInputFile.nmbr_shear_planes)
+            self.throughHoleDiameter.setText(str(self.openedInputFile.through_hole_diameter))
+            self.substDiameter.setText(str(self.openedInputFile.subst_da))
+            # TODO: clamped parts table
+            # fos tab
+            self.fosY.setText(str(self.openedInputFile.fos_y))
+            self.fosU.setText(str(self.openedInputFile.fos_u))
+            self.fosSlip.setText(str(self.openedInputFile.fos_slip))
+            self.fosGap.setText(str(self.openedInputFile.fos_gap))
+            # loads tab
+            self.deltaT.setText(str(self.openedInputFile.delta_t))
+            # TODO: loads table
+            tableModel = LoadTableModel(self.openedInputFile.bolt_loads)
+            self.loadsTable.setModel(tableModel)
+            # calculate tab
+            self.inputFile.setText(openedFileName)
+            outp_file = openedFileName.split('.')[0]+".out"
+            self.outputFile.setText(outp_file)
+
+            # finally set statusbar
+            self.statusbar.showMessage("Input File Opened: "+openedFileName)
+
+    # MENU - save
+    def menuSave(self):
+        print("save")
+
+    # MENU - save as
+    def menuSaveAs(self):
+        print("save as")
 
 
 if __name__ == "__main__":
