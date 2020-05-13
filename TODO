@@ -1,11 +1,12 @@
 # TODO file for BAT
 #
+- include thermal output for std-thermal analysis
 - docu ;-)
 - check global slippage margin
 - check Asub with newer SHM-Excel!
 - check different cB values for result impact; cB SHM conservative??
 - visualization? (bolt diagram?)
-- Base Class for analysis methods?
+- base class for analysis methods
 
 # GUI
 - pyQt gui...a lot of work

@@ -157,7 +157,7 @@ class InputFileParser:
                                 self.temp_bolt_material = tmp_line[1]
                             elif tmp_line[0]=="*TEMP_USE_SHIM":
                                 if tmp_line[1] == "no":
-                                    self.use_shim = "no"
+                                    self.temp_use_shim = "no"
                                 else:
                                     # get (shim-material, shim-type) or no
                                     tmp_shim_str = tmp_line[1].replace('[','').replace(']','').split(',')

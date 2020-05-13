@@ -199,11 +199,14 @@ class EsaPss:
         d_l_P = 0.0
         for _, c in self.inp_file.clamped_parts.items():
             d_l_P += self.materials.materials[c[0]].alpha * c[1] * self.inp_file.delta_t
-        # preload loss in bolt: clamped parts - bolts
+        # preload change in bolt: clamped parts - bolts
+        # sigen-convention: minus (-) is loss in preload
+        # if alpha_P > alpha_B : FT_res (+)
+        # if alpha_P < alpha_B : FT_res (-)
         d_l = d_l_P - d_l_B
         # preload loss due to thermal effects
-        # sigen-convention: minus (-) is loss in preload
         FT_res = d_l * (self.cB*self.cP)/(self.cB+self.cP)
+        # TODO: write thermal output
         self.FT = [FT_res, FT_res] # save FT for FPreMin & FPreMax
 
     # VDI method for thermal preload loss (Young's Modulus variation taken into account)
@@ -245,10 +248,11 @@ class EsaPss:
         dS = 1./self.cB # compliance of bolt
         dP = 1./self.cP # compliance of clamped parts
         denom = dS*E_SRT/E_ST + dP*E_PRT/E_PT # denominator
-        d_F_th_min = F_VRT_min * (1 - (dS+dP)/denom) \
-            + self.lk*(alpha_ST - alpha_PT)*self.inp_file.delta_t/denom
-        d_F_th_max = F_VRT_max * (1 - (dS+dP)/denom) \
-            + self.lk*(alpha_ST - alpha_PT)*self.inp_file.delta_t/denom
+        # multiply d_F_th with (-1) to get correct sign convention
+        d_F_th_min = (F_VRT_min * (1 - (dS+dP)/denom) \
+            + self.lk*(alpha_ST - alpha_PT)*self.inp_file.delta_t/denom)*(-1)
+        d_F_th_max = (F_VRT_max * (1 - (dS+dP)/denom) \
+            + self.lk*(alpha_ST - alpha_PT)*self.inp_file.delta_t/denom)*(-1)
         # generate output string
         output_str = "" # use output_str for print() or print-to-file
         output_str += "{0:=^95}\n".format('=') # global splitter
@@ -275,10 +279,10 @@ class EsaPss:
         output_str += "|-{0:-^50}-{1:-^20}-{2:-^20}|\n".format("-", "-", "-")
         output_str += "| {0:<64} {1:>12.1f} / {2:<12.1f}|\n".format(\
             "Term-1 preload loss based on FVmin / FVmax [N]:",\
-            F_VRT_min*(1-(dS+dP)/denom), F_VRT_max*(1-(dS+dP)/denom))
+            F_VRT_min*(1-(dS+dP)/denom)*(-1), F_VRT_max*(1-(dS+dP)/denom)*(-1) )
         output_str += "| {0:<64} {1:^27.1f}|\n".format(\
             "Term-2 Preload loss based on CTE [N]:",\
-                self.lk*(alpha_ST-alpha_PT)*self.inp_file.delta_t/denom)
+                self.lk*(alpha_ST-alpha_PT)*self.inp_file.delta_t/denom*(-1) )
         output_str += "| {0:<64} {1:>12.1f} / {2:<12.1f}|\n".format(\
             "Preload loss due to thermal effects based on FVmin / FVmax [N]:",\
                 d_F_th_min, d_F_th_max)

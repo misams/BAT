@@ -50,7 +50,6 @@ def main():
     arg_parser.add_argument("-o",
         "--Output",
         type=str,
-        default=work_dir+"/output_test.out",
         help="define output result file (default: ./output_test.out)")
     arg_parser.add_argument("--gui",
         action="store_true",
@@ -60,6 +59,11 @@ def main():
         version="BAT Version: %(prog)s "+__version__)
     # parse command line arguments
     args = arg_parser.parse_args()
+    # set output file default
+    if args.Output:
+        output_file = args.Output
+    else:
+        output_file = args.Input.split('.')[0]+".out"
 
     # print header
     print("#\n# Bolt Analysis Tool (BAT: {0:^})\n#".format(__version__))
@@ -86,7 +90,7 @@ def main():
             #
             # calc ESA-PSS
             ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
-            ana_esapss.print_results(args.Output)
+            ana_esapss.print_results(output_file)
 
     # handle exceptions
     except (ex.Error, ValueError, IndexError, FileNotFoundError) as e:
