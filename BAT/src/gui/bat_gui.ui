@@ -21,6 +21,65 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout_4">
+    <item row="1" column="1" colspan="3">
+     <widget class="QLineEdit" name="projectName"/>
+    </item>
+    <item row="0" column="1" alignment="Qt::AlignHCenter">
+     <widget class="QRadioButton" name="radioEsaPss">
+      <property name="text">
+       <string>ESA PSS-03</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3" alignment="Qt::AlignHCenter">
+     <widget class="QRadioButton" name="radioVdi">
+      <property name="text">
+       <string>VDI 2230</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Method:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Project Name:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2" alignment="Qt::AlignHCenter">
+     <widget class="QRadioButton" name="radioEcss">
+      <property name="text">
+       <string>ECSS</string>
+      </property>
+     </widget>
+    </item>
     <item row="2" column="0" colspan="4">
      <widget class="QTabWidget" name="tabWidget">
       <property name="sizePolicy">
@@ -33,7 +92,7 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabBolt">
        <attribute name="title">
@@ -351,9 +410,6 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="0" colspan="3">
-            <widget class="QTableView" name="clampedPartsTable"/>
-           </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_20">
              <property name="text">
@@ -421,6 +477,9 @@
               </spacer>
              </item>
             </layout>
+           </item>
+           <item row="6" column="0" colspan="3">
+            <widget class="QTableWidget" name="clampedPartsTable"/>
            </item>
           </layout>
          </widget>
@@ -559,9 +618,40 @@
           <property name="title">
            <string>Bolt Load Definition</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_6">
-           <item>
-            <widget class="QTableView" name="loadsTable"/>
+          <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="0">
+            <widget class="QTableWidget" name="loadsTable"/>
+           </item>
+           <item row="0" column="1">
+            <layout class="QVBoxLayout" name="verticalLayout_9">
+             <item>
+              <widget class="QPushButton" name="addRowButton">
+               <property name="text">
+                <string>Add Row</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="deleteRowButton">
+               <property name="text">
+                <string>Delete Row</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -695,65 +785,6 @@
         </item>
        </layout>
       </widget>
-     </widget>
-    </item>
-    <item row="1" column="1" colspan="3">
-     <widget class="QLineEdit" name="projectName"/>
-    </item>
-    <item row="0" column="1" alignment="Qt::AlignHCenter">
-     <widget class="QRadioButton" name="radioEsaPss">
-      <property name="text">
-       <string>ESA PSS-03</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="3" alignment="Qt::AlignHCenter">
-     <widget class="QRadioButton" name="radioVdi">
-      <property name="text">
-       <string>VDI 2230</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_2">
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Method:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label">
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::RightToLeft</enum>
-      </property>
-      <property name="text">
-       <string>Project Name:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="2" alignment="Qt::AlignHCenter">
-     <widget class="QRadioButton" name="radioEcss">
-      <property name="text">
-       <string>ECSS</string>
-      </property>
      </widget>
     </item>
    </layout>

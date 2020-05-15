@@ -33,7 +33,7 @@ class InputFileParser:
         self.fos_slip = 0.0
         self.fos_gap = 0.0
         # bolt-loads
-        self.bolt_loads = {}
+        self.bolt_loads = [] # 2d-array
         # temperature input
         self.delta_t = 0.0
         self.temp_use_vdi_method = ""
@@ -139,9 +139,11 @@ class InputFileParser:
                             # load-ID, axial-force, lateral-force-1, lateral-force-2 (optional)
                             tmp_line = line.split()
                             if len(tmp_line)==4: # optional lat-force-2 used
-                                self.bolt_loads.update({tmp_line[0] : (float(tmp_line[1]), float(tmp_line[2]), float(tmp_line[3]))})
+                                self.bolt_loads.append(\
+                                    [tmp_line[0], float(tmp_line[1]), float(tmp_line[2]), float(tmp_line[3])])
                             elif len(tmp_line)==3: # optional lat-force-2 NOT used
-                                self.bolt_loads.update({tmp_line[0] : (float(tmp_line[1]), float(tmp_line[2]), 0.0)})
+                                self.bolt_loads.append(\
+                                    [tmp_line[0], float(tmp_line[1]), float(tmp_line[2]), 0.0])
                             line = fid.readline()
                     elif line.lstrip()[0:16]=="*TEMP_DEFINITION":
                         line = fid.readline()

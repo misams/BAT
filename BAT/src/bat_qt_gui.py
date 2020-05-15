@@ -5,7 +5,6 @@ from pathlib import Path
 from src.functions.InputFileParser import InputFileParser
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QFileDialog
-from src.gui.table_models import LoadTableModel
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
@@ -65,7 +64,7 @@ class Ui(QtWidgets.QMainWindow):
         self.numberOfShearPlanes.setValue(1)
         self.throughHoleDiameter = self.findChild(QtWidgets.QLineEdit, "throughHoleDiameter")
         self.substDiameter = self.findChild(QtWidgets.QLineEdit, "substDiameter")
-        self.clampedPartsTable = self.findChild(QtWidgets.QTableView, "clampedPartsTable")
+        self.clampedPartsTable = self.findChild(QtWidgets.QTableWidget, "clampedPartsTable")
         self.addCpButton = self.findChild(QtWidgets.QPushButton, "addCpButton")
         self.addCpButton.clicked.connect(self.addCpPressed)
         self.deleteCpButton = self.findChild(QtWidgets.QPushButton, "deleteCpButton")
@@ -77,7 +76,16 @@ class Ui(QtWidgets.QMainWindow):
         self.fosSlip= self.findChild(QtWidgets.QLineEdit, "fosSlip")
         self.fosGap= self.findChild(QtWidgets.QLineEdit, "fosGap")
         # Loads tab
-        self.loadsTable = self.findChild(QtWidgets.QTableView, "loadsTable")
+        self.loadsTable = self.findChild(QtWidgets.QTableWidget, "loadsTable")
+        self.loadsTable.setColumnCount(4) # init load-table
+        self.loadsTable.insertRow(0)
+        self.loadsTable.setHorizontalHeaderLabels(\
+            ["Bolt-ID\n\nLoad-Case", "FN\n\n[N]", "FQ1\n\n[N]", "FQ2\n(optional)\n[N]"])
+        self.loadsTable.setItem(0,0,QtWidgets.QTableWidgetItem("test bolt"))
+        self.addRowButton = self.findChild(QtWidgets.QPushButton, "addRowButton")
+        self.addRowButton.clicked.connect(self.addRowPressed)
+        self.deleteRowButton = self.findChild(QtWidgets.QPushButton, "deleteRowButton")
+        self.deleteRowButton.clicked.connect(self.deleteRowPressed)
         self.deltaT= self.findChild(QtWidgets.QLineEdit, "deltaT")
         # Calculate tab
         self.inputFile= self.findChild(QtWidgets.QLineEdit, "inputFile")
@@ -117,6 +125,15 @@ class Ui(QtWidgets.QMainWindow):
     # delete clamped part button pressed
     def deleteCpPressed(self):
         print("Delete CP")
+
+    # add row button pressed
+    def addRowPressed(self):
+        print("Add Row")
+
+    # delete row button pressed
+    def deleteRowPressed(self):
+        print("Delete Row")
+
 
     # save input file button pressed
     def saveInputFilePressed(self):
@@ -198,9 +215,15 @@ class Ui(QtWidgets.QMainWindow):
             self.fosGap.setText(str(self.openedInputFile.fos_gap))
             # loads tab
             self.deltaT.setText(str(self.openedInputFile.delta_t))
-            # TODO: loads table
-            tableModel = LoadTableModel(self.openedInputFile.bolt_loads)
-            self.loadsTable.setModel(tableModel)
+            for i, bi in enumerate(self.openedInputFile.bolt_loads):
+                if i > 0: # first line is inserted by default
+                    self.loadsTable.insertRow(i)
+                # fill bolt-loads into table
+                self.loadsTable.setItem(i,0,QtWidgets.QTableWidgetItem(bi[0]))
+                self.loadsTable.setItem(i,1,QtWidgets.QTableWidgetItem(str(bi[1])))
+                self.loadsTable.setItem(i,2,QtWidgets.QTableWidgetItem(str(bi[2])))
+                self.loadsTable.setItem(i,3,QtWidgets.QTableWidgetItem(str(bi[3])))
+
             # calculate tab
             self.inputFile.setText(openedFileName)
             outp_file = openedFileName.split('.')[0]+".out"

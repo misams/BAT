@@ -369,9 +369,10 @@ class EsaPss:
         # perform calculation for all bolts / loadcases
         sum_FPA = 0.0
         sum_FQ = 0.0
-        for lc_name, lc in self.inp_file.bolt_loads.items():
-            FA = lc[0] # axial bolt force
-            FQ = math.sqrt(lc[1]**2+lc[2]**2) # shear bolt force
+        for bi in self.inp_file.bolt_loads:
+            # bi : ['Bolt-ID', FN, FQ1, FQ2]
+            FA = bi[1] # axial bolt force
+            FQ = math.sqrt(bi[2]**2+bi[2]**2) # shear bolt force
             FPA = FA*(1-self.phi_n) # reduction in clamping force
             FSA = FA*self.phi_n # additional bolt force
             # required clamping force for friction grip
@@ -419,7 +420,7 @@ class EsaPss:
                 self.inp_file.temp_use_vdi_method)
             # save data for each bolt/loadcase to result dict
             # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
-            self.bolt_results.update({lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap,\
+            self.bolt_results.update({bi[0] : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap,\
                 MOS_y, MOS_u, MOS_loc_pres]})
 
         # calculate global slippage margin
