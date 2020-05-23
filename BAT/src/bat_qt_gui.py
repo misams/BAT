@@ -66,6 +66,9 @@ class Ui(QtWidgets.QMainWindow):
         self.deleteCpButton = self.findChild(QtWidgets.QPushButton, "deleteCpButton")
         self.deleteCpButton.clicked.connect(self.deleteCpPressed)
         self.useShimCheck = self.findChild(QtWidgets.QCheckBox, "useShimCheck")
+        self.useShimCheck.stateChanged.connect(self.useShimChecked)
+        self.combo_shim = QtWidgets.QComboBox()
+        self.combo_shim_mat = QtWidgets.QComboBox()
         # FOS tab
         self.fosY= self.findChild(QtWidgets.QLineEdit, "fosY")
         self.fosU= self.findChild(QtWidgets.QLineEdit, "fosU")
@@ -128,23 +131,34 @@ class Ui(QtWidgets.QMainWindow):
         self.loadsTable.insertRow(0)
         self.loadsTable.setHorizontalHeaderLabels(\
             ["Bolt-ID\n\nLoad-Case", "FN\n\n[N]", "FQ1\n\n[N]", "FQ2\n(optional)\n[N]"])
+        self.loadsTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.loadsTable.setItem(0,0,QtWidgets.QTableWidgetItem("test bolt"))
         #
         # clamped-parts-table
+        self.useShimCheck.setChecked(True)
         self.clampedPartsTable.setColumnCount(2) # init clamped-parts-table
         self.clampedPartsTable.insertRow(0)
         self.clampedPartsTable.setHorizontalHeaderLabels(\
-            ["Material\nor\nShim", "Thickness\n[mm]"])
-        header = self.clampedPartsTable.horizontalHeader()       
+            ["Thickness [mm]\nor\nShim", "Material"])
+        header = self.clampedPartsTable.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)#ResizeToContents)
-        #header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
-        combo = QtWidgets.QComboBox()
-        combo_box_options = ["bla1", "bla2"]
-        for t in combo_box_options:
-            combo.addItem(t)
-        self.clampedPartsTable.setCellWidget(0,0,combo)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        # add shim line CP(0)
+        for i in self.bolts.washers:
+            self.combo_shim.addItem(i)
+        for i in self.materials.materials:
+            self.combo_shim_mat.addItem(i)
+        self.clampedPartsTable.setCellWidget(0,1,self.combo_shim_mat)
+        self.clampedPartsTable.setCellWidget(0,0,self.combo_shim)
         self.clampedPartsTable.setVerticalHeaderItem(0, QtWidgets.QTableWidgetItem("CP(0)"))
+        # add first clamped part - empty line
+        combo_cp_mat = QtWidgets.QComboBox()
+        self.clampedPartsTable.insertRow(1)
+        self.clampedPartsTable.setVerticalHeaderItem(1, QtWidgets.QTableWidgetItem("CP(1)"))
+        for i in self.materials.materials:
+            combo_cp_mat.addItem(i)
+        self.clampedPartsTable.setCellWidget(1,1,combo_cp_mat)
+        self.clampedPartsTable.setItem(1,0,QtWidgets.QTableWidgetItem(''))
 
     # erase gui - reset / new
     def erase_gui(self):
@@ -195,15 +209,55 @@ class Ui(QtWidgets.QMainWindow):
             elif radioButton.text()=="NO":
                 self.prevailingTorque.setEnabled(False)
 
-    # add clamped part button pressed
+    # use-shim checkbox
+    def useShimChecked(self):
+        if self.useShimCheck.isChecked():
+            self.combo_shim_mat.setEnabled(True)
+            self.combo_shim.setEnabled(True)
+        else:
+            self.combo_shim_mat.setEnabled(False)
+            self.combo_shim.setEnabled(False)
+
+    # clampedPartsTable - add clamped part button pressed
     def addCpPressed(self):
-        print("Add CP")
+        # current selection in table
+        selection = self.clampedPartsTable.selectedIndexes()
+        if selection:
+            # insert row: selected cell (row+1)
+            ins_row = selection[0].row()+1
+            self.clampedPartsTable.insertRow(ins_row)
+            self.clampedPartsTable.setVerticalHeaderItem(ins_row,\
+                QtWidgets.QTableWidgetItem("CP({0:d})".format(ins_row)))
+            # insert CP materials combo-box in new row
+            combo_cp_mat = QtWidgets.QComboBox()
+            for i in self.materials.materials:
+                combo_cp_mat.addItem(i)
+            self.clampedPartsTable.setCellWidget(ins_row,1,combo_cp_mat)
+            self.clampedPartsTable.setItem(ins_row,0,QtWidgets.QTableWidgetItem(''))
+            # renumber clamped parts CP(i); start at first CP(1)
+            for row in range(1,self.clampedPartsTable.rowCount()):
+                self.clampedPartsTable.setVerticalHeaderItem(row,\
+                    QtWidgets.QTableWidgetItem("CP({0:d})".format(row)))
 
-    # delete clamped part button pressed
+    # clampedPartsTable - delete clamped part button pressed
     def deleteCpPressed(self):
-        print("Delete CP")
+        # get number of selections per row (in selection order)
+        row_sel = Counter([i.row() for i in self.clampedPartsTable.selectedIndexes()])
+        if row_sel:
+            # key: row-number, value: selected-columns
+            key = list(row_sel.keys())[0]
+            value = list(row_sel.values())[0]
+            # if selected-columns == 2 then complete row selected
+            # delete row only if complete single row selected & not CP(0)
+            if value==2 and len(row_sel)==1 and key>0:
+                # remove row in clampedPartsTable
+                self.clampedPartsTable.removeRow(key)
+                # renumber clamped parts CP(i); start at first CP(1)
+                for row in range(1,self.clampedPartsTable.rowCount()):
+                    self.clampedPartsTable.setVerticalHeaderItem(row,\
+                        QtWidgets.QTableWidgetItem("CP({0:d})".format(row)))
 
-    # add row button pressed
+    # loadsTable - add row button pressed
     def addRowPressed(self):
         # current selection in table
         selection = self.loadsTable.selectedIndexes()
@@ -211,7 +265,7 @@ class Ui(QtWidgets.QMainWindow):
             # insert row: selected cell (row+1)
             self.loadsTable.insertRow(selection[0].row()+1)
 
-    # delete row button pressed
+    # loadsTable - delete row button pressed
     def deleteRowPressed(self):
         # get number of selections per row (in selection order)
         row_sel = Counter([i.row() for i in self.loadsTable.selectedIndexes()])
@@ -235,7 +289,14 @@ class Ui(QtWidgets.QMainWindow):
 
     # calculate button pressed
     def calculatePressed(self):
-        print("BAT Calculation Start")
+        # get shim data - CP(0)
+        shim_mat = self.clampedPartsTable.cellWidget(0,0).currentText()
+        shim = self.clampedPartsTable.cellWidget(0,1).currentText()
+        # get clamped parts
+        rows = self.clampedPartsTable.rowCount()
+        for row in range(1,rows): # start at first clamped-part CP(1)
+            print(self.clampedPartsTable.item(row,0).text())
+            print(self.clampedPartsTable.cellWidget(row,1).currentText())
 
     # MENU - new
     def menuNew(self):
@@ -298,7 +359,34 @@ class Ui(QtWidgets.QMainWindow):
             self.numberOfShearPlanes.setValue(self.openedInputFile.nmbr_shear_planes)
             self.throughHoleDiameter.setText(str(self.openedInputFile.through_hole_diameter))
             self.substDiameter.setText(str(self.openedInputFile.subst_da))
-            # TODO: clamped parts table
+            if self.openedInputFile.use_shim != "no":
+                self.useShimCheck.setChecked(True)
+                self.useShimChecked()
+                # set CP(0) - shim if used
+                # set shim and shim-material combo-box
+                shim_combo = self.clampedPartsTable.cellWidget(0,0)
+                index = shim_combo.findText(\
+                    self.openedInputFile.use_shim[1], QtCore.Qt.MatchFixedString)
+                if index >= 0:
+                    shim_combo.setCurrentIndex(index)
+                shim_mat_combo = self.clampedPartsTable.cellWidget(0,1)
+                index = shim_mat_combo.findText(\
+                    self.openedInputFile.use_shim[0], QtCore.Qt.MatchFixedString)
+                if index >= 0:
+                    shim_mat_combo.setCurrentIndex(index)
+            for row in range(1,self.clampedPartsTable.rowCount()): 
+                self.clampedPartsTable.removeRow(row) # delete all CPs
+            for i, cp in self.openedInputFile.clamped_parts.items():
+                self.clampedPartsTable.selectRow(i-1) # select row
+                self.addCpPressed() # add row below
+                self.clampedPartsTable.item(i,0).setText(str(cp[1])) # set CP thickness
+                print(cp[1])
+                # set CP material combo-box
+                cp_mat_combo = self.clampedPartsTable.cellWidget(i,1)
+                index = cp_mat_combo.findText(\
+                    cp[0], QtCore.Qt.MatchFixedString)
+                if index >= 0:
+                    cp_mat_combo.setCurrentIndex(index)
             # fos tab
             self.fosY.setText(str(self.openedInputFile.fos_y))
             self.fosU.setText(str(self.openedInputFile.fos_u))
