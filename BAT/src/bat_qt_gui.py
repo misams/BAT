@@ -4,8 +4,9 @@ import os
 from pathlib import Path
 from collections import Counter, OrderedDict
 from src.functions.InputFileParser import InputFileParser
+from src.EsaPss import EsaPss
 from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.Qt import Qt, QApplication, QClipboard
 
 # inherit correct QMainWindow class as defined in UI file (designer)
@@ -32,6 +33,7 @@ class Ui(QtWidgets.QMainWindow):
         self.actionSave.triggered.connect(self.menuSave)
         self.actionSave_as.triggered.connect(self.menuSaveAs)
         self.actionQuit.triggered.connect(self.close)
+        self.actionAbout_BAT.triggered.connect(self.menuAboutBat)
         # base options
         self.radioEsaPss = self.findChild(QtWidgets.QRadioButton, "radioEsaPss")
         self.radioEcss = self.findChild(QtWidgets.QRadioButton, "radioEcss")
@@ -82,16 +84,18 @@ class Ui(QtWidgets.QMainWindow):
         self.deleteRowButton.clicked.connect(self.deleteRowPressed)
         self.pasteLoadsExcel = self.findChild(QtWidgets.QPushButton, "pasteLoadsExcel")
         self.pasteLoadsExcel.clicked.connect(self.pasteFromExcel)
-        self.deltaT= self.findChild(QtWidgets.QLineEdit, "deltaT")
+        self.deltaT = self.findChild(QtWidgets.QLineEdit, "deltaT")
         # Calculate tab
-        self.inputFile= self.findChild(QtWidgets.QLineEdit, "inputFile")
-        self.saveInputFileButton= self.findChild(QtWidgets.QPushButton, "saveInputFileButton")
+        self.inputFile = self.findChild(QtWidgets.QLineEdit, "inputFile")
+        self.saveInputFileButton = self.findChild(QtWidgets.QPushButton, "saveInputFileButton")
         self.saveInputFileButton.clicked.connect(self.saveInputFilePressed)
-        self.outputFile= self.findChild(QtWidgets.QLineEdit, "outputFile")
-        self.saveOutputFileButton= self.findChild(QtWidgets.QPushButton, "saveOutputFileButton")
+        self.outputFile = self.findChild(QtWidgets.QLineEdit, "outputFile")
+        self.saveOutputFileButton = self.findChild(QtWidgets.QPushButton, "saveOutputFileButton")
         self.saveOutputFileButton.clicked.connect(self.saveOutputFilePressed)
-        self.calculateButton= self.findChild(QtWidgets.QPushButton, "calculateButton")
+        self.calculateButton = self.findChild(QtWidgets.QPushButton, "calculateButton")
         self.calculateButton.clicked.connect(self.calculatePressed)
+        # Output tab
+        self.textEditOutput = self.findChild(QtWidgets.QTextEdit, "textEditOutput")
         # INIT GUI
         self.init_gui()
 
@@ -159,6 +163,8 @@ class Ui(QtWidgets.QMainWindow):
             combo_cp_mat.addItem(i)
         self.clampedPartsTable.setCellWidget(1,1,combo_cp_mat)
         self.clampedPartsTable.setItem(1,0,QtWidgets.QTableWidgetItem(''))
+        # output tab setup
+        self.tabWidget.setTabEnabled(5, False)
 
     # erase gui - reset / new
     def erase_gui(self):
@@ -177,12 +183,18 @@ class Ui(QtWidgets.QMainWindow):
         self.tightTorqueTol.setText('')
         self.radioLockYes.setChecked(True)
         self.prevailingTorque.setText('')
-        self.loadingPlaneFactor.setText('')
+        self.loadingPlaneFactor.setText("0.5")
         # clamped parts tab
         self.cofClampedParts.setText('')
         self.numberOfShearPlanes.setValue(1)
         self.throughHoleDiameter.setText('')
         self.substDiameter.setText('')
+        row_offset = 0 # row-number changes after removeRow
+        for row in range(1,self.clampedPartsTable.rowCount()): 
+            self.clampedPartsTable.removeRow(row-row_offset) # delete all CPs
+            row_offset += 1
+        self.clampedPartsTable.selectRow(0) # add first clamped-part CP(1)
+        self.addCpPressed() # add row below
         # fos tab
         self.fosY.setText("1.1")
         self.fosU.setText("1.25")
@@ -197,6 +209,10 @@ class Ui(QtWidgets.QMainWindow):
         # calculate tab
         self.inputFile.setText('')
         self.outputFile.setText('')
+        # output tab
+        self.textEditOutput.clear()
+        self.tabWidget.setTabEnabled(5, False)
+        self.tabWidget.setCurrentIndex(0)
         # finally set statusbar
         self.statusbar.showMessage("New BAT project created")
 
@@ -289,14 +305,18 @@ class Ui(QtWidgets.QMainWindow):
 
     # calculate button pressed
     def calculatePressed(self):
-        # get shim data - CP(0)
-        shim_mat = self.clampedPartsTable.cellWidget(0,0).currentText()
-        shim = self.clampedPartsTable.cellWidget(0,1).currentText()
-        # get clamped parts
-        rows = self.clampedPartsTable.rowCount()
-        for row in range(1,rows): # start at first clamped-part CP(1)
-            print(self.clampedPartsTable.item(row,0).text())
-            print(self.clampedPartsTable.cellWidget(row,1).currentText())
+        if self.openedInputFile:
+            if self.openedInputFile.method == "ESAPSS":
+                # calc ESA-PSS
+                ana_esapss = EsaPss(\
+                    self.openedInputFile, self.materials, self.bolts)
+                output_results = ana_esapss.print_results(\
+                    self.outputFile.text(), print_to_cmd=False)
+                # enable output-tab and fill with results
+                self.tabWidget.setTabEnabled(5, True)
+                self.textEditOutput.setText(output_results)
+            else:
+                print("Method not implemented in current BAT version.")
 
     # MENU - new
     def menuNew(self):
@@ -354,11 +374,13 @@ class Ui(QtWidgets.QMainWindow):
                 self.radioLockNo.setChecked(True)
                 self.prevailingTorque.setEnabled(False)
             self.loadingPlaneFactor.setText(str(self.openedInputFile.loading_plane_factor))
+            #
             # clamped parts tab
             self.cofClampedParts.setText(str(self.openedInputFile.cof_clamp))
             self.numberOfShearPlanes.setValue(self.openedInputFile.nmbr_shear_planes)
             self.throughHoleDiameter.setText(str(self.openedInputFile.through_hole_diameter))
             self.substDiameter.setText(str(self.openedInputFile.subst_da))
+            # shim setup
             if self.openedInputFile.use_shim != "no":
                 self.useShimCheck.setChecked(True)
                 self.useShimChecked()
@@ -374,13 +396,16 @@ class Ui(QtWidgets.QMainWindow):
                     self.openedInputFile.use_shim[0], QtCore.Qt.MatchFixedString)
                 if index >= 0:
                     shim_mat_combo.setCurrentIndex(index)
+            # delete all CPs after shim CP(0)
+            row_offset = 0 # row-number changes after removeRow
             for row in range(1,self.clampedPartsTable.rowCount()): 
-                self.clampedPartsTable.removeRow(row) # delete all CPs
+                self.clampedPartsTable.removeRow(row-row_offset) # delete all CPs
+                row_offset += 1
+            # fill clamped parts
             for i, cp in self.openedInputFile.clamped_parts.items():
                 self.clampedPartsTable.selectRow(i-1) # select row
                 self.addCpPressed() # add row below
                 self.clampedPartsTable.item(i,0).setText(str(cp[1])) # set CP thickness
-                print(cp[1])
                 # set CP material combo-box
                 cp_mat_combo = self.clampedPartsTable.cellWidget(i,1)
                 index = cp_mat_combo.findText(\
@@ -416,8 +441,34 @@ class Ui(QtWidgets.QMainWindow):
     # MENU - save as
     def menuSaveAs(self):
         print("save as")
+        # get shim data - CP(0)
+        shim_mat = self.clampedPartsTable.cellWidget(0,0).currentText()
+        shim = self.clampedPartsTable.cellWidget(0,1).currentText()
+        # get clamped parts
+        rows = self.clampedPartsTable.rowCount()
+        for row in range(1,rows): # start at first clamped-part CP(1)
+            print(self.clampedPartsTable.item(row,0).text())
+            print(self.clampedPartsTable.cellWidget(row,1).currentText())
+
+    # MENU - About BAT
+    def menuAboutBat(self):
+        print("about BAT")
+        self.showdialog()
+
+    def showdialog(self):
+       msg = QMessageBox()
+       msg.setIcon(QMessageBox.Information)
+       msg.setText("Bolt Analysis Tool - BAT{0:^30}".format(" "))
+       msg.setInformativeText("v0.5")
+       msg.setWindowTitle("About BAT Info")
+       msg.setDetailedText(
+           "Author: Michael Sams\nProject: https://github.com/misams/BAT")
+       msg.setStandardButtons(QMessageBox.Ok)
+       #msg.setStyleSheet("QLabel{min-width: 200px;}")
+       retval = msg.exec_()
 
     # use data in clipboard and paste loads from excel
+    # TODO
     def pasteFromExcel(self):
         text = QApplication.clipboard().text()
         print(text+'\n')
