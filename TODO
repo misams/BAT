@@ -1,5 +1,6 @@
 # TODO file for BAT
 #
+- subst-diameter ???
 - include thermal output for std-thermal analysis
 - docu ;-)
 - check global slippage margin
@@ -9,6 +10,7 @@
 - base class for analysis methods
 
 # GUI
+- solve shitty shim adding procedure / compare gui to input file!!!????
 - pyQt gui...a lot of work
 - logging for GUI
 

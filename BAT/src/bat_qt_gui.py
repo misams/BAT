@@ -1,11 +1,11 @@
-
 import sys
 import os
 from pathlib import Path
 from collections import Counter, OrderedDict
 from src.functions.InputFileParser import InputFileParser
 from src.EsaPss import EsaPss
-from PyQt5 import QtWidgets, uic, QtCore
+from src.gui.GuiInputHandler import GuiInputHandler
+from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.Qt import Qt, QApplication, QClipboard
 
@@ -18,9 +18,10 @@ class Ui(QtWidgets.QMainWindow):
         uic.loadUi(ui_file, self)
         #
         # INIT variables
-        self.materials = materials
-        self.bolts = bolts
-        self.openedInputFile = None
+        self.materials = materials # materials DB
+        self.bolts = bolts # bolts DB
+        self.openedInputFile = None # opened BAT input file
+        self.gih = GuiInputHandler() # GUI input handler
         #
         # set widgets pointers and connections
         #
@@ -41,8 +42,6 @@ class Ui(QtWidgets.QMainWindow):
         self.projectName = self.findChild(QtWidgets.QLineEdit, "projectName")
         self.tabWidget = self.findChild(QtWidgets.QTabWidget, "tabWidget")
         # Bolt tab
-        self.radioJointMin = self.findChild(QtWidgets.QRadioButton, "radioJointMin")
-        self.radioJointMean = self.findChild(QtWidgets.QRadioButton, "radioJointMean")
         self.comboBolt = self.findChild(QtWidgets.QComboBox, "comboBolt")
         self.comboBoltMaterial = self.findChild(QtWidgets.QComboBox, "comboBoltMaterial")
         self.cofBoltHeadMin = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMin")
@@ -94,8 +93,11 @@ class Ui(QtWidgets.QMainWindow):
         self.saveOutputFileButton.clicked.connect(self.saveOutputFilePressed)
         self.calculateButton = self.findChild(QtWidgets.QPushButton, "calculateButton")
         self.calculateButton.clicked.connect(self.calculatePressed)
+        self.radioJointMin = self.findChild(QtWidgets.QRadioButton, "radioJointMin")
+        self.radioJointMean = self.findChild(QtWidgets.QRadioButton, "radioJointMean")
         # Output tab
         self.textEditOutput = self.findChild(QtWidgets.QTextEdit, "textEditOutput")
+        #
         # INIT GUI
         self.init_gui()
 
@@ -123,6 +125,7 @@ class Ui(QtWidgets.QMainWindow):
         # set number of shear planes and loading plane factor
         self.numberOfShearPlanes.setValue(1)
         self.loadingPlaneFactor.setText("0.5")
+        self.substDiameter.setEnabled(False) # TODO: subst-diameter ???
         # fos tab
         self.fosY.setText("1.1")
         self.fosU.setText("1.25")
@@ -164,7 +167,11 @@ class Ui(QtWidgets.QMainWindow):
         self.clampedPartsTable.setCellWidget(1,1,combo_cp_mat)
         self.clampedPartsTable.setItem(1,0,QtWidgets.QTableWidgetItem(''))
         # output tab setup
-        self.tabWidget.setTabEnabled(5, False)
+        self.tabWidget.setTabEnabled(5, False) # disable output tab
+        font = QtGui.QFont("Monospace", 9) # set monospace font (platform independent)
+        font.setStyleHint(QtGui.QFont.TypeWriter)
+        self.textEditOutput.setCurrentFont(font)
+        self.textEditOutput.setLineWrapMode(QtWidgets.QTextEdit.NoWrap) # do not wrap text
 
     # erase gui - reset / new
     def erase_gui(self):
@@ -280,6 +287,9 @@ class Ui(QtWidgets.QMainWindow):
         if selection:
             # insert row: selected cell (row+1)
             self.loadsTable.insertRow(selection[0].row()+1)
+        elif self.loadsTable.rowCount()==0:
+            # insert row(0) - no row in table
+            self.loadsTable.insertRow(0)
 
     # loadsTable - delete row button pressed
     def deleteRowPressed(self):
@@ -305,7 +315,9 @@ class Ui(QtWidgets.QMainWindow):
 
     # calculate button pressed
     def calculatePressed(self):
-        if self.openedInputFile:
+        self.readGuiInputs() # read gui inputs
+        compare = self.gih.compareInput(self.openedInputFile) # compare to opened input file
+        if self.openedInputFile and not compare:
             if self.openedInputFile.method == "ESAPSS":
                 # calc ESA-PSS
                 ana_esapss = EsaPss(\
@@ -317,6 +329,11 @@ class Ui(QtWidgets.QMainWindow):
                 self.textEditOutput.setText(output_results)
             else:
                 print("Method not implemented in current BAT version.")
+        else:
+            print("Input does not match opened input file - save input file.")
+            self.MessageBox(QMessageBox.Warning, "GUI Input vs. Input-File Missmatch",\
+                "Input does not match opened input file - save input file.",\
+                "Deviating Items:\n{0:^}".format(str(compare)))
 
     # MENU - new
     def menuNew(self):
@@ -441,41 +458,131 @@ class Ui(QtWidgets.QMainWindow):
     # MENU - save as
     def menuSaveAs(self):
         print("save as")
-        # get shim data - CP(0)
-        shim_mat = self.clampedPartsTable.cellWidget(0,0).currentText()
-        shim = self.clampedPartsTable.cellWidget(0,1).currentText()
+        self.readGuiInputs()
+        #self.gih.print()
+        compare = self.gih.compareInput(self.openedInputFile)
+        print("Compare: ", compare)
+
+    # read gui entries and store to GuiInputHandler
+    def readGuiInputs(self):
+        # project name and method
+        self.gih.project_name = self.projectName.text()
+        method_string = ""
+        if self.radioEsaPss.isChecked():
+            method_string = "ESAPSS"
+        elif self.radioEcss.isChecked():
+            method_string = "ECSS"
+        elif self.radioVdi.isChecked():
+            method_string = "VDI"
+        self.gih.method = method_string
+        # Bolt tab
+        self.gih.bolt = self.comboBolt.currentText()
+        self.gih.bolt_material = self.comboBoltMaterial.currentText()
+        #[mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
+        # TODO: error handling if input wrong
+        self.gih.cof_bolt = (\
+            float(self.cofBoltHeadMax.text()), float(self.cofThreadMax.text()),\
+            float(self.cofBoltHeadMin.text()), float(self.cofThreadMin.text()) )
+        self.gih.tight_torque = float(self.tightTorque.text())
+        self.gih.torque_tol_tight_device = float(self.tightTorqueTol.text())
+        if self.radioLockNo.isChecked():
+            self.gih.locking_mechanism = "no"
+        else:
+            self.gih.locking_mechanism = "yes"
+            self.gih.prevailing_torque = float(self.prevailingTorque.text())
+        self.gih.loading_plane_factor = float(self.loadingPlaneFactor.text())
+        # Clamped Parts tab
+        self.gih.cof_clamp = float(self.cofClampedParts.text())
+        self.gih.nmbr_shear_planes = int(self.numberOfShearPlanes.value())
+        self.gih.through_hole_diameter = float(self.throughHoleDiameter.text())
+        self.gih.subst_da = "no" # TODO: subst-diameter ???
+        if self.useShimCheck.isChecked(): # shim
+            shim_mat = self.clampedPartsTable.cellWidget(0,1).currentText()
+            shim = self.clampedPartsTable.cellWidget(0,0).currentText()
+            self.gih.use_shim = (shim_mat, shim)
+        else:
+            self.gih.use_shim = "no"
         # get clamped parts
         rows = self.clampedPartsTable.rowCount()
         for row in range(1,rows): # start at first clamped-part CP(1)
-            print(self.clampedPartsTable.item(row,0).text())
-            print(self.clampedPartsTable.cellWidget(row,1).currentText())
-
+            thk = float(self.clampedPartsTable.item(row,0).text())
+            mat = self.clampedPartsTable.cellWidget(row,1).currentText()
+            self.gih.clamped_parts.update({row : (mat, thk)})
+        # FOS tab
+        self.gih.fos_y = float(self.fosY.text())
+        self.gih.fos_u = float(self.fosU.text())
+        self.gih.fos_slip = float(self.fosSlip.text())
+        self.gih.fos_gap = float(self.fosGap.text())
+        # Loads tab
+        loads = [] # load table
+        rows = self.loadsTable.rowCount()
+        for row in range(0,rows): # get all load rows
+            loads.append([self.loadsTable.item(row,0).text(),\
+                        float(self.loadsTable.item(row,1).text()),\
+                        float(self.loadsTable.item(row,2).text()),\
+                        float(self.loadsTable.item(row,3).text())])
+        self.gih.bolt_loads = loads
+        self.gih.delta_t = float(self.deltaT.text())
+        # Calculate tab
+        if self.radioJointMin.isChecked():
+            self.gih.joint_mos_type = "min"
+        else:
+            self.gih.joint_mos_type = "mean"
+        
     # MENU - About BAT
     def menuAboutBat(self):
-        print("about BAT")
-        self.showdialog()
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Bolt Analysis Tool - BAT{0:^30}".format(" "))
+        msg.setInformativeText("v0.5")
+        msg.setWindowTitle("About BAT Info")
+        msg.setDetailedText(
+            "Author: Michael Sams\nProject: https://github.com/misams/BAT")
+        msg.setStandardButtons(QMessageBox.Ok)
+        retval = msg.exec_()
 
-    def showdialog(self):
-       msg = QMessageBox()
-       msg.setIcon(QMessageBox.Information)
-       msg.setText("Bolt Analysis Tool - BAT{0:^30}".format(" "))
-       msg.setInformativeText("v0.5")
-       msg.setWindowTitle("About BAT Info")
-       msg.setDetailedText(
-           "Author: Michael Sams\nProject: https://github.com/misams/BAT")
-       msg.setStandardButtons(QMessageBox.Ok)
-       #msg.setStyleSheet("QLabel{min-width: 200px;}")
-       retval = msg.exec_()
+    # display gui error-messagebox
+    # QMessageBox.Information, Warning, Critical
+    def MessageBox(self, type, title, text, det_text=None):
+        msg = QMessageBox()
+        msg.setIcon(type)
+        msg.setText("{0:^}".format(text))
+        msg.setWindowTitle(title)
+        if det_text is not None:
+            msg.setDetailedText(det_text)
+        msg.setStandardButtons(QMessageBox.Ok)
+        retval = msg.exec_()
 
     # use data in clipboard and paste loads from excel
-    # TODO
     def pasteFromExcel(self):
+        # get text out of clipboard
         text = QApplication.clipboard().text()
-        print(text+'\n')
+        if text:
+            #print(repr(text)) # print raw-string
+            text_rows = text.rstrip('\n').split('\n') # split string at newline-chars (rows in Excel)
+            # clear loadsTable and delete all rows - empty table
+            self.loadsTable.clearContents()
+            self.loadsTable.setRowCount(0)
+            # add data out of Excel
+            for i, row in enumerate(text_rows):
+                row_items = row.split('\t')
+                if len(row_items) == 3:
+                    self.loadsTable.insertRow(i) # insert row
+                    # set cell values
+                    self.loadsTable.setItem(i,0,QtWidgets.QTableWidgetItem(row_items[0]))
+                    self.loadsTable.setItem(i,1,QtWidgets.QTableWidgetItem(row_items[1]))
+                    self.loadsTable.setItem(i,2,QtWidgets.QTableWidgetItem(row_items[2]))
+                    self.loadsTable.setItem(i,3,QtWidgets.QTableWidgetItem('0'))
+                elif len(row_items) == 4:
+                    self.loadsTable.insertRow(i) # insert row
+                    # set cell values
+                    self.loadsTable.setItem(i,0,QtWidgets.QTableWidgetItem(row_items[0]))
+                    self.loadsTable.setItem(i,1,QtWidgets.QTableWidgetItem(row_items[1]))
+                    self.loadsTable.setItem(i,2,QtWidgets.QTableWidgetItem(row_items[2]))
+                    self.loadsTable.setItem(i,3,QtWidgets.QTableWidgetItem(row_items[3]))
+                else:
+                    print("ERROR: Excel load format incorrect.")
+                    self.MessageBox(QMessageBox.Warning, "Excel Load Error",\
+                        "ERROR: Excel load format incorrect.")
+                    break
 
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    window = Ui()
-    window.show()
-    sys.exit(app.exec_())
