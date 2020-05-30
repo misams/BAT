@@ -85,7 +85,7 @@ def main():
             sys.exit(app.exec_())
         else:
             # read and process input file
-            inp_file = fp.InputFileParser(args.Input)
+            inp_file = fp.InputFileParser(args.Input, bolts)
             #inp_file.print() # debug
             #
             # calc ESA-PSS

@@ -2,11 +2,14 @@ import csv
 from pathlib import Path
 import logging
 from src.functions.exceptions import InputCofError
+from src.functions.BoltManager import BoltManager
 
 class InputFileParser:
-    def __init__(self, input_file):
+    def __init__(self, input_file, bolts_db : BoltManager):
         # input file path
         self.input_file = Path(input_file)
+        # bolts / washer database
+        self.bolts_db = bolts_db
         # input file values
         self.project_name = ""
         self.method = ""
@@ -107,6 +110,10 @@ class InputFileParser:
                                     tmp_shim_str = tmp_line[1].replace('[','').replace(']','').split(',')
                                     self.use_shim = (tmp_shim_str[0].lstrip().rstrip(), \
                                         tmp_shim_str[1].lstrip().rstrip())
+                                    # add shim to clamped parts as CP(0)
+                                    self.clamped_parts.update(\
+                                        { 0 : (self.use_shim[0],\
+                                            self.bolts_db.washers[self.use_shim[1]].h) })
                             elif tmp_line[0]=="*THROUGH_HOLE_DIAMETER":
                                 self.through_hole_diameter = float(tmp_line[1])
                             elif tmp_line[0]=="*SUBST_DA":
@@ -165,6 +172,10 @@ class InputFileParser:
                                     tmp_shim_str = tmp_line[1].replace('[','').replace(']','').split(',')
                                     self.temp_use_shim = (tmp_shim_str[0].lstrip().rstrip(), \
                                         tmp_shim_str[1].lstrip().rstrip())
+                                    # add temp-shim to temp clamped parts as CP(0)
+                                    self.temp_clamped_parts.update(\
+                                        { 0 : (self.temp_use_shim[0],\
+                                            self.bolts_db.washers[self.temp_use_shim[1]].h) })
                             elif tmp_line[0][:-3]=="*TEMP_CLAMPED_PART":
                                 # get clamped-part number (inside brackets) and save n-CP to dict
                                 cp_nmbr = int(tmp_line[0][tmp_line[0].find("(")+1:tmp_line[0].find(")")])

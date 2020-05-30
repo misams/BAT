@@ -3,10 +3,8 @@ __pycache__/
 .vscode
 bat.log
 *.out
-TPLE_M5_thermal.inp
-TPLE_M5_thermal_A286.inp
-TPLE_M5_thermal_A480.inp
-TPLE_M5_thermal_Inc718.inp
+TPLE*
 BAT/doc/dev_helper/LN 9016 Scheiben angesenkt.pdf
 *.swp
 BAT/doc/dev_helper/DIN 433 Teil 1 Scheiben.pdf
+test_.inp

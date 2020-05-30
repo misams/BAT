@@ -21,7 +21,7 @@ class Ui(QtWidgets.QMainWindow):
         self.materials = materials # materials DB
         self.bolts = bolts # bolts DB
         self.openedInputFile = None # opened BAT input file
-        self.gih = GuiInputHandler() # GUI input handler
+        self.gih = None # GUI input handler
         #
         # set widgets pointers and connections
         #
@@ -354,7 +354,7 @@ class Ui(QtWidgets.QMainWindow):
             "BAT Input Files (*.inp)")
         if openedFileName:
             # read and parse input file
-            self.openedInputFile = InputFileParser(openedFileName)
+            self.openedInputFile = InputFileParser(openedFileName, self.bolts)
             #
             # fill gui
             if self.openedInputFile.method == "ESAPSS":
@@ -413,6 +413,9 @@ class Ui(QtWidgets.QMainWindow):
                     self.openedInputFile.use_shim[0], QtCore.Qt.MatchFixedString)
                 if index >= 0:
                     shim_mat_combo.setCurrentIndex(index)
+            else:
+                self.useShimCheck.setChecked(False)
+                self.useShimChecked()
             # delete all CPs after shim CP(0)
             row_offset = 0 # row-number changes after removeRow
             for row in range(1,self.clampedPartsTable.rowCount()): 
@@ -420,15 +423,16 @@ class Ui(QtWidgets.QMainWindow):
                 row_offset += 1
             # fill clamped parts
             for i, cp in self.openedInputFile.clamped_parts.items():
-                self.clampedPartsTable.selectRow(i-1) # select row
-                self.addCpPressed() # add row below
-                self.clampedPartsTable.item(i,0).setText(str(cp[1])) # set CP thickness
-                # set CP material combo-box
-                cp_mat_combo = self.clampedPartsTable.cellWidget(i,1)
-                index = cp_mat_combo.findText(\
-                    cp[0], QtCore.Qt.MatchFixedString)
-                if index >= 0:
-                    cp_mat_combo.setCurrentIndex(index)
+                if i!=0:
+                    self.clampedPartsTable.selectRow(i-1) # select row
+                    self.addCpPressed() # add row below
+                    self.clampedPartsTable.item(i,0).setText(str(cp[1])) # set CP thickness
+                    # set CP material combo-box
+                    cp_mat_combo = self.clampedPartsTable.cellWidget(i,1)
+                    index = cp_mat_combo.findText(\
+                        cp[0], QtCore.Qt.MatchFixedString)
+                    if index >= 0:
+                        cp_mat_combo.setCurrentIndex(index)
             # fos tab
             self.fosY.setText(str(self.openedInputFile.fos_y))
             self.fosU.setText(str(self.openedInputFile.fos_u))
@@ -457,14 +461,18 @@ class Ui(QtWidgets.QMainWindow):
 
     # MENU - save as
     def menuSaveAs(self):
+        print(self.openedInputFile.print())
         print("save as")
         self.readGuiInputs()
-        #self.gih.print()
+        self.gih.print()
         compare = self.gih.compareInput(self.openedInputFile)
         print("Compare: ", compare)
+        self.gih.saveInputFile("/home/sams/git/BAT/BAT/test_.inp")
 
     # read gui entries and store to GuiInputHandler
     def readGuiInputs(self):
+        # create new GuiInputHandler class
+        self.gih = GuiInputHandler()
         # project name and method
         self.gih.project_name = self.projectName.text()
         method_string = ""
@@ -500,6 +508,9 @@ class Ui(QtWidgets.QMainWindow):
             shim_mat = self.clampedPartsTable.cellWidget(0,1).currentText()
             shim = self.clampedPartsTable.cellWidget(0,0).currentText()
             self.gih.use_shim = (shim_mat, shim)
+            # add shim to clamped parts dict
+            self.gih.clamped_parts.update({ 0 : (shim_mat,\
+                self.bolts.washers[shim].h) })
         else:
             self.gih.use_shim = "no"
         # get clamped parts

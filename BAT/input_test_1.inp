@@ -61,7 +61,7 @@ Bolt-5  55	0	0
     *TEMP_USE_VDI_METHOD = no # no or yes
     # define material properties at temp T
     *TEMP_BOLT_MATERIAL = A4-80
-    *TEMP_USE_SHIM = [8.8, LNM8] # also use "no" or shim out of database
+    *TEMP_USE_SHIM = [8.8, LN_M8] # also use "no" or shim out of database
     *TEMP_CLAMPED_PART(1) = [Titan, 100]
     *TEMP_CLAMPED_PART(2) = [S355, 5]
     *TEMP_CLAMPED_PART(3) = [S355, 5]

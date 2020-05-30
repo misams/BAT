@@ -8,11 +8,13 @@
 - check different cB values for result impact; cB SHM conservative??
 - visualization? (bolt diagram?)
 - base class for analysis methods
+- add Analysis-Notes/Infos to output (e.g. VDI Method temp. depend. strength values used)
 
 # GUI
 - solve shitty shim adding procedure / compare gui to input file!!!????
 - pyQt gui...a lot of work
 - logging for GUI
+- thermal output
 
 
 # Future tasks

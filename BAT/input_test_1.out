@@ -20,7 +20,7 @@
 | Factor of safety slippage                FOS_slip:                              2.00        |
 | Factor of safety gapping                 FOS_gap:                               2.00        |
 |---------------------------------------------------------------------------------------------|
-| Clamped-Part (0)                         Material:                              8.8         |
+| Clamped-Part (0) - Shim / Washer         Material:                              8.8         |
 |                                          Thickness [mm]:                        1.50        |
 |                                          Young's modulus [MPa]:               210000.0      |
 |                                          Yield strength [MPa]:                 640.0        |
@@ -102,4 +102,4 @@
 |-------------------------------------------------------------------------+------------+------------+------------+------------|
 |           Minimum MoS against Yield under bolt head / first clamp part: |     -      |     -      |    147%    |     -      |
 ===============================================================================================================================
-BAT Analysis Timestamp: 24-05-2020 21:40:02
+BAT Analysis Timestamp: 30-05-2020 12:38:52

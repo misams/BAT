@@ -1,4 +1,5 @@
 from src.functions.InputFileParser import InputFileParser
+from datetime import datetime
 
 class GuiInputHandler:
     def __init__(self):
@@ -74,7 +75,6 @@ class GuiInputHandler:
         if self.clamped_parts != inp_file.clamped_parts:
             compare_items.append("*CLAMPED_PARTS(i)")
             print(self.clamped_parts, inp_file.clamped_parts)
-            # TODO: solve shitty shim adding procedure!!!???
         if self.fos_y != inp_file.fos_y:
             compare_items.append("*FOS_Y")
         if self.fos_u != inp_file.fos_u:
@@ -89,6 +89,97 @@ class GuiInputHandler:
             compare_items.append("*DELTA_T")
         # return compare_items
         return compare_items
+
+    # save input file with GUI inputs
+    def saveInputFile(self, inp_file_name):
+        # write input file
+        with open(inp_file_name, 'w') as fid:
+            output_str = "" # use output_str for fid.write()
+            # define header
+            output_str += "{0:#^40}\n".format('#')
+            output_str += "#{0:^38}#\n".format(' ')
+            output_str += "# BAT Input File{0:^23}#\n".format(' ')
+            output_str += "#{0:^38}#\n".format(' ')
+            timestamp = str(datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
+            output_str += "# Created: {0:^}         #\n".format(timestamp)
+            output_str += "# Unit System: mm, N, Nm               #\n"
+            output_str += "#{0:^38}#\n".format(' ')
+            output_str += "{0:#^40}\n\n".format('#')
+            # project entries
+            output_str += "*PROJECT_NAME = {0:^}\n".format(self.project_name)
+            output_str += "*METHOD = {0:^} # {comment:^}\n\n".format(self.method, \
+                comment="ECSS or VDI2230 (not implemented)")
+            # definition of used bolts
+            output_str += "# Definition of used bolt\n"
+            output_str += "*BOLT_DEFINITION\n"
+            output_str += "    *JOINT_MOS_TYPE = {0:^} # {comment:^}\n".format(self.joint_mos_type, \
+                comment="min (STD) or mean: use min or mean preload for slippage MOS calculation")
+            output_str += "    *BOLT = {0:^} # {comment:^}\n".format(self.bolt, \
+                comment="or e.g. S_M8x1 for fine thread")
+            output_str += "    *BOLT_MATERIAL = {0:^}\n".format(self.bolt_material)
+            cof_bolt_str = str(self.cof_bolt).replace('(','[').replace(')',']')
+            output_str += "    *COF_BOLT = {0:^} # {comment:^}\n".format(cof_bolt_str, \
+                comment="[mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]")
+            output_str += "    *TIGHT_TORQUE = {0:.2f}\n".format(self.tight_torque)
+            output_str += "    *TORQUE_TOL_TIGHT_DEVICE = {0:.2f} # {comment:^}\n".format(self.torque_tol_tight_device, \
+                comment="torque wrench tolerance")
+            output_str += "    *LOCKING_MECHANISM = {0:^} # {comment:^}\n".format(self.locking_mechanism, \
+                comment="\"yes\" or \"no\", e.g. yes for Helicoil")
+            output_str += "    *PREVAILING_TORQUE = {0:.2f} # {comment:^}\n".format(self.prevailing_torque, \
+                comment="only used if *LOCKING_MECHANISM = yes")
+            output_str += "    *LOADING_PLANE_FACTOR = {0:.3f}\n".format(self.loading_plane_factor)
+            output_str += "*BOLT_DEFINITION_END\n\n"
+            # definition of clamped parts
+            output_str += "# Definition of clamped parts\n"
+            output_str += "*CLAMPED_PARTS_DEFINITION\n"
+            output_str += "    *COF_CLAMP = {0:.2f} # {comment:^}\n".format(self.cof_clamp, \
+                comment="min. coefficient of friction between clamped parts")
+            output_str += "    *NMBR_SHEAR_PLANES = {0:d}\n".format(self.nmbr_shear_planes)
+            if self.use_shim == "no":
+                shim_str = "no"
+            else:
+                shim_str = "[{0:^}, {1:^}]".format(self.use_shim[0], self.use_shim[1])
+            output_str += "    *USE_SHIM = {0:^} # {comment:^}\n".format(shim_str, \
+                comment="e.g. [Shim-Material, Shim-Type] out of database or use \"no\"")
+            output_str += "    *THROUGH_HOLE_DIAMETER = {0:.2f} # {comment:^}\n".format(self.through_hole_diameter, \
+                comment="D_B, drilled hole diameter in clamped parts")
+            output_str += "    *SUBST_DA = {0:^} # {comment:^}\n".format(self.subst_da, \
+                comment="\"no\" or define substitutional outside diameter of of the basic solid at the interface")
+            output_str += "    # define n-clamped parts; use ascending index and start at (1)\n"
+            for key, value in self.clamped_parts.items():
+                if key != 0: # ignore shim
+                    output_str += "    *CLAMPED_PART({0:d}) = [{1:^}, {2:.2f}]\n".format(key, value[0], value[1])
+            output_str += "*CLAMPED_PARTS_DEFINITION_END\n\n"
+            # definition of factors of safety
+            output_str += "# Definition of factors of safety\n"
+            output_str += "*FOS_DEFINITION\n"
+            output_str += "    *FOS_Y = {0:.2f} # {comment:^}\n".format(self.fos_y, \
+                comment="yield")
+            output_str += "    *FOS_U = {0:.2f} # {comment:^}\n".format(self.fos_u, \
+                comment="ultimate")
+            output_str += "    *FOS_SLIP = {0:.2f} # {comment:^}\n".format(self.fos_slip, \
+                comment="slippage")
+            output_str += "    *FOS_GAP = {0:.2f} # {comment:^}\n".format(self.fos_gap, \
+                comment="gapping")
+            output_str += "*FOS_DEFINITION_END\n\n"
+            # definition of bolt loads
+            output_str += "# Definition of bolt loads\n"
+            output_str += "# load/bolt-ID (max. 12 char.), axial-force, lateral-force-1, lateral-force-2 (optional)\n"
+            output_str += "*BOLT_LOAD_DEFINITION\n"
+            for bl in self.bolt_loads:
+                output_str += "{0:^} {1:.2f} {2:.2f} {3:.2f}\n".format(bl[0], bl[1], bl[2], bl[3])
+            output_str += "*BOLT_LOAD_DEFINITION_END\n\n"
+            # definition of temperature environment
+            output_str += "# Definition of temperature environment\n"
+            output_str += "# temperature difference defined in K or deg-C\n"
+            output_str += "# reference temperature == assembly temperature\n"
+            output_str += "*TEMP_DEFINITION\n"
+            output_str += "    *DELTA_T = {0:.2f} # {comment:^}\n".format(self.delta_t, \
+                comment="+K/degC means higher temperature at service")
+            # NOTE: VDI method not implemented in GUI
+            output_str += "*TEMP_DEFINITION\n"
+            # write GUI input to BAT input file
+            fid.write(output_str)
 
     # print function of input file
     # DEBUGGING function

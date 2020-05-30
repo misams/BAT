@@ -25,17 +25,6 @@ class EsaPss:
         # used variables for analysis
         self.used_bolt = bolts.bolts[self.inp_file.bolt] # used bolt
         self.used_bolt_mat = self.materials.materials[self.inp_file.bolt_material]
-        # if washer used --> add washer to clamped parts
-        if self.inp_file.use_shim != "no":
-            self.inp_file.clamped_parts.update( \
-                {0 : (self.inp_file.use_shim[0], self.bolts.washers[self.inp_file.use_shim[1]].h) })
-            log_str = "Shim added to clamped materials --> {0:^}".format(str(self.inp_file.clamped_parts[0]))
-            print(log_str)
-            logging.info(log_str)
-        else:
-            log_str = "No shim used."
-            print(log_str)
-            logging.info(log_str)
         # calculated variables
         self.Tp = 0.0 # prevailing torque
         self.lk = 0.0 # clamped length
@@ -95,6 +84,7 @@ class EsaPss:
         #    (self.lk+self.used_washer.h)/self.used_bolt.A3 + 0.4*self.used_bolt.d/self.used_bolt.A3)
         
         # Joint elastic compliance for joints with large areas of contact, p.6-7ff.
+        # TODO: rework SUBST_DA topic!
         # calc substitutional area for clamped parts
         if self.lk/self.used_bolt.d >= 1.0 and self.lk/self.used_bolt.d <=2:
             logging.info("Calculate Asub acc. to case (ii)")
@@ -215,10 +205,6 @@ class EsaPss:
         log_str = "VDI thermal preload method used for analysis"
         print(log_str)
         logging.info(log_str)
-        # if washer used --> add washer to clamped parts for ###
-        if self.inp_file.temp_use_shim != "no":
-            self.inp_file.temp_clamped_parts.update( \
-                {0 : (self.inp_file.temp_use_shim[0], self.bolts.washers[self.inp_file.temp_use_shim[1]].h) })
         # calculate clamped part stiffness cPT at temperature T
         # --> used for Young's Modulus E_PT calculation only
         cPT = 0.0
@@ -305,7 +291,7 @@ class EsaPss:
         # prevailing torque if locking mechanism defined
         if self.inp_file.locking_mechanism == "yes":
             self.Tp = self.inp_file.prevailing_torque
-        #NOTE: friction angle valid ONLY for 60deg threads!! (metric + unified threads)
+        # NOTE: friction angle valid ONLY for 60deg threads!! (metric + unified threads)
         # COF_BOLT = [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min] 
         mu_uhmax = self.inp_file.cof_bolt[0]
         mu_thmax = self.inp_file.cof_bolt[1]
@@ -346,7 +332,7 @@ class EsaPss:
         # Calculate stresses
         # max. torsional stress after tightening - see VDI2230 p.24
         Wp = (self.used_bolt.ds**3)*math.pi/16
-        #NOTE: only applicable for metric threads
+        # NOTE: only applicable for metric threads
         MG_max = self.FPreMax*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
             1.155*mu_thmin)
         MG_min = self.FPreMin*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
@@ -512,10 +498,17 @@ class EsaPss:
         output_str += "|{0:-^93}|\n".format('-') # empty line within section
         # list clamped parts with properties
         cp = self.inp_file.clamped_parts
-        for i in range(len(self.inp_file.clamped_parts)):
-            if self.inp_file.use_shim == "no": i += 1 # add 1 if no shim is used; shim is always [0]
+        tmp_shim_str = "" # add "Shim" to CP(0)
+        for i in range(len(cp)):
+            # shim handling for output string
+            if self.inp_file.use_shim != "no" and i==0:
+                tmp_shim_str = " - Shim / Washer" 
+            elif self.inp_file.use_shim != "no" and i>0:
+                tmp_shim_str = ""
+            else:
+                i += 1 # add 1 if no shim is used; shim is always [0]
             output_str += "| {0:<40} {1:<30} {2:^20}|\n".format(\
-                "Clamped-Part ("+str(i)+")", "Material:", cp[i][0])
+                "Clamped-Part ("+str(i)+")"+tmp_shim_str, "Material:", cp[i][0])
             output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
                 " ", "Thickness [mm]:", cp[i][1])
             output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
