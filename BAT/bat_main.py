@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import logging
+import configparser
 from PyQt5 import QtWidgets
 import src.functions.InputFileParser as fp
 import src.functions.MaterialManager as mat
@@ -10,29 +11,33 @@ import src.EsaPss as esapss
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.3(beta)"
+__version__ = "0.4"
 """
 Change Log:
 
-v0.3.1(beta) - 18.04.2020
+v0.4 - 10.06.2020
+- pyQT5 GUI initial release
+- config file: bat.ini added
+v0.3.1 - 18.04.2020
 - GUI development started (--gui option added to launch BAT GUI)
-v0.3(beta) - 13.04.2020
+v0.3 - 13.04.2020
 - BAT input printed to output
 - error corrected if *USE_SHIM = no
-v0.2(beta) - 08.04.2020
+v0.2 - 08.04.2020
 - VDI 2230 thermal method added (takes Young's modulus temperature dependance into account)
-v0.1(beta) - April 2020
+v0.1 - April 2020
 - first revision of beta software status
 """
 
 def main():
-    # get file path of bat_main.py --> start here with relative file path
+    # get file path of bat_main.py - initial home-directory
     work_dir = os.path.dirname(os.path.realpath(__file__))
-    print("Working directory: " + work_dir)
+    print("BAT home directory: " + work_dir)
 
     # define logging config (overwrite log file 'w')
     # DEBUG, INFO, WARNING, ERROR, and CRITICAL
-    logging.basicConfig(filename=work_dir+"/bat.log", filemode='w',
+    log_file = work_dir+"/bat.log"
+    logging.basicConfig(filename=log_file, filemode='w',
         format="%(asctime)s %(levelname)-8s %(message)s",
         level=logging.DEBUG,
         datefmt="%Y-%m-%d %H:%M:%S")
@@ -50,7 +55,11 @@ def main():
     arg_parser.add_argument("-o",
         "--Output",
         type=str,
-        help="define output result file (default: ./output_test.out)")
+        help="define output result file")
+    arg_parser.add_argument("--config",
+        type=str,
+        default= work_dir + "/config/bat.ini",
+        help="define config file (default: ./config/bat.ini)")
     arg_parser.add_argument("--gui",
         action="store_true",
         help="use BAT GUI")
@@ -65,22 +74,49 @@ def main():
     else:
         output_file = args.Input.split('.')[0]+".out"
 
-    # print header
-    print("#\n# Bolt Analysis Tool (BAT: {0:^})\n#".format(__version__))
-
-    # run BAT analysis
+    # EXCECUTE BAT
     try:
+        #
+        # read config file: bat.ini
+        #
+        config = configparser.ConfigParser()
+        config.read_file(open(args.config, 'r'))
+        print("BAT config file   : " + args.config)
+        logging.info("BAT config file   : " + args.config)
+        # database directory
+        db_dir = config["PATHS"]["db_dir"]
+        if db_dir != "DEFAULT":
+            db_dir = os.path.abspath(db_dir)
+        else:
+            db_dir = work_dir+"/db"
+        print("BAT DB directory  : " + db_dir)
+        logging.info("BAT DB directory  : " + db_dir)
+        # location of bat_gui.ui
+        ui_file = config["PATHS"]["ui_file"]
+        if ui_file != "DEFAULT":
+            ui_file = os.path.abspath(ui_file)
+        else:
+            ui_file = work_dir+"/src/gui/bat_gui.ui"
+        print("BAT GUI ui-file   : " + ui_file)
+        logging.info("BAT GUI ui-file   : " + ui_file)
+
+        #
+        # run BAT analysis
+        #
+        # print header
+        print("#\n# Bolt Analysis Tool (BAT: {0:^})\n#".format(__version__))
+
         # read and process material-database files
-        materials = mat.MaterialManager(work_dir+"/db/materials.mat")
+        materials = mat.MaterialManager(db_dir+"/materials.mat")
 
         # handle bolt db files - read all available bolts and washers
-        bolts = bm.BoltManager(work_dir+"/db")
+        bolts = bm.BoltManager(db_dir)
 
         # use GUI or command-line
         if args.gui is True:
             print("BAT GUI initialized...rock it!")
             app = QtWidgets.QApplication(sys.argv)
-            window = bat_qt_gui.Ui(materials, bolts)
+            window = bat_qt_gui.Ui(ui_file, materials, bolts, __version__)
             window.show()
             sys.exit(app.exec_())
         else:
@@ -93,7 +129,7 @@ def main():
             ana_esapss.print_results(output_file)
 
     # handle exceptions
-    except (ex.Error, ValueError, IndexError, FileNotFoundError) as e:
+    except (ex.Error, ValueError, IndexError, FileNotFoundError, KeyError) as e:
         # print successful end of BAT analysis
         print("#\n# ERROR --> go to \"bat.log\" file\n# BAT analysis terminated: " + str(e))
         logging.error("BAT run terminated due to fatal error: " + str(e))

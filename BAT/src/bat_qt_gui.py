@@ -11,10 +11,9 @@ from PyQt5.Qt import Qt, QApplication, QClipboard
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
-    def __init__(self, materials=None, bolts=None):
+    def __init__(self, ui_file, materials=None, bolts=None, bat_version="-"):
         super(Ui, self).__init__()
-        # load *.ui file (relative path to ./gui/bat_gui.ui from bat_qt_gui.py location)
-        ui_file = os.path.dirname(os.path.realpath(__file__)) + "/gui/bat_gui.ui"
+        # load *.ui file
         uic.loadUi(ui_file, self)
         #
         # INIT variables
@@ -22,6 +21,11 @@ class Ui(QtWidgets.QMainWindow):
         self.bolts = bolts # bolts DB
         self.openedInputFile = None # opened BAT input file
         self.gih = None # GUI input handler
+        self.bat_version = bat_version
+        #
+        # set window title
+        #
+        self.setWindowTitle("Bolt Analysis Tool - BAT (v{0:^})".format(self.bat_version))
         #
         # set widgets pointers and connections
         #
@@ -545,7 +549,7 @@ class Ui(QtWidgets.QMainWindow):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText("Bolt Analysis Tool - BAT{0:^30}".format(" "))
-        msg.setInformativeText("v0.5")
+        msg.setInformativeText("Version: v" + self.bat_version)
         msg.setWindowTitle("About BAT Info")
         msg.setDetailedText(
             "Author: Michael Sams\nProject: https://github.com/misams/BAT")
