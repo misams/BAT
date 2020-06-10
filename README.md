@@ -33,7 +33,7 @@ $ python bat_main.py --help
 ```shell
 $ python bat_main.py --gui
 ```
-![Example Screenshot BAT v0.4](https://github.com/misams/BAT/BAT/doc/bat_example.png)
+![Example Screenshot BAT v0.4](https://github.com/misams/BAT/master/BAT/doc/bat_example.png)
 
 ## Changelog
 ### v0.4
