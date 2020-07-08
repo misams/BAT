@@ -358,7 +358,7 @@ class EsaPss:
         for bi in self.inp_file.bolt_loads:
             # bi : ['Bolt-ID', FN, FQ1, FQ2]
             FA = bi[1] # axial bolt force
-            FQ = math.sqrt(bi[2]**2+bi[2]**2) # shear bolt force
+            FQ = math.sqrt(bi[2]**2+bi[3]**2) # shear bolt force
             FPA = FA*(1-self.phi_n) # reduction in clamping force
             FSA = FA*self.phi_n # additional bolt force
             # required clamping force for friction grip
@@ -577,7 +577,7 @@ class EsaPss:
         output_str += "| {0:<50}|{1:^20.3f}|{2:^20.3f}|\n".format(\
             "Coefficient of friction in thread:", self.inp_file.cof_bolt[3],\
                 self.inp_file.cof_bolt[1])
-        output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
+        output_str += "| {0:<50}|{1:^41.2f}|\n".format(\
             "Coefficient of friction between clamped parts:", self.inp_file.cof_clamp)
         output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-") # empty line in table
         output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
