@@ -36,6 +36,11 @@ $ python bat_main.py --gui
 ![Example Screenshot BAT v0.4](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
 
 ## Changelog
+### v0.5
+>26.07.2020
+- FQ bug corrected
+- Save-as method implemented
+
 ### v0.4
 >10.06.2020
 - pyQT5 GUI initial release

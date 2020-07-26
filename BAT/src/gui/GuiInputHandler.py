@@ -177,7 +177,7 @@ class GuiInputHandler:
             output_str += "    *DELTA_T = {0:.2f} # {comment:^}\n".format(self.delta_t, \
                 comment="+K/degC means higher temperature at service")
             # NOTE: VDI method not implemented in GUI; writes dummy block
-            output_str += "*TEMP_DEFINITION\n"
+            output_str += "*TEMP_DEFINITION_END\n"
             # write GUI input to BAT input file
             fid.write(output_str)
 

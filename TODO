@@ -14,6 +14,7 @@
 
 # GUI
 
+- check inputs are correct / consistent
 - logging for GUI
 - thermal output
 - include VDI method

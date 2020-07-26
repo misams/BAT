@@ -11,10 +11,13 @@ import src.EsaPss as esapss
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.4"
+__version__ = "0.5"
 """
 Change Log:
 
+v0.5 - 26.07.2020
+- FQ bug corrected
+- Save-as method implemented
 v0.4 - 10.06.2020
 - pyQT5 GUI initial release
 - config file: bat.ini added
@@ -99,7 +102,14 @@ def main():
             ui_file = work_dir+"/src/gui/bat_gui.ui"
         print("BAT GUI ui-file   : " + ui_file)
         logging.info("BAT GUI ui-file   : " + ui_file)
-
+        # default input-file directory
+        inp_dir = config["PATHS"]["inp_dir"]
+        if inp_dir != "DEFAULT":
+            inp_dir = os.path.abspath(inp_dir)
+        else:
+            inp_dir = work_dir
+        print("BAT input-file directory  : " + inp_dir)
+        logging.info("BAT input-file directory  : " + inp_dir)
         #
         # run BAT analysis
         #
@@ -116,7 +126,7 @@ def main():
         if args.gui is True:
             print("BAT GUI initialized...rock it!")
             app = QtWidgets.QApplication(sys.argv)
-            window = bat_qt_gui.Ui(ui_file, materials, bolts, __version__)
+            window = bat_qt_gui.Ui(ui_file, materials, bolts, inp_dir, __version__)
             window.show()
             sys.exit(app.exec_())
         else:

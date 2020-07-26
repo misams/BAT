@@ -69,7 +69,7 @@
 ===============================================================================================
 | Coefficient of friction under bolt head:          |       0.075        |       0.125        |
 | Coefficient of friction in thread:                |       0.132        |       0.220        |
-| Coefficient of friction between clamped parts:    |                   0.3                   |
+| Coefficient of friction between clamped parts:    |                  0.34                   |
 |---------------------------------------------------+--------------------+--------------------|
 | Bolt preload after tightening [N]:                |       7987.2       |      14183.2       |
 | MEAN Bolt preload after tightening [N]:           |                 11085.2                 |
@@ -102,4 +102,4 @@
 |-------------------------------------------------------------------------+------------+------------+------------+------------|
 |           Minimum MoS against Yield under bolt head / first clamp part: |     -      |     -      |    147%    |     -      |
 ===============================================================================================================================
-BAT Analysis Timestamp: 06-07-2020 08:10:04
+BAT Analysis Timestamp: 26-07-2020 11:48:05

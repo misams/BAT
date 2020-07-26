@@ -1,5 +1,6 @@
 import sys
 import os
+import logging
 from pathlib import Path
 from collections import Counter, OrderedDict
 from src.functions.InputFileParser import InputFileParser
@@ -9,9 +10,11 @@ from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.Qt import Qt, QApplication, QClipboard
 
+# TODO: implement logging
+
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
-    def __init__(self, ui_file, materials=None, bolts=None, bat_version="-"):
+    def __init__(self, ui_file, materials=None, bolts=None, inp_dir=None, bat_version="-"):
         super(Ui, self).__init__()
         # load *.ui file
         uic.loadUi(ui_file, self)
@@ -21,7 +24,8 @@ class Ui(QtWidgets.QMainWindow):
         self.bolts = bolts # bolts DB
         self.openedInputFile = None # opened BAT input file
         self.gih = None # GUI input handler
-        self.bat_version = bat_version
+        self.inp_dir = inp_dir # default directory of input-files
+        self.bat_version = bat_version # BAT software version
         #
         # set window title
         #
@@ -48,6 +52,7 @@ class Ui(QtWidgets.QMainWindow):
         # Bolt tab
         self.comboBolt = self.findChild(QtWidgets.QComboBox, "comboBolt")
         self.comboBoltMaterial = self.findChild(QtWidgets.QComboBox, "comboBoltMaterial")
+        self.comboBoltMaterialT = self.findChild(QtWidgets.QComboBox, "comboBoltMaterialT")
         self.cofBoltHeadMin = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMin")
         self.cofBoltHeadMax = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMax")
         self.cofThreadMin = self.findChild(QtWidgets.QLineEdit, "cofThreadMin")
@@ -88,6 +93,7 @@ class Ui(QtWidgets.QMainWindow):
         self.pasteLoadsExcel = self.findChild(QtWidgets.QPushButton, "pasteLoadsExcel")
         self.pasteLoadsExcel.clicked.connect(self.pasteFromExcel)
         self.deltaT = self.findChild(QtWidgets.QLineEdit, "deltaT")
+        self.checkBoxVdiThermal = self.findChild(QtWidgets.QCheckBox, "checkBoxVdiThermal")
         # Calculate tab
         self.inputFile = self.findChild(QtWidgets.QLineEdit, "inputFile")
         self.saveInputFileButton = self.findChild(QtWidgets.QPushButton, "saveInputFileButton")
@@ -114,6 +120,9 @@ class Ui(QtWidgets.QMainWindow):
 
     # init gui - default settings
     def init_gui(self):
+        # disable VDI method
+        self.checkBoxVdiThermal.setEnabled(False)
+        self.comboBoltMaterialT.setEnabled(False)
         # set radio-buttons
         self.radioEsaPss.setChecked(True)
         self.radioEcss.setEnabled(False) # not implemented yet
@@ -126,6 +135,7 @@ class Ui(QtWidgets.QMainWindow):
             self.comboBolt.addItem(key)
         for key in self.materials.materials:
             self.comboBoltMaterial.addItem(key)
+            self.comboBoltMaterialT.addItem(key)
         # set number of shear planes and loading plane factor
         self.numberOfShearPlanes.setValue(1)
         self.loadingPlaneFactor.setText("0.5")
@@ -344,134 +354,162 @@ class Ui(QtWidgets.QMainWindow):
         # reset gui - erase
         self.erase_gui()
 
+    # open input file
+    def openInput(self, openedFileName):
+        # read and parse input file
+        self.openedInputFile = InputFileParser(openedFileName, self.bolts)
+        #
+        # fill gui
+        if self.openedInputFile.method == "ESAPSS":
+            self.radioEsaPss.setChecked(True)
+        else:
+            print("ERROR: ECSS/VDI method not implemented yet")
+        self.projectName.setText(self.openedInputFile.project_name)
+        if self.openedInputFile.joint_mos_type == "min":
+            self.radioJointMin.setChecked(True)
+        else:
+            print("ERROR: MEAN method not implemented yet")
+        # set bolt and bolt-material combo-box
+        index = self.comboBolt.findText(\
+            self.openedInputFile.bolt, QtCore.Qt.MatchFixedString)
+        if index >= 0:
+            self.comboBolt.setCurrentIndex(index)
+        index = self.comboBoltMaterial.findText(\
+            self.openedInputFile.bolt_material, QtCore.Qt.MatchFixedString)
+        if index >= 0:
+            self.comboBoltMaterial.setCurrentIndex(index)
+        # fill CoFs
+        # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
+        self.cofBoltHeadMax.setText(str(self.openedInputFile.cof_bolt[0]))
+        self.cofThreadMax.setText(str(self.openedInputFile.cof_bolt[1]))
+        self.cofBoltHeadMin.setText(str(self.openedInputFile.cof_bolt[2]))
+        self.cofThreadMin.setText(str(self.openedInputFile.cof_bolt[3]))
+        # fill torques etc
+        self.tightTorque.setText(str(self.openedInputFile.tight_torque))
+        self.tightTorqueTol.setText(str(self.openedInputFile.torque_tol_tight_device))
+        if self.openedInputFile.locking_mechanism == "yes":
+            self.radioLockYes.setChecked(True)
+            self.prevailingTorque.setText(str(self.openedInputFile.prevailing_torque))
+        else:
+            self.radioLockNo.setChecked(True)
+            self.prevailingTorque.setEnabled(False)
+        self.loadingPlaneFactor.setText(str(self.openedInputFile.loading_plane_factor))
+        #
+        # clamped parts tab
+        self.cofClampedParts.setText(str(self.openedInputFile.cof_clamp))
+        self.numberOfShearPlanes.setValue(self.openedInputFile.nmbr_shear_planes)
+        self.throughHoleDiameter.setText(str(self.openedInputFile.through_hole_diameter))
+        self.substDiameter.setText(str(self.openedInputFile.subst_da))
+        # shim setup
+        if self.openedInputFile.use_shim != "no":
+            self.useShimCheck.setChecked(True)
+            self.useShimChecked()
+            # set CP(0) - shim if used
+            # set shim and shim-material combo-box
+            shim_combo = self.clampedPartsTable.cellWidget(0,0)
+            index = shim_combo.findText(\
+                self.openedInputFile.use_shim[1], QtCore.Qt.MatchFixedString)
+            if index >= 0:
+                shim_combo.setCurrentIndex(index)
+            shim_mat_combo = self.clampedPartsTable.cellWidget(0,1)
+            index = shim_mat_combo.findText(\
+                self.openedInputFile.use_shim[0], QtCore.Qt.MatchFixedString)
+            if index >= 0:
+                shim_mat_combo.setCurrentIndex(index)
+        else:
+            self.useShimCheck.setChecked(False)
+            self.useShimChecked()
+        # delete all CPs after shim CP(0)
+        row_offset = 0 # row-number changes after removeRow
+        for row in range(1,self.clampedPartsTable.rowCount()): 
+            self.clampedPartsTable.removeRow(row-row_offset) # delete all CPs
+            row_offset += 1
+        # fill clamped parts
+        for i, cp in self.openedInputFile.clamped_parts.items():
+            if i!=0:
+                self.clampedPartsTable.selectRow(i-1) # select row
+                self.addCpPressed() # add row below
+                self.clampedPartsTable.item(i,0).setText(str(cp[1])) # set CP thickness
+                # set CP material combo-box
+                cp_mat_combo = self.clampedPartsTable.cellWidget(i,1)
+                index = cp_mat_combo.findText(\
+                    cp[0], QtCore.Qt.MatchFixedString)
+                if index >= 0:
+                    cp_mat_combo.setCurrentIndex(index)
+        # fos tab
+        self.fosY.setText(str(self.openedInputFile.fos_y))
+        self.fosU.setText(str(self.openedInputFile.fos_u))
+        self.fosSlip.setText(str(self.openedInputFile.fos_slip))
+        self.fosGap.setText(str(self.openedInputFile.fos_gap))
+        # loads tab
+        self.deltaT.setText(str(self.openedInputFile.delta_t))
+        self.loadsTable.setRowCount(0) # delete all rows
+        for i, bi in enumerate(self.openedInputFile.bolt_loads):
+            self.loadsTable.insertRow(i) # insert row
+            # fill bolt-loads into table
+            self.loadsTable.setItem(i,0,QtWidgets.QTableWidgetItem(bi[0]))
+            self.loadsTable.setItem(i,1,QtWidgets.QTableWidgetItem(str(bi[1])))
+            self.loadsTable.setItem(i,2,QtWidgets.QTableWidgetItem(str(bi[2])))
+            self.loadsTable.setItem(i,3,QtWidgets.QTableWidgetItem(str(bi[3])))
+        # calculate tab
+        self.inputFile.setText(openedFileName)
+        outp_file = openedFileName.split('.')[0]+".out"
+        self.outputFile.setText(outp_file)
+        # finally set statusbar
+        self.statusbar.showMessage("Input File Opened: "+openedFileName)
+
     # MENU - open input file
     def menuOpenInput(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         dialog = QFileDialog() # file-dialog
         dialog.setOptions(options)
-        bat_home_dir = Path(os.path.dirname(os.path.realpath(__file__))).parents[0]
-        dialog.setDirectory(str(bat_home_dir))
+        #bat_home_dir = Path(os.path.dirname(os.path.realpath(__file__))).parents[0]
+        dialog.setDirectory(str(self.inp_dir))
         openedFileName, _ = dialog.getOpenFileName(self,\
-            "QFileDialog.getOpenFileName()",\
+            "Open BAT Input File",\
             "",\
             "BAT Input Files (*.inp)")
         if openedFileName:
-            # read and parse input file
-            self.openedInputFile = InputFileParser(openedFileName, self.bolts)
-            #
-            # fill gui
-            if self.openedInputFile.method == "ESAPSS":
-                self.radioEsaPss.setChecked(True)
-            else:
-                print("ERROR: ECSS/VDI method not implemented yet")
-            self.projectName.setText(self.openedInputFile.project_name)
-            if self.openedInputFile.joint_mos_type == "min":
-                self.radioJointMin.setChecked(True)
-            else:
-                print("ERROR: MEAN method not implemented yet")
-            # set bolt and bolt-material combo-box
-            index = self.comboBolt.findText(\
-                self.openedInputFile.bolt, QtCore.Qt.MatchFixedString)
-            if index >= 0:
-                self.comboBolt.setCurrentIndex(index)
-            index = self.comboBoltMaterial.findText(\
-                self.openedInputFile.bolt_material, QtCore.Qt.MatchFixedString)
-            if index >= 0:
-                self.comboBoltMaterial.setCurrentIndex(index)
-            # fill CoFs
-            # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
-            self.cofBoltHeadMax.setText(str(self.openedInputFile.cof_bolt[0]))
-            self.cofThreadMax.setText(str(self.openedInputFile.cof_bolt[1]))
-            self.cofBoltHeadMin.setText(str(self.openedInputFile.cof_bolt[2]))
-            self.cofThreadMin.setText(str(self.openedInputFile.cof_bolt[3]))
-            # fill torques etc
-            self.tightTorque.setText(str(self.openedInputFile.tight_torque))
-            self.tightTorqueTol.setText(str(self.openedInputFile.torque_tol_tight_device))
-            if self.openedInputFile.locking_mechanism == "yes":
-                self.radioLockYes.setChecked(True)
-                self.prevailingTorque.setText(str(self.openedInputFile.prevailing_torque))
-            else:
-                self.radioLockNo.setChecked(True)
-                self.prevailingTorque.setEnabled(False)
-            self.loadingPlaneFactor.setText(str(self.openedInputFile.loading_plane_factor))
-            #
-            # clamped parts tab
-            self.cofClampedParts.setText(str(self.openedInputFile.cof_clamp))
-            self.numberOfShearPlanes.setValue(self.openedInputFile.nmbr_shear_planes)
-            self.throughHoleDiameter.setText(str(self.openedInputFile.through_hole_diameter))
-            self.substDiameter.setText(str(self.openedInputFile.subst_da))
-            # shim setup
-            if self.openedInputFile.use_shim != "no":
-                self.useShimCheck.setChecked(True)
-                self.useShimChecked()
-                # set CP(0) - shim if used
-                # set shim and shim-material combo-box
-                shim_combo = self.clampedPartsTable.cellWidget(0,0)
-                index = shim_combo.findText(\
-                    self.openedInputFile.use_shim[1], QtCore.Qt.MatchFixedString)
-                if index >= 0:
-                    shim_combo.setCurrentIndex(index)
-                shim_mat_combo = self.clampedPartsTable.cellWidget(0,1)
-                index = shim_mat_combo.findText(\
-                    self.openedInputFile.use_shim[0], QtCore.Qt.MatchFixedString)
-                if index >= 0:
-                    shim_mat_combo.setCurrentIndex(index)
-            else:
-                self.useShimCheck.setChecked(False)
-                self.useShimChecked()
-            # delete all CPs after shim CP(0)
-            row_offset = 0 # row-number changes after removeRow
-            for row in range(1,self.clampedPartsTable.rowCount()): 
-                self.clampedPartsTable.removeRow(row-row_offset) # delete all CPs
-                row_offset += 1
-            # fill clamped parts
-            for i, cp in self.openedInputFile.clamped_parts.items():
-                if i!=0:
-                    self.clampedPartsTable.selectRow(i-1) # select row
-                    self.addCpPressed() # add row below
-                    self.clampedPartsTable.item(i,0).setText(str(cp[1])) # set CP thickness
-                    # set CP material combo-box
-                    cp_mat_combo = self.clampedPartsTable.cellWidget(i,1)
-                    index = cp_mat_combo.findText(\
-                        cp[0], QtCore.Qt.MatchFixedString)
-                    if index >= 0:
-                        cp_mat_combo.setCurrentIndex(index)
-            # fos tab
-            self.fosY.setText(str(self.openedInputFile.fos_y))
-            self.fosU.setText(str(self.openedInputFile.fos_u))
-            self.fosSlip.setText(str(self.openedInputFile.fos_slip))
-            self.fosGap.setText(str(self.openedInputFile.fos_gap))
-            # loads tab
-            self.deltaT.setText(str(self.openedInputFile.delta_t))
-            self.loadsTable.setRowCount(0) # delete all rows
-            for i, bi in enumerate(self.openedInputFile.bolt_loads):
-                self.loadsTable.insertRow(i) # insert row
-                # fill bolt-loads into table
-                self.loadsTable.setItem(i,0,QtWidgets.QTableWidgetItem(bi[0]))
-                self.loadsTable.setItem(i,1,QtWidgets.QTableWidgetItem(str(bi[1])))
-                self.loadsTable.setItem(i,2,QtWidgets.QTableWidgetItem(str(bi[2])))
-                self.loadsTable.setItem(i,3,QtWidgets.QTableWidgetItem(str(bi[3])))
-            # calculate tab
-            self.inputFile.setText(openedFileName)
-            outp_file = openedFileName.split('.')[0]+".out"
-            self.outputFile.setText(outp_file)
-            # finally set statusbar
-            self.statusbar.showMessage("Input File Opened: "+openedFileName)
+            self.openInput(openedFileName)
 
     # MENU - save
     def menuSave(self):
-        print("save")
-
-    # MENU - save as
-    def menuSaveAs(self):
         print(self.openedInputFile.print())
-        print("save as")
+        print("save")
         self.readGuiInputs()
         self.gih.print()
         compare = self.gih.compareInput(self.openedInputFile)
         print("Compare: ", compare)
         self.gih.saveInputFile("/home/sams/git/BAT/BAT/test_.inp")
+
+    # MENU - save as
+    def menuSaveAs(self):
+        # read all GUI inputs 
+        # TODO: check if inputs are correct / consistent
+        self.readGuiInputs()
+        # define and save new input-file
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        dialog = QFileDialog() # file-dialog
+        dialog.setOptions(options)
+        #bat_home_dir = Path(os.path.dirname(os.path.realpath(__file__))).parents[0]
+        dialog.setDirectory(str(self.inp_dir))
+        savedFileName, _ = dialog.getSaveFileName(self,\
+            "Save New BAT Input File",\
+            "",\
+            "BAT Input Files (*.inp)")
+        if savedFileName:
+            # save GUI inputs into file
+            self.gih.saveInputFile(savedFileName)
+            print("Input-file saved: " + savedFileName)
+            logging.info("Input-file saved: " + savedFileName)
+            # set fields in calculate tab
+            self.inputFile.setText(savedFileName)
+            outp_file = savedFileName.split('.')[0]+".out"
+            self.outputFile.setText(outp_file)
+            # reopen new input file
+            self.openInput(savedFileName)
 
     # read gui entries and store to GuiInputHandler
     def readGuiInputs(self):
