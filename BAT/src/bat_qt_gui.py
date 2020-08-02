@@ -79,6 +79,7 @@ class Ui(QtWidgets.QMainWindow):
         self.useShimCheck.stateChanged.connect(self.useShimChecked)
         self.combo_shim = QtWidgets.QComboBox()
         self.combo_shim_mat = QtWidgets.QComboBox()
+        self.combo_shim_matT = QtWidgets.QComboBox()
         # FOS tab
         self.fosY= self.findChild(QtWidgets.QLineEdit, "fosY")
         self.fosU= self.findChild(QtWidgets.QLineEdit, "fosU")
@@ -94,6 +95,7 @@ class Ui(QtWidgets.QMainWindow):
         self.pasteLoadsExcel.clicked.connect(self.pasteFromExcel)
         self.deltaT = self.findChild(QtWidgets.QLineEdit, "deltaT")
         self.checkBoxVdiThermal = self.findChild(QtWidgets.QCheckBox, "checkBoxVdiThermal")
+        self.checkBoxVdiThermal.stateChanged.connect(self.useVdiChecked)
         # Calculate tab
         self.inputFile = self.findChild(QtWidgets.QLineEdit, "inputFile")
         self.saveInputFileButton = self.findChild(QtWidgets.QPushButton, "saveInputFileButton")
@@ -120,9 +122,6 @@ class Ui(QtWidgets.QMainWindow):
 
     # init gui - default settings
     def init_gui(self):
-        # disable VDI method
-        self.checkBoxVdiThermal.setEnabled(False)
-        self.comboBoltMaterialT.setEnabled(False)
         # set radio-buttons
         self.radioEsaPss.setChecked(True)
         self.radioEcss.setEnabled(False) # not implemented yet
@@ -130,6 +129,7 @@ class Ui(QtWidgets.QMainWindow):
         self.radioJointMin.setChecked(True)
         self.radioJointMean.setEnabled(False) # not implemented yet
         self.radioLockYes.setChecked(True)
+        self.comboBoltMaterialT.setEnabled(False) # disable VDI bolt material
         # fill bolt combo-boxes
         for key in self.bolts.bolts:
             self.comboBolt.addItem(key)
@@ -154,32 +154,40 @@ class Ui(QtWidgets.QMainWindow):
             ["Bolt-ID\n\nLoad-Case", "FN\n\n[N]", "FQ1\n\n[N]", "FQ2\n(optional)\n[N]"])
         self.loadsTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.loadsTable.setItem(0,0,QtWidgets.QTableWidgetItem("test bolt"))
+        self.checkBoxVdiThermal.setChecked(False)
         #
         # clamped-parts-table
         self.useShimCheck.setChecked(True)
-        self.clampedPartsTable.setColumnCount(2) # init clamped-parts-table
+        self.clampedPartsTable.setColumnCount(3) # init clamped-parts-table
         self.clampedPartsTable.insertRow(0)
         self.clampedPartsTable.setHorizontalHeaderLabels(\
-            ["Thickness [mm]\nor\nShim", "Material"])
+            ["Thickness [mm]\nor\nShim", "Material", "Material VDI-Temp."])
         header = self.clampedPartsTable.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         # add shim line CP(0)
         for i in self.bolts.washers:
             self.combo_shim.addItem(i)
         for i in self.materials.materials:
             self.combo_shim_mat.addItem(i)
-        self.clampedPartsTable.setCellWidget(0,1,self.combo_shim_mat)
+            self.combo_shim_matT.addItem(i)
         self.clampedPartsTable.setCellWidget(0,0,self.combo_shim)
+        self.clampedPartsTable.setCellWidget(0,1,self.combo_shim_mat)
+        self.clampedPartsTable.setCellWidget(0,2,self.combo_shim_matT)
         self.clampedPartsTable.setVerticalHeaderItem(0, QtWidgets.QTableWidgetItem("CP(0)"))
         # add first clamped part - empty line
         combo_cp_mat = QtWidgets.QComboBox()
+        combo_cp_matT = QtWidgets.QComboBox()
         self.clampedPartsTable.insertRow(1)
         self.clampedPartsTable.setVerticalHeaderItem(1, QtWidgets.QTableWidgetItem("CP(1)"))
         for i in self.materials.materials:
             combo_cp_mat.addItem(i)
-        self.clampedPartsTable.setCellWidget(1,1,combo_cp_mat)
+            combo_cp_matT.addItem(i)
         self.clampedPartsTable.setItem(1,0,QtWidgets.QTableWidgetItem(''))
+        self.clampedPartsTable.setCellWidget(1,1,combo_cp_mat)
+        self.clampedPartsTable.setCellWidget(1,2,combo_cp_matT)
+        self.useShimChecked()
         # output tab setup
         self.tabWidget.setTabEnabled(5, False) # disable output tab
         font = QtGui.QFont("Monospace", 9) # set monospace font (platform independent)
@@ -194,6 +202,7 @@ class Ui(QtWidgets.QMainWindow):
         self.radioJointMin.setChecked(True)
         self.comboBolt.setCurrentIndex(0)
         self.comboBoltMaterial.setCurrentIndex(0)
+        self.comboBoltMaterialT.setCurrentIndex(0)
         # CoFs: [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
         self.cofBoltHeadMax.setText('')
         self.cofThreadMax.setText('')
@@ -227,6 +236,8 @@ class Ui(QtWidgets.QMainWindow):
         self.loadsTable.setRowCount(0)
         self.loadsTable.insertRow(0)
         self.loadsTable.setItem(0,0,QtWidgets.QTableWidgetItem("test bolt"))
+        self.checkBoxVdiThermal.setChecked(False)
+        self.useShimChecked()
         # calculate tab
         self.inputFile.setText('')
         self.outputFile.setText('')
@@ -246,14 +257,34 @@ class Ui(QtWidgets.QMainWindow):
             elif radioButton.text()=="NO":
                 self.prevailingTorque.setEnabled(False)
 
-    # use-shim checkbox
+    # use-shim checkbox (includes useVdiChecked() method)
     def useShimChecked(self):
         if self.useShimCheck.isChecked():
             self.combo_shim_mat.setEnabled(True)
+            self.combo_shim_matT.setEnabled(True)
             self.combo_shim.setEnabled(True)
         else:
             self.combo_shim_mat.setEnabled(False)
+            self.combo_shim_matT.setEnabled(False)
             self.combo_shim.setEnabled(False)
+        # check VDI checkbox
+        self.useVdiChecked()
+
+    # use VDI-thermal method checkbox
+    def useVdiChecked(self):
+        if self.checkBoxVdiThermal.isChecked():
+            self.comboBoltMaterialT.setEnabled(True)
+            # enable materialT column in clamped parts table
+            for row in range(1,self.clampedPartsTable.rowCount()):
+                self.clampedPartsTable.cellWidget(row,2).setEnabled(True)
+            # handle row(0) for shim
+            if self.useShimCheck.isChecked():
+                self.clampedPartsTable.cellWidget(0,2).setEnabled(True)
+        else:
+            self.comboBoltMaterialT.setEnabled(False)
+            # disable materialT column in clamped parts table
+            for row in range(0,self.clampedPartsTable.rowCount()):
+                self.clampedPartsTable.cellWidget(row,2).setEnabled(False)
 
     # clampedPartsTable - add clamped part button pressed
     def addCpPressed(self):
@@ -267,14 +298,18 @@ class Ui(QtWidgets.QMainWindow):
                 QtWidgets.QTableWidgetItem("CP({0:d})".format(ins_row)))
             # insert CP materials combo-box in new row
             combo_cp_mat = QtWidgets.QComboBox()
+            combo_cp_matT = QtWidgets.QComboBox()
             for i in self.materials.materials:
                 combo_cp_mat.addItem(i)
-            self.clampedPartsTable.setCellWidget(ins_row,1,combo_cp_mat)
+                combo_cp_matT.addItem(i)
             self.clampedPartsTable.setItem(ins_row,0,QtWidgets.QTableWidgetItem(''))
+            self.clampedPartsTable.setCellWidget(ins_row,1,combo_cp_mat)
+            self.clampedPartsTable.setCellWidget(ins_row,2,combo_cp_matT)
             # renumber clamped parts CP(i); start at first CP(1)
             for row in range(1,self.clampedPartsTable.rowCount()):
                 self.clampedPartsTable.setVerticalHeaderItem(row,\
                     QtWidgets.QTableWidgetItem("CP({0:d})".format(row)))
+            self.useShimChecked() # check and set VDI-thermal method
 
     # clampedPartsTable - delete clamped part button pressed
     def deleteCpPressed(self):
@@ -284,9 +319,9 @@ class Ui(QtWidgets.QMainWindow):
             # key: row-number, value: selected-columns
             key = list(row_sel.keys())[0]
             value = list(row_sel.values())[0]
-            # if selected-columns == 2 then complete row selected
+            # if selected-columns == 3 then complete row selected
             # delete row only if complete single row selected & not CP(0)
-            if value==2 and len(row_sel)==1 and key>0:
+            if value==3 and len(row_sel)==1 and key>0:
                 # remove row in clampedPartsTable
                 self.clampedPartsTable.removeRow(key)
                 # renumber clamped parts CP(i); start at first CP(1)
