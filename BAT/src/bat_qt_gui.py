@@ -404,7 +404,7 @@ class Ui(QtWidgets.QMainWindow):
             self.radioJointMin.setChecked(True)
         else:
             print("ERROR: MEAN method not implemented yet")
-        # set bolt and bolt-material combo-box
+        # set bolt and bolt-material combo-box (incl. VDI bolt mat)
         index = self.comboBolt.findText(\
             self.openedInputFile.bolt, QtCore.Qt.MatchFixedString)
         if index >= 0:
@@ -413,6 +413,10 @@ class Ui(QtWidgets.QMainWindow):
             self.openedInputFile.bolt_material, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.comboBoltMaterial.setCurrentIndex(index)
+        index = self.comboBoltMaterialT.findText(\
+            self.openedInputFile.temp_bolt_material, QtCore.Qt.MatchFixedString)
+        if index >= 0: # set VDI temp_bolt_material
+            self.comboBoltMaterialT.setCurrentIndex(index)
         # fill CoFs
         # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
         self.cofBoltHeadMax.setText(str(self.openedInputFile.cof_bolt[0]))
@@ -451,6 +455,12 @@ class Ui(QtWidgets.QMainWindow):
                 self.openedInputFile.use_shim[0], QtCore.Qt.MatchFixedString)
             if index >= 0:
                 shim_mat_combo.setCurrentIndex(index)
+            # VDI shim material
+            shim_temp_mat_combo = self.clampedPartsTable.cellWidget(0,2)
+            index = shim_temp_mat_combo.findText(\
+                self.openedInputFile.temp_use_shim[0], QtCore.Qt.MatchFixedString)
+            if index >= 0:
+                shim_temp_mat_combo.setCurrentIndex(index)
         else:
             self.useShimCheck.setChecked(False)
             self.useShimChecked()
@@ -471,6 +481,13 @@ class Ui(QtWidgets.QMainWindow):
                     cp[0], QtCore.Qt.MatchFixedString)
                 if index >= 0:
                     cp_mat_combo.setCurrentIndex(index)
+        for i, temp_cp in self.openedInputFile.temp_clamped_parts.items():
+                # set VDI CP material combo-box
+                cp_temp_mat_combo = self.clampedPartsTable.cellWidget(i,2)
+                index = cp_temp_mat_combo.findText(\
+                    temp_cp[0], QtCore.Qt.MatchFixedString)
+                if index >= 0:
+                    cp_temp_mat_combo.setCurrentIndex(index)
         # fos tab
         self.fosY.setText(str(self.openedInputFile.fos_y))
         self.fosU.setText(str(self.openedInputFile.fos_u))
@@ -478,6 +495,12 @@ class Ui(QtWidgets.QMainWindow):
         self.fosGap.setText(str(self.openedInputFile.fos_gap))
         # loads tab
         self.deltaT.setText(str(self.openedInputFile.delta_t))
+        if self.openedInputFile.temp_use_vdi_method != "no": # VDI method checkbox
+            self.checkBoxVdiThermal.setChecked(True)
+            self.useShimChecked()
+        else:
+            self.checkBoxVdiThermal.setChecked(False)
+            self.useShimChecked()
         self.loadsTable.setRowCount(0) # delete all rows
         for i, bi in enumerate(self.openedInputFile.bolt_loads):
             self.loadsTable.insertRow(i) # insert row
@@ -563,6 +586,7 @@ class Ui(QtWidgets.QMainWindow):
         # Bolt tab
         self.gih.bolt = self.comboBolt.currentText()
         self.gih.bolt_material = self.comboBoltMaterial.currentText()
+        self.gih.temp_bolt_material = self.comboBoltMaterialT.currentText()
         #[mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
         # TODO: error handling if input wrong
         self.gih.cof_bolt = (\
@@ -582,20 +606,27 @@ class Ui(QtWidgets.QMainWindow):
         self.gih.through_hole_diameter = float(self.throughHoleDiameter.text())
         self.gih.subst_da = "no" # TODO: subst-diameter ???
         if self.useShimCheck.isChecked(): # shim
-            shim_mat = self.clampedPartsTable.cellWidget(0,1).currentText()
             shim = self.clampedPartsTable.cellWidget(0,0).currentText()
+            shim_mat = self.clampedPartsTable.cellWidget(0,1).currentText()
+            temp_shim_mat = self.clampedPartsTable.cellWidget(0,2).currentText()
             self.gih.use_shim = (shim_mat, shim)
+            self.gih.temp_use_shim = (temp_shim_mat, shim)
             # add shim to clamped parts dict
             self.gih.clamped_parts.update({ 0 : (shim_mat,\
                 self.bolts.washers[shim].h) })
+            self.gih.temp_clamped_parts.update({ 0 : (temp_shim_mat,\
+                self.bolts.washers[shim].h) })
         else:
             self.gih.use_shim = "no"
+            self.gih.temp_use_shim = "no"
         # get clamped parts
         rows = self.clampedPartsTable.rowCount()
         for row in range(1,rows): # start at first clamped-part CP(1)
             thk = float(self.clampedPartsTable.item(row,0).text())
             mat = self.clampedPartsTable.cellWidget(row,1).currentText()
+            temp_mat = self.clampedPartsTable.cellWidget(row,2).currentText()
             self.gih.clamped_parts.update({row : (mat, thk)})
+            self.gih.temp_clamped_parts.update({row : (temp_mat, thk)})
         # FOS tab
         self.gih.fos_y = float(self.fosY.text())
         self.gih.fos_u = float(self.fosU.text())
@@ -611,6 +642,10 @@ class Ui(QtWidgets.QMainWindow):
                         float(self.loadsTable.item(row,3).text())])
         self.gih.bolt_loads = loads
         self.gih.delta_t = float(self.deltaT.text())
+        if self.checkBoxVdiThermal.isChecked():
+            self.gih.temp_use_vdi_method = "yes"
+        else:
+            self.gih.temp_use_vdi_method = "no"
         # Calculate tab
         if self.radioJointMin.isChecked():
             self.gih.joint_mos_type = "min"

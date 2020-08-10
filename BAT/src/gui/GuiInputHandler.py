@@ -87,6 +87,15 @@ class GuiInputHandler:
             compare_items.append("BOLT-LOADS")
         if self.delta_t != inp_file.delta_t:
             compare_items.append("*DELTA_T")
+        if self.temp_use_vdi_method != inp_file.temp_use_vdi_method:
+            compare_items.append("*TEMP_USE_VDI_METHOD")
+        if self.temp_bolt_material != inp_file.temp_bolt_material:
+            compare_items.append("*TEMP_BOLT_MATERIAL")
+        if self.temp_use_shim != inp_file.temp_use_shim:
+            compare_items.append("*TEMP_USE_SHIM")
+        if self.temp_clamped_parts != inp_file.temp_clamped_parts:
+            compare_items.append("*TEMP_CLAMPED_PARTS")
+            print(self.temp_clamped_parts, inp_file.temp_clamped_parts)
         # return compare_items
         return compare_items
 
@@ -176,7 +185,22 @@ class GuiInputHandler:
             output_str += "*TEMP_DEFINITION\n"
             output_str += "    *DELTA_T = {0:.2f} # {comment:^}\n".format(self.delta_t, \
                 comment="+K/degC means higher temperature at service")
-            # NOTE: VDI method not implemented in GUI; writes dummy block
+            output_str += "    #\n    # VDI method takes temperature dependency of \n"
+            output_str += "    # Young's Modulus and strength values into account\n"
+            output_str += "    *TEMP_USE_VDI_METHOD = {0:^}\n".format(self.temp_use_vdi_method)
+            output_str += "    # Define bolt, shim and materials at temp. T\n"
+            output_str += "    *TEMP_BOLT_MATERIAL = {0:^}\n".format(self.temp_bolt_material)
+            if self.temp_use_shim == "no":
+                temp_shim_str = "no"
+            else:
+                temp_shim_str = "[{0:^}, {1:^}]".format(self.temp_use_shim[0], self.temp_use_shim[1])
+            output_str += "    *TEMP_USE_SHIM = {0:^} # {comment:^}\n".format(temp_shim_str, \
+                comment="e.g. [Shim-Material, Shim-Type] out of database or use \"no\"")
+            output_str += "    # define n-clamped parts at temp. T; use ascending index and start at (1)\n"
+            for key, value in self.temp_clamped_parts.items():
+                if key != 0: # ignore shim
+                    output_str += "    *TEMP_CLAMPED_PART({0:d}) = [{1:^}, {2:.2f}]\n".format(\
+                        key, value[0], value[1])
             output_str += "*TEMP_DEFINITION_END\n"
             # write GUI input to BAT input file
             fid.write(output_str)
