@@ -74,7 +74,6 @@ class GuiInputHandler:
             compare_items.append("*SUBST_DA")
         if self.clamped_parts != inp_file.clamped_parts:
             compare_items.append("*CLAMPED_PARTS(i)")
-            print(self.clamped_parts, inp_file.clamped_parts)
         if self.fos_y != inp_file.fos_y:
             compare_items.append("*FOS_Y")
         if self.fos_u != inp_file.fos_u:
@@ -95,7 +94,6 @@ class GuiInputHandler:
             compare_items.append("*TEMP_USE_SHIM")
         if self.temp_clamped_parts != inp_file.temp_clamped_parts:
             compare_items.append("*TEMP_CLAMPED_PARTS")
-            print(self.temp_clamped_parts, inp_file.temp_clamped_parts)
         # return compare_items
         return compare_items
 

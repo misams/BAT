@@ -11,10 +11,11 @@ import src.EsaPss as esapss
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.5"
+__version__ = "0.6"
 """
 Change Log:
-
+v0.6 - 01.09.2020
+- Save-methods finished
 v0.5 - 26.07.2020
 - FQ bug corrected
 - Save-as method implemented
@@ -42,7 +43,7 @@ def main():
     log_file = work_dir+"/bat.log"
     logging.basicConfig(filename=log_file, filemode='w',
         format="%(asctime)s %(levelname)-8s %(message)s",
-        level=logging.DEBUG,
+        level=logging.INFO,
         datefmt="%Y-%m-%d %H:%M:%S")
     log_header_str = "BAT run started\n#\n# Bolt Analysis Tool (BAT) Log-File\n"\
         "#\n# BAT-Version: {0:^}\n#".format(__version__)
@@ -143,7 +144,7 @@ def main():
         # print successful end of BAT analysis
         print("#\n# ERROR --> go to \"bat.log\" file\n# BAT analysis terminated: " + str(e))
         logging.error("BAT run terminated due to fatal error: " + str(e))
-    else:
+    finally:
         # print successful end of BAT analysis
         print("#\n# END of BAT analysis")
         logging.info("BAT run successfully finished")

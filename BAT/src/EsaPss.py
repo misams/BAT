@@ -118,7 +118,7 @@ class EsaPss:
         #self.inp_file.through_hole_diameter = 8.4
         #self.Asub = math.pi/4*(self.used_bolt.dh**2-self.inp_file.through_hole_diameter**2+math.pi/8*\
         #    (self.used_washer.dmaj/self.used_bolt.dh-1)*(self.used_bolt.dh*self.lk/5+\
-        #        self.lk**2/100)) # with wront parentheses 
+        #        self.lk**2/100)) # with wrong parentheses 
         #self.Asub = math.pi/4*( self.used_bolt.dh**2-self.inp_file.through_hole_diameter**2 ) +\
         #    math.pi/8*( self.used_washer.dmaj/self.used_bolt.dh-1 ) *\
         #        ( self.used_bolt.dh*self.lk/5+self.lk**2/100 ) # with corrected parentheses

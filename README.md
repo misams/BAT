@@ -33,9 +33,13 @@ $ python bat_main.py --help
 ```shell
 $ python bat_main.py --gui
 ```
-![Example Screenshot BAT v0.4](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
+![Example Screenshot BAT v0.6](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
 
 ## Changelog
+### v0.6
+>01.09.2020
+- Save-methods finished
+
 ### v0.5
 >26.07.2020
 - FQ bug corrected

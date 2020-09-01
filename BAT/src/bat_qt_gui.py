@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.Qt import Qt, QApplication, QClipboard
 
-# TODO: implement logging
+# TODO: implement consitent logging
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
@@ -354,13 +354,39 @@ class Ui(QtWidgets.QMainWindow):
                 self.loadsTable.removeRow(key-row_offset)
                 row_offset += 1
 
-    # save input file button pressed
+    # save input file button pressed (equal to save-as)
     def saveInputFilePressed(self):
-        print("Save Input File")
+        self.menuSaveAs()
  
     # save output file button pressed
     def saveOutputFilePressed(self):
-        print("Save Output File")
+        # define output file
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        dialog = QFileDialog() # file-dialog
+        dialog.setOptions(options)
+        dialog.setDirectory(str(self.inp_dir))
+        outputFileName, _ = dialog.getSaveFileName(self,\
+            "BAT Output File",\
+            "",\
+            "BAT Output Files (*.out)")
+        if outputFileName:
+            # set fields in calculate tab & check if "out" is already added to file name
+            tmp = outputFileName.split('.')
+            if len(tmp) == 1 or (len(tmp) == 2 and tmp[1] == "out"):
+                outputFileName = tmp[0]+".out"
+            else:
+                if not self.inputFile.text():
+                    outputFileName = ""
+                else:
+                    outputFileName = self.inputFile.text().split('.')[0]+".out"
+                log_str = "ERROR: output file name not correct - do not use any special characters"
+                print(log_str)
+                logging.warning(log_str)
+            # set output-file in gui-widget
+            self.outputFile.setText(outputFileName)
+            print("Output-file redefined: " + outputFileName)
+            logging.info("Output-file redefined: " + outputFileName)
 
     # calculate button pressed
     def calculatePressed(self):
@@ -379,9 +405,9 @@ class Ui(QtWidgets.QMainWindow):
             else:
                 print("Method not implemented in current BAT version.")
         else:
-            print("Input does not match opened input file - save input file.")
-            self.MessageBox(QMessageBox.Warning, "GUI Input vs. Input-File Missmatch",\
-                "Input does not match opened input file - save input file.",\
+            print("Input does not match opened input file - save input file first.")
+            self.messageBox(QMessageBox.Warning, "GUI Input vs. Input-File Missmatch",\
+                "Input does not match opened input file - save input file first.",\
                 "Deviating Items:\n{0:^}".format(str(compare)))
 
     # MENU - new
@@ -533,13 +559,24 @@ class Ui(QtWidgets.QMainWindow):
 
     # MENU - save
     def menuSave(self):
-        print(self.openedInputFile.print())
-        print("save")
-        self.readGuiInputs()
-        self.gih.print()
-        compare = self.gih.compareInput(self.openedInputFile)
-        print("Compare: ", compare)
-        self.gih.saveInputFile("/home/sams/git/BAT/BAT/test_.inp")
+        self.readGuiInputs() # read gui inputs
+        if self.openedInputFile: # check if input-file is already opened
+            compare = self.gih.compareInput(self.openedInputFile) # compare to opened input file
+            if compare:
+                mbox = self.messageBox(QMessageBox.Information, "Save Info",\
+                    "Input changed - saveing input file will overwrite following inputs:",\
+                    "Deviating Items:\n{0:^}".format(str(compare)), "OkCancel")
+                if mbox == QMessageBox.Ok:
+                    self.gih.saveInputFile(self.openedInputFile.input_file)
+                    print("Input-file saved: " + str(self.openedInputFile.input_file))
+            else: 
+                self.gih.saveInputFile(self.openedInputFile.input_file)
+                print("Input-file saved: " + str(self.openedInputFile.input_file))
+            # reopen new input file
+            self.openInput(str(self.openedInputFile.input_file))
+        else:
+            # if no input file loaded - save-as new input file
+            self.menuSaveAs()
 
     # MENU - save as
     def menuSaveAs(self):
@@ -558,16 +595,24 @@ class Ui(QtWidgets.QMainWindow):
             "",\
             "BAT Input Files (*.inp)")
         if savedFileName:
-            # save GUI inputs into file
-            self.gih.saveInputFile(savedFileName)
-            print("Input-file saved: " + savedFileName)
-            logging.info("Input-file saved: " + savedFileName)
-            # set fields in calculate tab
-            self.inputFile.setText(savedFileName)
-            outp_file = savedFileName.split('.')[0]+".out"
-            self.outputFile.setText(outp_file)
-            # reopen new input file
-            self.openInput(savedFileName)
+            # check if "inp" is already added to file name
+            tmp = savedFileName.split('.')
+            if len(tmp) == 1 or (len(tmp) == 2 and tmp[1] == "inp"):
+                savedFileName = tmp[0]+".inp"
+                # save GUI inputs into file
+                self.gih.saveInputFile(savedFileName)
+                print("Input-file saved: " + savedFileName)
+                logging.info("Input-file saved: " + savedFileName)
+                # set fields in calculate tab
+                self.inputFile.setText(savedFileName)
+                outp_file = savedFileName.split('.')[0]+".out"
+                self.outputFile.setText(outp_file)
+                # reopen new input file
+                self.openInput(savedFileName)
+            else:
+                log_str = "ERROR: input file name not correct - do not use any special characters"
+                print(log_str)
+                logging.warning(log_str)
 
     # read gui entries and store to GuiInputHandler
     def readGuiInputs(self):
@@ -666,15 +711,18 @@ class Ui(QtWidgets.QMainWindow):
 
     # display gui error-messagebox
     # QMessageBox.Information, Warning, Critical
-    def MessageBox(self, type, title, text, det_text=None):
+    def messageBox(self, type, title, text, det_text=None, button_opt="Ok"):
         msg = QMessageBox()
         msg.setIcon(type)
         msg.setText("{0:^}".format(text))
         msg.setWindowTitle(title)
         if det_text is not None:
             msg.setDetailedText(det_text)
-        msg.setStandardButtons(QMessageBox.Ok)
-        retval = msg.exec_()
+        if button_opt == "Ok":
+            msg.setStandardButtons(QMessageBox.Ok)
+        elif button_opt == "OkCancel":
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        return msg.exec_()
 
     # use data in clipboard and paste loads from excel
     def pasteFromExcel(self):
@@ -705,7 +753,7 @@ class Ui(QtWidgets.QMainWindow):
                     self.loadsTable.setItem(i,3,QtWidgets.QTableWidgetItem(row_items[3]))
                 else:
                     print("ERROR: Excel load format incorrect.")
-                    self.MessageBox(QMessageBox.Warning, "Excel Load Error",\
+                    self.messageBox(QMessageBox.Warning, "Excel Load Error",\
                         "ERROR: Excel load format incorrect.")
                     break
 
