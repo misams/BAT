@@ -18,6 +18,7 @@ class Bolt:
         self.A1 = 0.0 # nominal cross section
         self.A3 = 0.0 # minor thread cross section
         self.slope = 0.0 # slope, phi
+        self.ds = 0.0 # stress diameter
         # process splitted *.bolt row
         self._csv_line_to_bolt(splitted_row)
 

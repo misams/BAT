@@ -137,10 +137,10 @@ def main():
             #inp_file.print() # debug
             #
             # calc ESA-PSS
-            ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
-            ana_esapss.print_results(output_file)
+            #ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
+            #ana_esapss.print_results(output_file)
             # ECSS TEST
-            #ana_ecss = ecss.ECSS(inp_file, materials, bolts)
+            ana_ecss = ecss.ECSS(inp_file, materials, bolts)
 
     # handle exceptions
     except (ex.Error, ValueError, IndexError, FileNotFoundError, KeyError) as e:

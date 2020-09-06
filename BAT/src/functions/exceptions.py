@@ -18,3 +18,7 @@ class AsubError(Error):
 class EmbeddingInterfacesError(Error):
     """ number of interfaces out of definition range """
     pass
+
+class JointMosTypeError(Error):
+    """ wrong joint MOS type in input file """
+    pass

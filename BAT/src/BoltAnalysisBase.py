@@ -3,7 +3,9 @@ from src.functions.MaterialManager import MaterialManager
 from src.functions.BoltManager import BoltManager
 from pathlib import Path
 import math
+import logging
 from abc import ABC, abstractmethod
+from src.functions.exceptions import JointMosTypeError
 """
 Bolt analysis BASE-class
 ECSS-E-HB-32-23A & VDI2230 nomenclature-mix is used
@@ -25,13 +27,12 @@ class BoltAnalysisBase(ABC):
         self.M_p = 0.0 # prevailing torque (VDI2230:M_ue)
         self.l_K = 0.0 # joint / clamped length (ECSS:L_j)
         #?self.DA = 0.0 # 
-        #?self.Asub = 0.0 # substitution area of clamped parts
+        self.A_sub = 0.0 # substitution area of clamped parts
         #?self.Dsub = 0.0 # subst. diameter out of Asub
         self.delta_b = 0.0 # bolt compliance (VDI2230:delta_S)
         self.delta_c = 0.0 # compliance of clamped parts (VDI2230:delta_P) 
         self.Phi = 0.0 # basic force ratio of a concentric joint (VDI2230:Phi)
         self.Phi_n = 0.0 # with loading plane factor effect (VDI2230:Phi_n)
-        self.nmbr_emb_if = 0 # number of interfaces for embedding
         self.f_Z = 0.0 # plastic deform. due to embedding (VDI2230:f_Z)
         self.F_Z = 0.0 # preload loss due to embedding (VDI2230:F_Z)
         self.dF_V_th = None # change in preload due to CTE missmatch [FT_min, FT_max]
@@ -40,8 +41,8 @@ class BoltAnalysisBase(ABC):
         self.alpha_b_th = None # CTE bolt [alpha_b_RT, alpha_b_T]
         self.alpha_c_th = None # CTE clamped parts [alpha_c_RT, alpha_c_T]
         self.nmbr_of_bolts = len(self.inp_file.bolt_loads) # for global slippage analysis
-        self.F_V_at = None # preload after tightening [min, mean, max]
-        self.F_V = None # service preload (incl. embedding and thermal losses) [min, mean, max]
+        self.F_V_at = None # preload after tightening [min, max]
+        self.F_V = None # service preload (incl. embedding and thermal losses) [min, max]
         self.alpha_A = 0.0 # tightening factor 
         self.tau = None # 100% torsional stress aft. tightening [min, max]
         self.sig_n = None # normal stress aft. tightening [min, max]
@@ -64,11 +65,11 @@ class BoltAnalysisBase(ABC):
     # calculate thermal effects on preload (preload loss / increase)
     # preload change in bolt: clamped parts - bolts (convention)
     # sign-convention: minus (-) is loss in preload
-    # if alpha_P > alpha_B : FT_res (+)
-    # if alpha_P < alpha_B : FT_res (-)
+    # if alpha_c > alpha_b : FT_res (+)
+    # if alpha_c < alpha_b : FT_res (-)
     def _calc_thermal_loss(self):
         # thermal expansion of bolt
-        d_l_b = self.used_bolt_mat.alpha * self.lk * self.inp_file.delta_t
+        d_l_b = self.used_bolt_mat.alpha * self.l_K * self.inp_file.delta_t
         # add all clamped parts thermal expansions
         d_l_c = 0.0
         for _, c in self.inp_file.clamped_parts.items():
@@ -88,14 +89,14 @@ class BoltAnalysisBase(ABC):
         # --> used for Young's Modulus E_PT calculation only
         cPT = 0.0
         for _, c in self.inp_file.temp_clamped_parts.items():
-            cPT += 1./(self.Asub*self.materials.materials[c[0]].E/c[1])
+            cPT += 1./(self.A_sub*self.materials.materials[c[0]].E/c[1])
         cPT = 1./cPT # clamped part stiffness' in series
         # get material properties at correct temperatures
         E_SRT = self.used_bolt_mat.E # E of bolt at RT
         E_ST = self.materials.materials[self.inp_file.temp_bolt_material].E
         self.E_b_th = [E_SRT, E_ST] # bolt E @RT and @T
-        E_PRT = self.cP*self.lk/self.Asub # E_overall_mean of clamped parts at RT
-        E_PT = cPT*self.lk/self.Asub
+        E_PRT = self.cP*self.lk/self.A_sub # E_overall_mean of clamped parts at RT
+        E_PT = cPT*self.lk/self.A_sub
         self.E_c_th = [E_PRT, E_PT] # clamped parts E @RT and @T
         alpha_SRT = self.used_bolt_mat.alpha
         alpha_ST = self.materials.materials[self.inp_file.temp_bolt_material].alpha
@@ -129,98 +130,107 @@ class BoltAnalysisBase(ABC):
         # check if prevailing torque is defined (e.g. helicoils used)
         # prevailing torque if locking mechanism defined
         if self.inp_file.locking_mechanism == "yes":
-            self.Tp = self.inp_file.prevailing_torque
-        # NOTE: friction angle valid ONLY for 60deg threads!! (metric + unified threads)
+            self.M_p = self.inp_file.prevailing_torque
         # COF_BOLT = [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min] 
         mu_uhmax = self.inp_file.cof_bolt[0]
         mu_thmax = self.inp_file.cof_bolt[1]
         mu_uhmin = self.inp_file.cof_bolt[2]
         mu_thmin = self.inp_file.cof_bolt[3]
+        # NOTE: friction angle valid ONLY for 60deg threads!! (metric + unified threads)
         rho_max = math.atan(mu_thmax/math.cos(30.*math.pi/180.))
         rho_min = math.atan(mu_thmin/math.cos(30.*math.pi/180.))
-        # mean diameter of bolt head 
-        Dkm = (self.inp_file.through_hole_diameter+self.used_bolt.dh) /2
-        # min / max joint coefficient
-        Kmax = ( self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_max) +\
-            mu_uhmax*Dkm/2 ) / self.used_bolt.d
-        Kmin = ( self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_min) +\
-            mu_uhmin*Dkm/2 ) / self.used_bolt.d
+        # effective diameter of friction moment under bolt head
+        # VDI2230 D_Km; ECSS d_uh [5.4.6]
+        D_Km = (self.inp_file.through_hole_diameter+self.used_bolt.dh)/2
+        # min / max joint coefficient (with CoF-min and max)
+        Kmax = self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_max) +\
+            mu_uhmax*D_Km/(2*math.sin(self.used_bolt.lbd*math.pi/180/2))
+        Kmin = self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_min) +\
+            mu_uhmin*D_Km/(2*math.sin(self.used_bolt.lbd*math.pi/180/2))
         # calculate bolt preload for tightening torque
         TA = self.inp_file.tight_torque
         Tscatter = self.inp_file.torque_tol_tight_device
         TAmin = TA - Tscatter
         TAmax = TA + Tscatter
         # min / max init. preload after tightening (*1000 to get N)
-        self.FPreMin = (TAmin-self.Tp)/(Kmax*self.used_bolt.d)*1000
-        self.FPreMax = (TAmax-self.Tp)/(Kmin*self.used_bolt.d)*1000
-        self.FPreMean = (self.FPreMax+self.FPreMin)/2
+        # includes prevailing-torque
+        # F_V_at: preload after tightening [min, max]
+        self.F_V_at = [(TAmin-self.M_p)/Kmax*1000, (TAmax-self.M_p)/Kmin*1000]
         # calculate tightening factor (preload scatter incl. friction and tight. dev. tolerance)
-        self.alpha_A = self.FPreMax/self.FPreMin
+        self.alpha_A = self.F_V_at[1]/self.F_V_at[0]
         # check if VDI thermal method is used
         if self.inp_file.temp_use_vdi_method == "yes":
-            temp_res = self._calc_thermal_loss_VDI(self.FPreMin, self.FPreMax)
-            self.FT = [temp_res[0], temp_res[1]] # safe FT for FPreMin & FPreMax
-            self.FT_outp_str = temp_res[2]
-        # service preload with embedding and thermal loss
-        self.FPreMinServ = self.FPreMin + self.FZ + self.FT[0]
-        self.FPreMaxServ = self.FPreMax + self.FZ + self.FT[1]
-        self.FPreMeanServ = (self.FPreMinServ+self.FPreMaxServ)/2
+            # [FPreMin, FPreMax]
+            self.dF_V_th = self._calc_thermal_loss_VDI(self.F_V_at[0], self.F_V_at[1])
+        # service preload with embedding and thermal loss (ECSS ch. 6.3.2.2)
+        self.F_V = [self.F_V_at[0] + self.F_Z + self.dF_V_th[0], self.F_V_at[1] + self.dF_V_th[1]]
         # mean preload in the complete joint (incl. all bolts)
-        sum_FPreMeanServ = self.nmbr_of_bolts*self.FPreMeanServ
-
+        sum_F_V_mean = self.nmbr_of_bolts*(self.F_V[0]+self.F_V[1])/2
+        #
         # Calculate stresses
-        # max. torsional stress after tightening - see VDI2230 p.24
-        Wp = (self.used_bolt.ds**3)*math.pi/16
+        #
+        # max. torsional stress after tightening
+        Wp = (self.used_bolt.ds**3)*math.pi/16 #  polar section modulus
         # NOTE: only applicable for metric threads
-        MG_max = self.FPreMax*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
-            1.155*mu_thmin)
-        MG_min = self.FPreMin*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
-            1.155*mu_thmax)
-        self.tau_min = MG_min/Wp
-        self.tau_max = MG_max/Wp # max. torsional stress aft. tightening
-        # max. normal stress after tightening
-        self.sig_n_min = self.FPreMin/self.used_bolt.As
-        self.sig_n_max = self.FPreMax/self.used_bolt.As
-        # von-Mises equivalent stress in bolt
-        self.sig_v_min = math.sqrt(self.sig_n_min**2 + 3*(self.tau_min)**2)
-        self.sig_v_max = math.sqrt(self.sig_n_max**2 + 3*(self.tau_max)**2)
+        # ECSS Equ. [6.5.3] without thermal term
+        MG_max = TAmax*1000 - self.F_V_at[1]*mu_uhmin*D_Km/math.sin(self.used_bolt.lbd*math.pi/180/2)/2
+        MG_min = TAmin*1000 - self.F_V_at[0]*mu_uhmax*D_Km/math.sin(self.used_bolt.lbd*math.pi/180/2)/2
+        self.tau = [MG_min/Wp, MG_max/Wp] # [min, max] torsional stress aft. tightening
+        # max. normal stress after tightening [min, max]
+        self.sig_n = [self.F_V_at[0]/self.used_bolt.As, self.F_V_at[1]/self.used_bolt.As]
+        # von-Mises equivalent stress in bolt after tightening [min, max]
+        self.sig_v = [math.sqrt(self.sig_n[0]**2 + 3*(self.tau[0])**2), \
+                    math.sqrt(self.sig_n[1]**2 + 3*(self.tau[1])**2)]
         # degree of utilization (utilization of the minimum yield point)
-        self.nue_min = self.sig_v_min/self.used_bolt_mat.sig_y
-        self.nue_max = self.sig_v_max/self.used_bolt_mat.sig_y
+        self.nue = [self.sig_v[0]/self.used_bolt_mat.sig_y, \
+            self.sig_v[1]/self.used_bolt_mat.sig_y]
         #
         # calculate yield MOS under bolt head / first clamped part after tightening
-        self.MOS_pres = self._mos_pres(self.FPreMax)
-
+        self.MOS_pres = self._mos_pres(self.F_V_at[1])
+        #
         # perform calculation for all bolts / loadcases
+        #
         sum_FPA = 0.0
         sum_FQ = 0.0
         for bi in self.inp_file.bolt_loads:
             # bi : ['Bolt-ID', FN, FQ1, FQ2]
             FA = bi[1] # axial bolt force
             FQ = math.sqrt(bi[2]**2+bi[3]**2) # shear bolt force
-            FPA = FA*(1-self.phi_n) # reduction in clamping force
-            FSA = FA*self.phi_n # additional bolt force
-            # required clamping force for friction grip
+            FPA = FA*(1-self.Phi_n) # reduction in clamping force
+            FSA = FA*self.Phi_n # additional bolt force
+            # required clamping force for friction grip per bolt
             FKreq = FQ/(self.inp_file.nmbr_shear_planes*self.inp_file.cof_clamp)
-            ##FM_minslip = FKreq*self.inp_file.fos_slip+FPA*self.inp_file.fos_y+self.FZ
-            ##FM_mingap = FPA*self.inp_file.fos_gap+self.FZ
-            ##FM_min = max(FM_minslip,FM_mingap)
-            ### required torque for mu_max (1/1000 to get Nm)
-            ##Treq = (FM_min*(self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_max)+\
-            ##    mu_uhmax*Dkm/2)+self.Tp)/1000
             # calc sums for global slippage margin
             sum_FPA += FPA
             sum_FQ += FQ
             #
-            # local slippage margin
+            # calculate local slippage margin
             if FKreq==0:
                 MOS_loc_slip = math.inf # set to "inf" if no shear load defined
             else:
-                MOS_loc_slip = (self.FPreMinServ-FPA)/(FKreq*self.inp_file.fos_slip)-1
+                if self.inp_file.joint_mos_type.casefold() == "min":
+                    MOS_loc_slip = (self.F_V[0]-FPA)/(FKreq*self.inp_file.fos_slip)-1
+                elif self.inp_file.joint_mos_type.casefold() == "mean":
+                    MOS_loc_slip = ((self.F_V[0]+self.F_V[1])*0.5-FPA)/(FKreq*\
+                        self.inp_file.fos_slip)-1
+                else:
+                    MOS_loc_slip = -999
+                    err_str = "Wrong *JOINT_MOS_TYPE defined in input file"
+                    logging.error(err_str)
+                    raise JointMosTypeError(err_str)
             # local gapping margin
-            MOS_gap = self.FPreMinServ/(self.inp_file.fos_gap*FPA)-1
+            if self.inp_file.joint_mos_type.casefold() == "min":
+                MOS_gap = self.F_V[0]/(self.inp_file.fos_gap*FPA)-1
+            elif self.inp_file.joint_mos_type.casefold() == "mean":
+                MOS_gap = (self.F_V[0]+self.F_V[1])*0.5/(self.inp_file.fos_gap*FPA)-1
+            else:
+                MOS_gap = -999
+                err_str = "Wrong *JOINT_MOS_TYPE defined in input file"
+                logging.error(err_str)
+                raise JointMosTypeError(err_str)
+            # bolt margin
             # if VDI thermal method used, use temp. dependent sig_y and sig_u for MOS evaluation
-            if self.inp_file.temp_use_vdi_method == "yes":
+            if self.inp_file.temp_use_vdi_method.casefold() == "yes":
                 bolt_sig_y = self.materials.materials[self.inp_file.temp_bolt_material].sig_y
                 bolt_sig_u = self.materials.materials[self.inp_file.temp_bolt_material].sig_u
                 log_str = "Temperature dependent yield and ultimate bolt strength used for MOS"
@@ -229,33 +239,28 @@ class BoltAnalysisBase(ABC):
             else:
                 bolt_sig_y = self.materials.materials[self.inp_file.bolt_material].sig_y
                 bolt_sig_u = self.materials.materials[self.inp_file.bolt_material].sig_u
-                log_str = "Yield and ultimate bolt strength at RT used for MOS"
-                print(log_str)
-                logging.info(log_str)
-            # yield bolt margin
-            MOS_y = bolt_sig_y/math.sqrt( ((self.FPreMaxServ+\
+            # yield bolt margin (with 50% shear stress relaxation)
+            MOS_y = bolt_sig_y/math.sqrt( ((self.F_V[1]+\
                 FSA*self.inp_file.fos_y)/self.used_bolt.As)**2 +\
-                    3*(0.5*self.tau_max)**2 )-1
-            # ultimate bolt margin
-            MOS_u = bolt_sig_u/math.sqrt( ((self.FPreMaxServ+\
+                    3*(0.5*self.tau[1])**2 )-1
+            # ultimate bolt margin (with 50% shear stress relaxation)
+            MOS_u = bolt_sig_u/math.sqrt( ((self.F_V[1]+\
                 FSA*self.inp_file.fos_u)/self.used_bolt.As)**2 +\
-                    3*(0.5*self.tau_max)**2 )-1
+                    3*(0.5*self.tau[1])**2 )-1
             # yield margin for pressure under bolt head
-            MOS_loc_pres = self._mos_pres(self.FPreMaxServ+FSA*self.inp_file.fos_y,\
+            MOS_loc_pres = self._mos_pres(self.F_V[1]+FSA*self.inp_file.fos_y,\
                 self.inp_file.temp_use_vdi_method)
             # save data for each bolt/loadcase to result dict
             # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
             self.bolt_results.update({bi[0] : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap,\
                 MOS_y, MOS_u, MOS_loc_pres]})
-
         # calculate global slippage margin
         # total lateral joint force which can be transmitted via friction
-        F_tot_lat = (sum_FPreMeanServ-sum_FPA)*self.inp_file.cof_clamp*self.inp_file.nmbr_shear_planes
+        F_tot_lat = (sum_F_V_mean-sum_FPA)*self.inp_file.cof_clamp*self.inp_file.nmbr_shear_planes
         self.MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
 
     # check yield MoS under bolt head and between washer and first clamped part
     def _mos_pres(self, F_axial, use_temp_mat_props="no"):
-        MOS_pres = 0.0 # return value
         # yield strength of first clamped part (under washer)
         # if VDI thermal method used, use temp. dependent sig_y and sig_u for MOS evaluation
         if use_temp_mat_props == "yes":
@@ -270,10 +275,7 @@ class BoltAnalysisBase(ABC):
             sig_y_pres = self.materials.materials[self.inp_file.clamped_parts[1][0]].sig_y
             sig_y_pres_shim = self.materials.materials[self.inp_file.use_shim[0]].sig_y \
                 if self.inp_file.use_shim!="no" else 0.0
-            log_str = "Yield strength at RT of shim and first clamped part "\
-                + "used for MOS_pres, F_axial = {0:.1f}".format(F_axial)
-            print(log_str)
-            logging.info(log_str)
+        # MOS with or without washer
         if self.inp_file.use_shim != "no": # with washer
             # minimal area under bolt head
             A_pres_1 = (self.used_bolt.dh**2)*math.pi/4 - \
@@ -304,6 +306,8 @@ class BoltAnalysisBase(ABC):
         output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
             "BAT method:", self.inp_file.method, "")
         output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Joint type:", self.inp_file.joint_type, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
             "Joint MoS type:", self.inp_file.joint_mos_type, "")
         output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
             "Bolt:", self.inp_file.bolt, "")
@@ -321,9 +325,10 @@ class BoltAnalysisBase(ABC):
             "Through hole diameter [mm]:", self.inp_file.through_hole_diameter, "")
         output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
             "Shim used:", "yes" if self.inp_file.use_shim!="no" else "no", "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Edge dist. of the flanges [mm]:", self.inp_file.egde_dist_flange, "")
         output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
-            "Substitutional diameter DA defined:",\
-                "yes" if self.inp_file.subst_da!="no" else "no (calulated)", "")
+            "Embedding surf. rough. Rz [micron]:", self.inp_file.emb_rz, "")
         output_str += "|{0:-^93}|\n".format('-') # empty line within section
         # factors of safety
         output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
@@ -351,11 +356,11 @@ class BoltAnalysisBase(ABC):
             output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
                 " ", "Thickness [mm]:", cp[i][1])
             output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
-                " ", "Young's modulus [MPa]:", self.materials.materials[cp[i][0]].E)
+                " ", "Young's modulus @RT [MPa]:", self.materials.materials[cp[i][0]].E)
             output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
-                " ", "Yield strength [MPa]:", self.materials.materials[cp[i][0]].sig_y)
+                " ", "Yield strength @RT [MPa]:", self.materials.materials[cp[i][0]].sig_y)
             output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
-                " ", "Ultimate strength [MPa]:", self.materials.materials[cp[i][0]].sig_u)
+                " ", "Ultimate strength @RT [MPa]:", self.materials.materials[cp[i][0]].sig_u)
             output_str += "| {0:<40} {1:<30} {2:^20.3e}|\n".format(\
                 " ", "CTE [1/K]:", self.materials.materials[cp[i][0]].alpha)
         output_str += "{0:=^95}\n".format('=') # global splitter
@@ -368,12 +373,12 @@ class BoltAnalysisBase(ABC):
         output_str += "| {0:^91} |\n".format("ESA PSS-03-208 Issue 1 ANALYSIS RESULTS")
         output_str += "{0:=^95}\n".format('=')
         output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
-            "Tightening torque w/o prevailing torque [Nm]:", self.inp_file.tight_torque, "")
+            "Tightening torque with prevailing torque [Nm]:", self.inp_file.tight_torque, "")
         output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
             "Prevailing torque [Nm]:", self.Tp, "")
         output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
-            "Tightening torque with prevailing torque [Nm]:", \
-                self.inp_file.tight_torque+self.Tp, "")
+            "Tightening torque w/o prevailing torque [Nm]:", \
+                self.inp_file.tight_torque-self.Tp, "")
         output_str += "|{0:-^93}|\n".format('-') # empty line within section
         output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
             "Clamped length lk [mm]:", self.lk, "")

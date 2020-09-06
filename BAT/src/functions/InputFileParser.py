@@ -31,6 +31,7 @@ class InputFileParser:
         self.through_hole_diameter = 0.0
         self.subst_da = ""
         self.egde_dist_flange = 0.0
+        self.emb_rz = ""
         self.clamped_parts = {}
         # FOS-definition-block
         self.fos_y = 0.0
@@ -124,6 +125,8 @@ class InputFileParser:
                                 self.subst_da = tmp_line[1]
                             elif tmp_line[0]=="*EDGE_DIST_FLANGE":
                                 self.egde_dist_flange = float(tmp_line[1])
+                            elif tmp_line[0]=="*EMB_RZ":
+                                self.emb_rz = tmp_line[1]
                             elif tmp_line[0][:-3]=="*CLAMPED_PART":
                                 # get clamped-part number (inside brackets) and save n-CP to dict
                                 cp_nmbr = int(tmp_line[0][tmp_line[0].find("(")+1:tmp_line[0].find(")")])
@@ -225,6 +228,7 @@ class InputFileParser:
         print("*THROUGH_HOLE_DIAMETER:      {0:^}".format(str(self.through_hole_diameter)))
         print("*SUBST_DA:                   {0:^}".format(self.subst_da))
         print("*EDGE_DIST_FLANGE:           {0:^}".format(str(self.egde_dist_flange)))
+        print("*EMB_RZ:                     {0:^}".format(self.emb_rz))
         print("*CLAMPED_PARTS(i):           {0:^}".format(str(self.clamped_parts)))
         print("*FOS_Y:                      {0:^}".format(str(self.fos_y)))
         print("*FOS_U:                      {0:^}".format(str(self.fos_u)))

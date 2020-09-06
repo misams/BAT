@@ -16,7 +16,7 @@
     *COF_BOLT = [0.125, 0.22, 0.075, 0.132] # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
     *TIGHT_TORQUE = 15 # also use "STD" --> standard tightening torque table, incl. prevailing torque
     *TORQUE_TOL_TIGHT_DEVICE = 1.0 # torque wrench tolerance 
-    *LOCKING_MECHANISM = no # or "yes", e.g. Helicoil
+    *LOCKING_MECHANISM = yes # or "yes", e.g. Helicoil
     *PREVAILING_TORQUE = 0.6 # only used if *LOCKING_MECHANISM = yes
     *LOADING_PLANE_FACTOR = 0.5
 *BOLT_DEFINITION_END
@@ -29,6 +29,7 @@
     *THROUGH_HOLE_DIAMETER = 8.4 # D_B, drilled hole diameter of clamped parts
     *SUBST_DA = no # "no" or define substitutional outside diameter of of the basic solid at the interface
     *EDGE_DIST_FLANGE = 20 # edge distance of the flanges (avail. diam. for compression zone)
+    *EMB_RZ = <10 # embedding avg. surface roughness Rz [<10, 10-40, 40-160]mu
     # define n-clamped parts; use ascending index and start at (1)
     *CLAMPED_PART(1) = [Titan, 100]
     *CLAMPED_PART(2) = [S355, 5]
