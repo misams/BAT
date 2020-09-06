@@ -12,6 +12,7 @@ class Bolt:
         self.d3 = 0.0 # minor diameter
         self.As = 0.0 # stress cross section
         self.dh = 0.0 # min dia. under head or head diameter
+        self.lbd = 0.0 # under-head bearing angle
         # calculated values
         self.Ap = 0.0 # pitch cross section
         self.A1 = 0.0 # nominal cross section
@@ -31,6 +32,7 @@ class Bolt:
             self.d3 = float(row[4])
             self.As = float(row[5])
             self.dh = float(row[6])
+            self.lbd = float(row[7])
             # calculated values
             self.A1 = math.pow(self.d, 2.0)*math.pi/4.0
             self.Ap = math.pow(self.d2, 2.0)*math.pi/4.0
@@ -43,5 +45,6 @@ class Bolt:
 
     # string output for print()
     def __str__(self):
-        return "{0:^} d={1:.1f}, p={2:.2f}, d2={3:.3f}, d3={4:.3f}, As={5:.2f}, dh={6:.2f}".format(\
-            self.name, self.d, self.p, self.d2, self.d3, self.As, self.dh)
+        return "{0:^} d={1:.1f}, p={2:.2f}, d2={3:.3f}, d3={4:.3f}, \
+            As={5:.2f}, dh={6:.2f}, lbd={7:.1f}".format(\
+            self.name, self.d, self.p, self.d2, self.d3, self.As, self.dh, self.lbd)

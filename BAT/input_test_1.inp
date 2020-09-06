@@ -9,6 +9,7 @@
 
 # Definition of used bolt
 *BOLT_DEFINITION
+    *JOINT_TYPE = TBJ # connection type [TBJ: through-bolt joint, TTJ: tapped thread joint]
     *JOINT_MOS_TYPE = min # min (STD) or mean: use min or mean preload for slippage MOS calculation
     *BOLT = H_M8 # or e.g. M8f for fine thread
     *BOLT_MATERIAL = A4-80
@@ -24,9 +25,10 @@
 *CLAMPED_PARTS_DEFINITION
     *COF_CLAMP = 0.34 # min. coefficient of friction between clamped parts
     *NMBR_SHEAR_PLANES = 1
-    *USE_SHIM = [8.8, LN_M8] # also use "no" or shim out of database
+    *USE_SHIM = [8.8, LN9016_M8] # also use "no" or shim out of database
     *THROUGH_HOLE_DIAMETER = 8.4 # D_B, drilled hole diameter of clamped parts
     *SUBST_DA = no # "no" or define substitutional outside diameter of of the basic solid at the interface
+    *EDGE_DIST_FLANGE = 20 # edge distance of the flanges (avail. diam. for compression zone)
     # define n-clamped parts; use ascending index and start at (1)
     *CLAMPED_PART(1) = [Titan, 100]
     *CLAMPED_PART(2) = [S355, 5]
@@ -61,7 +63,7 @@ Bolt-5  55	0	0
     *TEMP_USE_VDI_METHOD = no # no or yes
     # define material properties at temp T
     *TEMP_BOLT_MATERIAL = A4-80
-    *TEMP_USE_SHIM = [8.8, LN_M8] # also use "no" or shim out of database
+    *TEMP_USE_SHIM = [8.8, LN9016_M8] # also use "no" or shim out of database
     *TEMP_CLAMPED_PART(1) = [Titan, 100]
     *TEMP_CLAMPED_PART(2) = [S355, 5]
     *TEMP_CLAMPED_PART(3) = [S355, 5]

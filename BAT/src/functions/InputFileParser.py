@@ -14,6 +14,7 @@ class InputFileParser:
         self.project_name = ""
         self.method = ""
         # bolts-definition-block
+        self.joint_type = "" # connection type [TBJ==DSV; TTJ==ESV]
         self.joint_mos_type = "" # use min or mean preload for slippage MOS calculation
         self.bolt = "" # e.g. S_M4x0.5 - socket M4 fine thread
         self.bolt_material = ""
@@ -29,6 +30,7 @@ class InputFileParser:
         self.use_shim = None
         self.through_hole_diameter = 0.0
         self.subst_da = ""
+        self.egde_dist_flange = 0.0
         self.clamped_parts = {}
         # FOS-definition-block
         self.fos_y = 0.0
@@ -68,6 +70,8 @@ class InputFileParser:
                             tmp_line = self._proc_line(line) # process inp-file line
                             if tmp_line[0]=="*JOINT_MOS_TYPE":
                                 self.joint_mos_type = tmp_line[1]
+                            elif tmp_line[0]=="*JOINT_TYPE":
+                                self.joint_type = tmp_line[1]
                             elif tmp_line[0]=="*BOLT":
                                 self.bolt = tmp_line[1]
                             elif tmp_line[0]=="*BOLT_MATERIAL":
@@ -118,6 +122,8 @@ class InputFileParser:
                                 self.through_hole_diameter = float(tmp_line[1])
                             elif tmp_line[0]=="*SUBST_DA":
                                 self.subst_da = tmp_line[1]
+                            elif tmp_line[0]=="*EDGE_DIST_FLANGE":
+                                self.egde_dist_flange = float(tmp_line[1])
                             elif tmp_line[0][:-3]=="*CLAMPED_PART":
                                 # get clamped-part number (inside brackets) and save n-CP to dict
                                 cp_nmbr = int(tmp_line[0][tmp_line[0].find("(")+1:tmp_line[0].find(")")])
@@ -203,6 +209,7 @@ class InputFileParser:
     def print(self):
         print("*PROJECT_NAME:               {0:^}".format(self.project_name))
         print("*METHOD:                     {0:^}".format(self.method))
+        print("*JOINT_TYPE:                 {0:^}".format(self.joint_type))
         print("*JOINT_MOS_TYPE:             {0:^}".format(self.joint_mos_type))
         print("*BOLT:                       {0:^}".format(self.bolt))
         print("*BOLT_MATERIAL:              {0:^}".format(self.bolt_material))
@@ -217,6 +224,7 @@ class InputFileParser:
         print("*USE_SHIM:                   {0:^}".format(str(self.use_shim)))
         print("*THROUGH_HOLE_DIAMETER:      {0:^}".format(str(self.through_hole_diameter)))
         print("*SUBST_DA:                   {0:^}".format(self.subst_da))
+        print("*EDGE_DIST_FLANGE:           {0:^}".format(str(self.egde_dist_flange)))
         print("*CLAMPED_PARTS(i):           {0:^}".format(str(self.clamped_parts)))
         print("*FOS_Y:                      {0:^}".format(str(self.fos_y)))
         print("*FOS_U:                      {0:^}".format(str(self.fos_u)))

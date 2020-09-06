@@ -8,6 +8,7 @@ import src.functions.InputFileParser as fp
 import src.functions.MaterialManager as mat
 import src.functions.BoltManager as bm
 import src.EsaPss as esapss
+import src.ECSS as ecss
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
@@ -138,6 +139,8 @@ def main():
             # calc ESA-PSS
             ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
             ana_esapss.print_results(output_file)
+            # ECSS TEST
+            #ana_ecss = ecss.ECSS(inp_file, materials, bolts)
 
     # handle exceptions
     except (ex.Error, ValueError, IndexError, FileNotFoundError, KeyError) as e:
