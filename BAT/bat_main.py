@@ -8,7 +8,7 @@ import src.functions.InputFileParser as fp
 import src.functions.MaterialManager as mat
 import src.functions.BoltManager as bm
 import src.EsaPss as esapss
-import src.ECSS as ecss
+import src.Ecss as ecss
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
@@ -136,11 +136,17 @@ def main():
             inp_file = fp.InputFileParser(args.Input, bolts)
             #inp_file.print() # debug
             #
-            # calc ESA-PSS
-            #ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
-            #ana_esapss.print_results(output_file)
-            # ECSS TEST
-            ana_ecss = ecss.ECSS(inp_file, materials, bolts)
+            if inp_file.method == "ESAPSS":
+                # calc ESA PSS-03-208
+                ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
+                ana_esapss.print_results(output_file)
+            elif inp_file.method == "ECSS":
+                # calc ECSS-E-HB-32-23A
+                ana_ecss = ecss.Ecss(inp_file, materials, bolts, __version__)
+                ana_ecss.print_results(output_file)
+            else:
+                print("#\n# ERROR: analysis method not implemented.")
+                logging.error("ERROR: analysis method not implemented.")
 
     # handle exceptions
     except (ex.Error, ValueError, IndexError, FileNotFoundError, KeyError) as e:

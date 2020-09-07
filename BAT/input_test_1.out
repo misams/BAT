@@ -1,9 +1,10 @@
 ===============================================================================================
-|                                   BAT Bolt Analysis Input                                   |
+|                                BAT Bolt Analysis Input (0.6)                                |
 |                                                                                             |
 |                                    bolt analysis test 1                                     |
 ===============================================================================================
-| BAT method:                                               ESAPSS                            |
+| BAT method:                                                ECSS                             |
+| Joint type:                                                TBJ                              |
 | Joint MoS type:                                            min                              |
 | Bolt:                                                      H_M8                             |
 | Bolt material:                                            A4-80                             |
@@ -13,7 +14,8 @@
 | Number of shear planes:                                     1                               |
 | Through hole diameter [mm]:                                8.40                             |
 | Shim used:                                                 yes                              |
-| Substitutional diameter DA defined:                   no (calulated)                        |
+| Edge dist. of the flanges [mm]:                           20.00                             |
+| Embedding surf. rough. Rz [micron]:                        <10                              |
 |---------------------------------------------------------------------------------------------|
 | Factor of safety yield                   FOS_y:                                 2.00        |
 | Factor of safety ultimate                FOS_u:                                 3.00        |
@@ -22,48 +24,45 @@
 |---------------------------------------------------------------------------------------------|
 | Clamped-Part (0) - Shim / Washer         Material:                              8.8         |
 |                                          Thickness [mm]:                        1.50        |
-|                                          Young's modulus [MPa]:               210000.0      |
-|                                          Yield strength [MPa]:                 640.0        |
-|                                          Ultimate strength [MPa]:              800.0        |
+|                                          Young's modulus @RT [MPa]:           210000.0      |
+|                                          Yield strength @RT [MPa]:             640.0        |
+|                                          Ultimate strength @RT [MPa]:          800.0        |
 |                                          CTE [1/K]:                          1.050e-05      |
 | Clamped-Part (1)                         Material:                             Titan        |
 |                                          Thickness [mm]:                       100.00       |
-|                                          Young's modulus [MPa]:               110000.0      |
-|                                          Yield strength [MPa]:                 870.0        |
-|                                          Ultimate strength [MPa]:              920.0        |
+|                                          Young's modulus @RT [MPa]:           110000.0      |
+|                                          Yield strength @RT [MPa]:             870.0        |
+|                                          Ultimate strength @RT [MPa]:          920.0        |
 |                                          CTE [1/K]:                          9.000e-06      |
 | Clamped-Part (2)                         Material:                              S355        |
 |                                          Thickness [mm]:                        5.00        |
-|                                          Young's modulus [MPa]:               200000.0      |
-|                                          Yield strength [MPa]:                 355.0        |
-|                                          Ultimate strength [MPa]:              510.0        |
+|                                          Young's modulus @RT [MPa]:           200000.0      |
+|                                          Yield strength @RT [MPa]:             355.0        |
+|                                          Ultimate strength @RT [MPa]:          510.0        |
 |                                          CTE [1/K]:                          1.050e-05      |
 | Clamped-Part (3)                         Material:                              S355        |
 |                                          Thickness [mm]:                        5.00        |
-|                                          Young's modulus [MPa]:               200000.0      |
-|                                          Yield strength [MPa]:                 355.0        |
-|                                          Ultimate strength [MPa]:              510.0        |
+|                                          Young's modulus @RT [MPa]:           200000.0      |
+|                                          Yield strength @RT [MPa]:             355.0        |
+|                                          Ultimate strength @RT [MPa]:          510.0        |
 |                                          CTE [1/K]:                          1.050e-05      |
 ===============================================================================================
 ===============================================================================================
-|                           ESA PSS-03-208 Issue 1 ANALYSIS RESULTS                           |
+|                        ECSS-E-HB-32-23A, 16.04.2010 ANALYSIS RESULTS                        |
 ===============================================================================================
-| Tightening torque w/o prevailing torque [Nm]:              15.0                             |
+| Tightening torque with prevailing torque [Nm]:             15.0                             |
 | Prevailing torque [Nm]:                                    0.6                              |
-| Tightening torque with prevailing torque [Nm]:             15.6                             |
+| Tightening torque w/o prevailing torque [Nm]:              14.4                             |
 |---------------------------------------------------------------------------------------------|
-| Clamped length lk [mm]:                                   111.50                            |
-| Subst. outside diameter DA [mm]:                           0.00                             |
-| Subst. area of cP Asub [mm^2]:                            351.07                            |
-| Subst. diameter of cP Dsub [mm]:                          22.75                             |
-| Bolt stiffness cB [N/mm]:                               7.705e+04                           |
-| Clamped part stiffness cP [N/mm]:                       3.633e+05                           |
-| Load factor Phi_K [-]:                                    0.1750                            |
-| Load factor Phi_n [-]:                                    0.0875                            |
-| Number of interfaces for embedding [-]:                     5                               |
-| Embedding [micron]:                                        7.53                             |
-| Preload loss due embedding FZ [N]:                        -478.7                            |
-| Preload loss due thermal effects FT [N]:                   0.0                              |
+| Clamped length l_K [mm]:                                  111.50                            |
+| Subst. area of CP compliance Asub [mm^2]:                 498.19                            |
+| Bolt stiffness c_B [N/mm]:                              5.623e+04                           |
+| Clamped part stiffness c_c [N/mm]:                      5.156e+05                           |
+| Load factor Phi [-]:                                      0.0983                            |
+| Load factor Phi_n [-]:                                    0.0492                            |
+| Embedding f_Z [micron]:                                    0.01                             |
+| Preload loss due embedding F_Z [N]:                       -760.5                            |
+| Preload loss due thermal effects dF_V_th [N]:            -3361.1                            |
 ===============================================================================================
 |                                                   |    MIN (mu_max)    |    MAX (mu_min)    |
 ===============================================================================================
@@ -74,32 +73,44 @@
 | Bolt preload after tightening [N]:                |       7644.9       |      13651.3       |
 | MEAN Bolt preload after tightening [N]:           |                 10648.1                 |
 | Preload Scatter / Tightening Factor Alpha_A [-]:  |               1.79 / ±28.2%             |
-| Total preload loss incl. emb. & temp. [N]:        |                 -478.7                  |
-| Bolt preload at service incl. emb. & temp. [N]:   |       7166.2       |      13172.6       |
-| MEAN Bolt preload at serv. incl. emb. & temp. [N]:|                 10169.4                 |
+| Total preload loss incl. emb. & temp. [N]:        |      -4121.6       |      -3361.1       |
+| Bolt preload at service incl. emb. & temp. [N]:   |       3523.3       |      10290.2       |
+| MEAN Bolt preload at serv. incl. emb. & temp. [N]:|                 6906.8                  |
 |---------------------------------------------------+--------------------+--------------------|
-| Torsional stress after tightening [MPa]:          |       136.1        |       163.2        |
+| Torsional stress after tightening [MPa]:          |       147.6        |       174.2        |
 | Normal stress after tightening [MPa]:             |       208.8        |       372.9        |
-| Von-Mises equiv. stress aft. tightening [MPa]:    |       314.9        |       467.9        |
-| Bolt utilization [%]:                             |       52.5%        |       78.0%        |
+| Von-Mises equiv. stress aft. tightening [MPa]:    |       330.1        |       479.6        |
+| Bolt utilization [%]:                             |       55.0%        |       79.9%        |
 |---------------------------------------------------+--------------------+--------------------|
 | Min. MoS (yield) under bolt head / washer [%]:    |         -          |        148%        |
+===============================================================================================
+===============================================================================================
+|              Thermal Preload Analysis             |  Room-Temp (ref)   |   defined Temp.    |
+===============================================================================================
+| Young's Modulus of bolt [MPa]:                    |      200000.0      |      200000.0      |
+| Young's Modulus of clamped parts [MPa]:           |      115396.5      |      115396.5      |
+| CTE of bolt [1/K]:                                |     1.510e-05      |     1.510e-05      |
+| CTE of clamped parts [1/K]:                       |     9.155e-06      |     9.155e-06      |
+|---------------------------------------------------+--------------------+--------------------|
+| Temperature difference delta_T [K]:                                         100.0           |
+|---------------------------------------------------------------------------------------------|
+| Preload loss due to thermal effects based on FVmin / FVmax [N]:       -3361.1 / -3361.1     |
 ===============================================================================================
 ===============================================================================================================================
 | Number |   Bolt /   | Axial Bolt | Shear Bolt | Add. Bolt  | Red. Clmp. |  Slippage  |  Gapping   |   Yield    |  Ultimate  |
 |   #    |  Loadcase  |   Force    |   Force    |   Force    |   Force    |    MoS     |    MoS     |    MoS     |    MoS     |
 |        |            |   FA [N]   |   FQ [N]   |  FSA [N]   |  FPA [N]   |  FoS=2.0   |  FoS=2.0   |  FoS=2.0   |  FoS=3.0   |
 ===============================================================================================================================
-|   1    |   Bolt-1   |   100.0    |   100.0    |    8.7     |    91.3    |   1103%    |   3827%    |    55%     |    107%    |
-|   2    |   Bolt-2   |    33.0    |    0.0     |    2.9     |    30.1    |    inf%    |   11799%   |    55%     |    107%    |
-|   3    |   Bolt-3   |    33.0    |    0.0     |    2.9     |    30.1    |    inf%    |   11799%   |    55%     |    107%    |
-|   4    |   Bolt-4   |    33.0    |    0.0     |    2.9     |    30.1    |    inf%    |   11799%   |    55%     |    107%    |
-|   5    |   Bolt-5   |    55.0    |    0.0     |    4.8     |    50.2    |    inf%    |   7039%    |    55%     |    107%    |
+|   1    |   Bolt-1   |   100.0    |   100.0    |    4.9     |    95.1    |    483%    |   1753%    |    88%     |    150%    |
+|   2    |   Bolt-2   |    33.0    |    0.0     |    1.6     |    31.4    |    inf%    |   5514%    |    88%     |    151%    |
+|   3    |   Bolt-3   |    33.0    |    0.0     |    1.6     |    31.4    |    inf%    |   5514%    |    88%     |    151%    |
+|   4    |   Bolt-4   |    33.0    |    0.0     |    1.6     |    31.4    |    inf%    |   5514%    |    88%     |    151%    |
+|   5    |   Bolt-5   |    55.0    |    0.0     |    2.7     |    52.3    |    inf%    |   3269%    |    88%     |    151%    |
 |-------------------------------------------------------------------------+------------+------------+------------+------------|
-|                                              Minimum Margins of Safety: |   1103%    |   3827%    |    55%     |    107%    |
+|                                              Minimum Margins of Safety: |    483%    |   1753%    |    88%     |    150%    |
 |-------------------------------------------------------------------------+------------+------------+------------+------------|
-|                                                 Global Slippage Margin: |   8505%    |     -      |     -      |     -      |
+|                                                 Global Slippage Margin: |   5730%    |     -      |     -      |     -      |
 |-------------------------------------------------------------------------+------------+------------+------------+------------|
-|           Minimum MoS against Yield under bolt head / first clamp part: |     -      |     -      |    157%    |     -      |
+|           Minimum MoS against Yield under bolt head / first clamp part: |     -      |     -      |    229%    |     -      |
 ===============================================================================================================================
-BAT Analysis Timestamp: 06-09-2020 17:28:19
+BAT Analysis Timestamp: 07-09-2020 12:30:59
