@@ -9,6 +9,7 @@ import src.functions.MaterialManager as mat
 import src.functions.BoltManager as bm
 import src.EsaPss as esapss
 import src.Ecss as ecss
+import src.TorqueTable as torque_table
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
@@ -72,6 +73,9 @@ def main():
     arg_parser.add_argument("--gui",
         action="store_true",
         help="use BAT GUI")
+    arg_parser.add_argument("--torque_table",
+        action="store_true",
+        help="generate torque table")
     arg_parser.add_argument("--version", 
         action="version",
         version="BAT Version: %(prog)s "+__version__)
@@ -135,6 +139,8 @@ def main():
             window = bat_qt_gui.Ui(ui_file, materials, bolts, inp_dir, __version__)
             window.show()
             sys.exit(app.exec_())
+        elif args.torque_table is True:
+            tb = torque_table.TorqueTable(materials, bolts)
         else:
             # read and process input file
             inp_file = fp.InputFileParser(args.Input, bolts)

@@ -46,6 +46,5 @@ class Bolt:
 
     # string output for print()
     def __str__(self):
-        return "{0:^} d={1:.1f}, p={2:.2f}, d2={3:.3f}, d3={4:.3f}, \
-            As={5:.2f}, dh={6:.2f}, lbd={7:.1f}".format(\
+        return "{0:^} d={1:.1f}, p={2:.2f}, d2={3:.3f}, d3={4:.3f}, As={5:.2f}, dh={6:.2f}, lbd={7:.1f}".format(\
             self.name, self.d, self.p, self.d2, self.d3, self.As, self.dh, self.lbd)
