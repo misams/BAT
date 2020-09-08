@@ -42,7 +42,7 @@ class BoltAnalysisBase(ABC):
         self.alpha_b_th = None # CTE bolt [alpha_b_RT, alpha_b_T]
         self.alpha_c_th = None # CTE clamped parts [alpha_c_RT, alpha_c_T]
         self.nmbr_of_bolts = len(self.inp_file.bolt_loads) # for global slippage analysis
-        self.F_V_at = None # preload after tightening [min, max]
+        self.F_M = None # preload after tightening / assembly preload [min, max]
         self.F_V = None # service preload (incl. embedding and thermal losses) [min, max]
         self.alpha_A = 0.0 # tightening factor 
         self.tau = None # 100% torsional stress aft. tightening [min, max]

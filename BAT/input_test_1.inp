@@ -1,76 +1,75 @@
-#########################
-#                       #
-# BAT Input File        #
-#                       #
-#########################
+########################################
+#                                      #
+# BAT Input File                       #
+#                                      #
+# Created: 08-09-2020 12:35:48         #
+# Unit System: mm, N, Nm               #
+#                                      #
+########################################
 
 *PROJECT_NAME = bolt analysis test 1
-*METHOD = ECSS # ECSS or VDI2230 (not implemented)
+*METHOD = ECSS # VDI2230 (not implemented)
 
 # Definition of used bolt
 *BOLT_DEFINITION
     *JOINT_TYPE = TBJ # connection type [TBJ: through-bolt joint, TTJ: tapped thread joint]
     *JOINT_MOS_TYPE = min # min (STD) or mean: use min or mean preload for slippage MOS calculation
-    *BOLT = H_M8 # or e.g. M8f for fine thread
+    *BOLT = H_M8 # or e.g. S_M8x1 for fine thread
     *BOLT_MATERIAL = A4-80
     *COF_BOLT = [0.125, 0.22, 0.075, 0.132] # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
-    *TIGHT_TORQUE = 15 # also use "STD" --> standard tightening torque table, incl. prevailing torque
-    *TORQUE_TOL_TIGHT_DEVICE = 1.0 # torque wrench tolerance 
-    *LOCKING_MECHANISM = yes # or "yes", e.g. Helicoil
-    *PREVAILING_TORQUE = 0.6 # only used if *LOCKING_MECHANISM = yes
-    *LOADING_PLANE_FACTOR = 0.5
+    *TIGHT_TORQUE = 15.00 # tightening torque WITH prevailing torque
+    *TORQUE_TOL_TIGHT_DEVICE = 1.00 # torque wrench tolerance
+    *LOCKING_MECHANISM = yes # "yes" or "no", e.g. yes for Helicoil
+    *PREVAILING_TORQUE = 0.60 # only used if *LOCKING_MECHANISM = yes
+    *LOADING_PLANE_FACTOR = 0.500
 *BOLT_DEFINITION_END
 
 # Definition of clamped parts
 *CLAMPED_PARTS_DEFINITION
     *COF_CLAMP = 0.34 # min. coefficient of friction between clamped parts
     *NMBR_SHEAR_PLANES = 1
-    *USE_SHIM = [8.8, LN9016_M8] # also use "no" or shim out of database
-    *THROUGH_HOLE_DIAMETER = 8.4 # D_B, drilled hole diameter of clamped parts
-    *SUBST_DA = no # "no" or define substitutional outside diameter of of the basic solid at the interface
-    *EDGE_DIST_FLANGE = 20 # edge distance of the flanges (avail. diam. for compression zone)
-    *EMB_RZ = <10 # embedding avg. surface roughness Rz [<10, 10-40, 40-160]mu
+    *USE_SHIM = [8.8, LN9016_M8] # e.g. [Shim-Material, Shim-Type] out of database or use "no"
+    *THROUGH_HOLE_DIAMETER = 8.40 # D_B, drilled hole diameter in clamped parts
+    *SUBST_DA = 30.00 # substitutional outside diameter of of the basic solid
+    *EMB_RZ = 10-40 # embedding avg. surface roughness Rz [<10, 10-40, 40-160]mu
     # define n-clamped parts; use ascending index and start at (1)
-    *CLAMPED_PART(1) = [Titan, 100]
-    *CLAMPED_PART(2) = [S355, 5]
-    *CLAMPED_PART(3) = [S355, 5]
+    *CLAMPED_PART(1) = [Titan, 100.00]
+    *CLAMPED_PART(2) = [S355, 5.00]
+    *CLAMPED_PART(3) = [S355, 5.00]
 *CLAMPED_PARTS_DEFINITION_END
 
 # Definition of factors of safety
 *FOS_DEFINITION
-    *FOS_Y = 2 # yield 
-    *FOS_U = 3 # ultimate
-    *FOS_SLIP = 2 # slippage
-    *FOS_GAP = 2 # gapping
+    *FOS_Y = 2.00 # yield
+    *FOS_U = 3.00 # ultimate
+    *FOS_SLIP = 2.00 # slippage
+    *FOS_GAP = 2.00 # gapping
 *FOS_DEFINITION_END
 
 # Definition of bolt loads
 # load/bolt-ID (max. 12 char.), axial-force, lateral-force-1, lateral-force-2 (optional)
 *BOLT_LOAD_DEFINITION
-Bolt-1  100	100	0
-Bolt-2  33	0	0
-Bolt-3  33	0	0
-Bolt-4  33	0	0
-Bolt-5  55	0	0
+Bolt-1 100.00 100.00 0.00
+Bolt-2 33.00 0.00 0.00
+Bolt-3 33.00 0.00 0.00
+Bolt-4 33.00 0.00 0.00
+Bolt-5 55.00 0.00 0.00
 *BOLT_LOAD_DEFINITION_END
 
 # Definition of temperature environment
 # temperature difference defined in K or deg-C
-# reference temperature = assembly temperature
+# reference temperature == assembly temperature
 *TEMP_DEFINITION
-    *DELTA_T = 100 # +K means higher temperature at service
+    *DELTA_T = 100.00 # +K/degC means higher temperature at service
     #
-    # VDI method takes Young's Modulus into account
-    *TEMP_USE_VDI_METHOD = no # no or yes
-    # define material properties at temp T
+    # VDI method takes temperature dependency of 
+    # Young's Modulus and strength values into account
+    *TEMP_USE_VDI_METHOD = no
+    # Define bolt, shim and materials at temp. T
     *TEMP_BOLT_MATERIAL = A4-80
-    *TEMP_USE_SHIM = [8.8, LN9016_M8] # also use "no" or shim out of database
-    *TEMP_CLAMPED_PART(1) = [Titan, 100]
-    *TEMP_CLAMPED_PART(2) = [S355, 5]
-    *TEMP_CLAMPED_PART(3) = [S355, 5]
+    *TEMP_USE_SHIM = [8.8, LN9016_M8] # e.g. [Shim-Material, Shim-Type] out of database or use "no"
+    # define n-clamped parts at temp. T; use ascending index and start at (1)
+    *TEMP_CLAMPED_PART(1) = [Titan, 100.00]
+    *TEMP_CLAMPED_PART(2) = [S355, 5.00]
+    *TEMP_CLAMPED_PART(3) = [S355, 5.00]
 *TEMP_DEFINITION_END
-
-# Definition of bolted flange
-*BOLTED_FLANGE_DEFINITION
-# TBD
-*BOLTED_FLANGE_DEFINITION_END

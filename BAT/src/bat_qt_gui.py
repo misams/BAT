@@ -5,6 +5,7 @@ from pathlib import Path
 from collections import Counter, OrderedDict
 from src.functions.InputFileParser import InputFileParser
 from src.EsaPss import EsaPss
+from src.Ecss import Ecss
 from src.gui.GuiInputHandler import GuiInputHandler
 from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
@@ -45,11 +46,16 @@ class Ui(QtWidgets.QMainWindow):
         self.actionAbout_BAT.triggered.connect(self.menuAboutBat)
         # base options
         self.radioEsaPss = self.findChild(QtWidgets.QRadioButton, "radioEsaPss")
+        self.radioEsaPss.toggled.connect(self.methodRadioClicked)
         self.radioEcss = self.findChild(QtWidgets.QRadioButton, "radioEcss")
+        self.radioEcss.toggled.connect(self.methodRadioClicked)
         self.radioVdi = self.findChild(QtWidgets.QRadioButton, "radioVdi")
+        self.radioVdi.toggled.connect(self.methodRadioClicked)
         self.projectName = self.findChild(QtWidgets.QLineEdit, "projectName")
         self.tabWidget = self.findChild(QtWidgets.QTabWidget, "tabWidget")
         # Bolt tab
+        self.radioTBJ = self.findChild(QtWidgets.QRadioButton, "radioTBJ")
+        self.radioTTJ = self.findChild(QtWidgets.QRadioButton, "radioTTJ")
         self.comboBolt = self.findChild(QtWidgets.QComboBox, "comboBolt")
         self.comboBoltMaterial = self.findChild(QtWidgets.QComboBox, "comboBoltMaterial")
         self.comboBoltMaterialT = self.findChild(QtWidgets.QComboBox, "comboBoltMaterialT")
@@ -69,7 +75,8 @@ class Ui(QtWidgets.QMainWindow):
         self.cofClampedParts = self.findChild(QtWidgets.QLineEdit, "cofClampedParts")
         self.numberOfShearPlanes = self.findChild(QtWidgets.QSpinBox, "numberOfShearPlanes")
         self.throughHoleDiameter = self.findChild(QtWidgets.QLineEdit, "throughHoleDiameter")
-        self.substDiameter = self.findChild(QtWidgets.QLineEdit, "substDiameter")
+        self.substDA = self.findChild(QtWidgets.QLineEdit, "substDA")
+        self.comboRz = self.findChild(QtWidgets.QComboBox, "comboRz")
         self.clampedPartsTable = self.findChild(QtWidgets.QTableWidget, "clampedPartsTable")
         self.addCpButton = self.findChild(QtWidgets.QPushButton, "addCpButton")
         self.addCpButton.clicked.connect(self.addCpPressed)
@@ -123,11 +130,10 @@ class Ui(QtWidgets.QMainWindow):
     # init gui - default settings
     def init_gui(self):
         # set radio-buttons
-        self.radioEsaPss.setChecked(True)
-        self.radioEcss.setEnabled(False) # not implemented yet
+        self.radioEcss.setChecked(True)
         self.radioVdi.setEnabled(False) # not implemented yet
         self.radioJointMin.setChecked(True)
-        self.radioJointMean.setEnabled(False) # not implemented yet
+        self.radioJointMean.setEnabled(True)
         self.radioLockYes.setChecked(True)
         self.comboBoltMaterialT.setEnabled(False) # disable VDI bolt material
         # fill bolt combo-boxes
@@ -139,7 +145,7 @@ class Ui(QtWidgets.QMainWindow):
         # set number of shear planes and loading plane factor
         self.numberOfShearPlanes.setValue(1)
         self.loadingPlaneFactor.setText("0.5")
-        self.substDiameter.setEnabled(False) # TODO: subst-diameter ???
+        self.substDA.setText('')
         # fos tab
         self.fosY.setText("1.1")
         self.fosU.setText("1.25")
@@ -197,8 +203,9 @@ class Ui(QtWidgets.QMainWindow):
 
     # erase gui - reset / new
     def erase_gui(self):
-        self.radioEsaPss.setChecked(True)
+        self.radioEcss.setChecked(True)
         self.projectName.setText("new BAT project")
+        self.radioTBJ.setChecked(True)
         self.radioJointMin.setChecked(True)
         self.comboBolt.setCurrentIndex(0)
         self.comboBoltMaterial.setCurrentIndex(0)
@@ -218,7 +225,7 @@ class Ui(QtWidgets.QMainWindow):
         self.cofClampedParts.setText('')
         self.numberOfShearPlanes.setValue(1)
         self.throughHoleDiameter.setText('')
-        self.substDiameter.setText('')
+        self.substDA.setText('')
         row_offset = 0 # row-number changes after removeRow
         for row in range(1,self.clampedPartsTable.rowCount()): 
             self.clampedPartsTable.removeRow(row-row_offset) # delete all CPs
@@ -247,6 +254,19 @@ class Ui(QtWidgets.QMainWindow):
         self.tabWidget.setCurrentIndex(0)
         # finally set statusbar
         self.statusbar.showMessage("New BAT project created")
+
+    # use method radioButton to set embedding options
+    def methodRadioClicked(self):
+        radioButton = self.sender()
+        if radioButton.isChecked():
+            self.comboRz.clear()
+            if radioButton.text()=="ESA PSS-03-208":
+                self.comboRz.addItem("-")
+            elif radioButton.text()=="ECSS-E-HB-32-23A":
+                # fill embedding Rz combo-box
+                self.comboRz.addItem("<10")
+                self.comboRz.addItem("10-40")
+                self.comboRz.addItem("40-160")
 
     # use locking device radioButton logic for prevailing torque QLineEdit
     def lockRadioClicked(self):
@@ -396,8 +416,17 @@ class Ui(QtWidgets.QMainWindow):
             if self.openedInputFile.method == "ESAPSS":
                 # calc ESA-PSS
                 ana_esapss = EsaPss(\
-                    self.openedInputFile, self.materials, self.bolts)
+                    self.openedInputFile, self.materials, self.bolts, self.bat_version)
                 output_results = ana_esapss.print_results(\
+                    self.outputFile.text(), print_to_cmd=False)
+                # enable output-tab and fill with results
+                self.tabWidget.setTabEnabled(5, True)
+                self.textEditOutput.setText(output_results)
+            elif self.openedInputFile.method == "ECSS":
+                # calc ESA-PSS
+                ana_ecss = Ecss(\
+                    self.openedInputFile, self.materials, self.bolts, self.bat_version)
+                output_results = ana_ecss.print_results(\
                     self.outputFile.text(), print_to_cmd=False)
                 # enable output-tab and fill with results
                 self.tabWidget.setTabEnabled(5, True)
@@ -423,13 +452,19 @@ class Ui(QtWidgets.QMainWindow):
         # fill gui
         if self.openedInputFile.method == "ESAPSS":
             self.radioEsaPss.setChecked(True)
+        elif self.openedInputFile.method == "ECSS":
+            self.radioEcss.setChecked(True)
         else:
-            print("ERROR: ECSS/VDI method not implemented yet")
+            print("ERROR: VDI2230 method not implemented yet")
         self.projectName.setText(self.openedInputFile.project_name)
         if self.openedInputFile.joint_mos_type == "min":
             self.radioJointMin.setChecked(True)
         else:
-            print("ERROR: MEAN method not implemented yet")
+            self.radioJointMean.setChecked(True)
+        if self.openedInputFile.joint_type == "TBJ":
+            self.radioTBJ.setChecked(True)
+        else:
+            self.radioTTJ.setChecked(True)
         # set bolt and bolt-material combo-box (incl. VDI bolt mat)
         index = self.comboBolt.findText(\
             self.openedInputFile.bolt, QtCore.Qt.MatchFixedString)
@@ -464,7 +499,13 @@ class Ui(QtWidgets.QMainWindow):
         self.cofClampedParts.setText(str(self.openedInputFile.cof_clamp))
         self.numberOfShearPlanes.setValue(self.openedInputFile.nmbr_shear_planes)
         self.throughHoleDiameter.setText(str(self.openedInputFile.through_hole_diameter))
-        self.substDiameter.setText(str(self.openedInputFile.subst_da))
+        self.substDA.setText(str(self.openedInputFile.subst_da))
+        # set Rz combo-box if method==ECSS
+        if self.openedInputFile.method=="ECSS":
+            index = self.comboRz.findText(\
+                self.openedInputFile.emb_rz, QtCore.Qt.MatchFixedString)
+            if index >= 0:
+                self.comboRz.setCurrentIndex(index)
         # shim setup
         if self.openedInputFile.use_shim != "no":
             self.useShimCheck.setChecked(True)
@@ -629,6 +670,12 @@ class Ui(QtWidgets.QMainWindow):
             method_string = "VDI"
         self.gih.method = method_string
         # Bolt tab
+        joint_type_string = ""
+        if self.radioTBJ.isChecked():
+            joint_type_string = "TBJ"
+        else:
+            joint_type_string = "TTJ"
+        self.gih.joint_type = joint_type_string
         self.gih.bolt = self.comboBolt.currentText()
         self.gih.bolt_material = self.comboBoltMaterial.currentText()
         self.gih.temp_bolt_material = self.comboBoltMaterialT.currentText()
@@ -649,7 +696,8 @@ class Ui(QtWidgets.QMainWindow):
         self.gih.cof_clamp = float(self.cofClampedParts.text())
         self.gih.nmbr_shear_planes = int(self.numberOfShearPlanes.value())
         self.gih.through_hole_diameter = float(self.throughHoleDiameter.text())
-        self.gih.subst_da = "no" # TODO: subst-diameter ???
+        self.gih.subst_da = float(self.substDA.text())
+        self.gih.emb_rz = self.comboRz.currentText()
         if self.useShimCheck.isChecked(): # shim
             shim = self.clampedPartsTable.cellWidget(0,0).currentText()
             shim_mat = self.clampedPartsTable.cellWidget(0,1).currentText()

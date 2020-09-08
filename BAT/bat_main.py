@@ -12,9 +12,13 @@ import src.Ecss as ecss
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.6"
+__version__ = "0.7"
 """
 Change Log:
+v0.7 - 08.09.2020
+- Base-Class for analysis methods
+- ESA-PSS converted to base-class
+- ECSS-E-HB-32-23A method included (GUI updated)
 v0.6 - 01.09.2020
 - Save-methods finished
 v0.5 - 26.07.2020
@@ -138,7 +142,7 @@ def main():
             #
             if inp_file.method == "ESAPSS":
                 # calc ESA PSS-03-208
-                ana_esapss = esapss.EsaPss(inp_file, materials, bolts)
+                ana_esapss = esapss.EsaPss(inp_file, materials, bolts, __version__)
                 ana_esapss.print_results(output_file)
             elif inp_file.method == "ECSS":
                 # calc ECSS-E-HB-32-23A

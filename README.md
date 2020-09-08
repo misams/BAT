@@ -3,8 +3,9 @@
 
 The bolt analysis tool (BAT) is an input file based Python command line tool for multi-bolt analyses. It is designed primarily for the space industry (ESA), but of course it can be used for all kinds of high duty bolted joint analyses. 
 
-Standards implemented in BAT (current status):
+Standards implemented in BAT (current status; concentric axially loaded joints only):
 - ESA PSS-03-208 Issue 1 (December 1989)
+- ECSS-E-HB-32-23A 16 April 2010
 
 It supports Python 3.0+ and uses pyQT5.
 
@@ -36,6 +37,12 @@ $ python bat_main.py --gui
 ![Example Screenshot BAT v0.6](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
 
 ## Changelog
+### v0.7
+>08.09.2020
+- Base-Class for analysis methods
+- ESA-PSS converted to base-class
+- ECSS-E-HB-32-23A method included (GUI updated)
+
 ### v0.6
 >01.09.2020
 - Save-methods finished

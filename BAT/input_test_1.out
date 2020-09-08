@@ -1,5 +1,5 @@
 ===============================================================================================
-|                                BAT Bolt Analysis Input (0.6)                                |
+|                               BAT Bolt Analysis Input (v0.7)                                |
 |                                                                                             |
 |                                    bolt analysis test 1                                     |
 ===============================================================================================
@@ -14,8 +14,8 @@
 | Number of shear planes:                                     1                               |
 | Through hole diameter [mm]:                                8.40                             |
 | Shim used:                                                 yes                              |
-| Edge dist. of the flanges [mm]:                           20.00                             |
-| Embedding surf. rough. Rz [micron]:                        <10                              |
+| Subst. outs. dia. of basic solid DA [mm]:                 30.00                             |
+| Embedding surf. rough. Rz [micron]:                       10-40                             |
 |---------------------------------------------------------------------------------------------|
 | Factor of safety yield                   FOS_y:                                 2.00        |
 | Factor of safety ultimate                FOS_u:                                 3.00        |
@@ -55,14 +55,14 @@
 | Tightening torque w/o prevailing torque [Nm]:              14.4                             |
 |---------------------------------------------------------------------------------------------|
 | Clamped length l_K [mm]:                                  111.50                            |
-| Subst. area of CP compliance Asub [mm^2]:                 498.19                            |
+| Subst. area of CP compliance Asub [mm^2]:                 393.44                            |
 | Bolt stiffness c_B [N/mm]:                              5.623e+04                           |
-| Clamped part stiffness c_c [N/mm]:                      5.156e+05                           |
-| Load factor Phi [-]:                                      0.0983                            |
-| Load factor Phi_n [-]:                                    0.0492                            |
-| Embedding f_Z [micron]:                                    0.01                             |
-| Preload loss due embedding F_Z [N]:                       -760.5                            |
-| Preload loss due thermal effects dF_V_th [N]:            -3361.1                            |
+| Clamped part stiffness c_c [N/mm]:                      4.072e+05                           |
+| Load factor Phi [-]:                                      0.1213                            |
+| Load factor Phi_n [-]:                                    0.0607                            |
+| Embedding f_Z [micron]:                                    0.02                             |
+| Preload loss due embedding F_Z [N]:                       -963.5                            |
+| Preload loss due thermal effects dF_V_th [N]:            -3275.3                            |
 ===============================================================================================
 |                                                   |    MIN (mu_max)    |    MAX (mu_min)    |
 ===============================================================================================
@@ -73,9 +73,9 @@
 | Bolt preload after tightening [N]:                |       7644.9       |      13651.3       |
 | MEAN Bolt preload after tightening [N]:           |                 10648.1                 |
 | Preload Scatter / Tightening Factor Alpha_A [-]:  |               1.79 / ±28.2%             |
-| Total preload loss incl. emb. & temp. [N]:        |      -4121.6       |      -3361.1       |
-| Bolt preload at service incl. emb. & temp. [N]:   |       3523.3       |      10290.2       |
-| MEAN Bolt preload at serv. incl. emb. & temp. [N]:|                 6906.8                  |
+| Total preload loss incl. emb. & temp. [N]:        |      -4238.8       |      -3275.3       |
+| Bolt preload at service incl. emb. & temp. [N]:   |       3406.1       |      10376.0       |
+| MEAN Bolt preload at serv. incl. emb. & temp. [N]:|                 6891.1                  |
 |---------------------------------------------------+--------------------+--------------------|
 | Torsional stress after tightening [MPa]:          |       147.6        |       174.2        |
 | Normal stress after tightening [MPa]:             |       208.8        |       372.9        |
@@ -94,23 +94,23 @@
 |---------------------------------------------------+--------------------+--------------------|
 | Temperature difference delta_T [K]:                                         100.0           |
 |---------------------------------------------------------------------------------------------|
-| Preload loss due to thermal effects based on FVmin / FVmax [N]:       -3361.1 / -3361.1     |
+| Preload loss due to thermal effects based on FVmin / FVmax [N]:       -3275.3 / -3275.3     |
 ===============================================================================================
 ===============================================================================================================================
 | Number |   Bolt /   | Axial Bolt | Shear Bolt | Add. Bolt  | Red. Clmp. |  Slippage  |  Gapping   |   Yield    |  Ultimate  |
 |   #    |  Loadcase  |   Force    |   Force    |   Force    |   Force    |    MoS     |    MoS     |    MoS     |    MoS     |
 |        |            |   FA [N]   |   FQ [N]   |  FSA [N]   |  FPA [N]   |  FoS=2.0   |  FoS=2.0   |  FoS=2.0   |  FoS=3.0   |
 ===============================================================================================================================
-|   1    |   Bolt-1   |   100.0    |   100.0    |    4.9     |    95.1    |    483%    |   1753%    |    88%     |    150%    |
-|   2    |   Bolt-2   |    33.0    |    0.0     |    1.6     |    31.4    |    inf%    |   5514%    |    88%     |    151%    |
-|   3    |   Bolt-3   |    33.0    |    0.0     |    1.6     |    31.4    |    inf%    |   5514%    |    88%     |    151%    |
-|   4    |   Bolt-4   |    33.0    |    0.0     |    1.6     |    31.4    |    inf%    |   5514%    |    88%     |    151%    |
-|   5    |   Bolt-5   |    55.0    |    0.0     |    2.7     |    52.3    |    inf%    |   3269%    |    88%     |    151%    |
+|   1    |   Bolt-1   |   100.0    |   100.0    |    6.1     |    93.9    |    463%    |   1713%    |    87%     |    149%    |
+|   2    |   Bolt-2   |    33.0    |    0.0     |    2.0     |    31.0    |    inf%    |   5394%    |    87%     |    149%    |
+|   3    |   Bolt-3   |    33.0    |    0.0     |    2.0     |    31.0    |    inf%    |   5394%    |    87%     |    149%    |
+|   4    |   Bolt-4   |    33.0    |    0.0     |    2.0     |    31.0    |    inf%    |   5394%    |    87%     |    149%    |
+|   5    |   Bolt-5   |    55.0    |    0.0     |    3.3     |    51.7    |    inf%    |   3196%    |    87%     |    149%    |
 |-------------------------------------------------------------------------+------------+------------+------------+------------|
-|                                              Minimum Margins of Safety: |    483%    |   1753%    |    88%     |    150%    |
+|                                              Minimum Margins of Safety: |    463%    |   1713%    |    87%     |    149%    |
 |-------------------------------------------------------------------------+------------+------------+------------+------------|
-|                                                 Global Slippage Margin: |   5730%    |     -      |     -      |     -      |
+|                                                 Global Slippage Margin: |   5717%    |     -      |     -      |     -      |
 |-------------------------------------------------------------------------+------------+------------+------------+------------|
-|           Minimum MoS against Yield under bolt head / first clamp part: |     -      |     -      |    229%    |     -      |
+|           Minimum MoS against Yield under bolt head / first clamp part: |     -      |     -      |    226%    |     -      |
 ===============================================================================================================================
-BAT Analysis Timestamp: 07-09-2020 12:30:59
+BAT Analysis Timestamp: 08-09-2020 12:40:15

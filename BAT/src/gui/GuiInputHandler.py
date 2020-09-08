@@ -7,6 +7,7 @@ class GuiInputHandler:
         self.project_name = ""
         self.method = ""
         # bolts-definition-block
+        self.joint_type = "" # TBJ or TTJ joints
         self.joint_mos_type = "" # use min or mean preload for slippage MOS calculation
         self.bolt = "" # e.g. S_M4x0.5 - socket M4 fine thread
         self.bolt_material = ""
@@ -21,7 +22,8 @@ class GuiInputHandler:
         self.nmbr_shear_planes = 0
         self.use_shim = None
         self.through_hole_diameter = 0.0
-        self.subst_da = ""
+        self.subst_da = 0.0
+        self.emb_rz = ""
         self.clamped_parts = {}
         # FOS-definition-block
         self.fos_y = 0.0
@@ -44,6 +46,8 @@ class GuiInputHandler:
             compare_items.append("*PROJECT_NAME")
         if self.method != inp_file.method:
             compare_items.append("*METHOD")
+        if self.joint_type != inp_file.joint_type:
+            compare_items.append("*JOINT_TYPE")
         if self.joint_mos_type != inp_file.joint_mos_type:
             compare_items.append("*JOINT_MOS_TYPE")
         if self.bolt != inp_file.bolt:
@@ -72,6 +76,8 @@ class GuiInputHandler:
             compare_items.append("*THROUGH_HOLE_DIAMETER")
         if self.subst_da != inp_file.subst_da:
             compare_items.append("*SUBST_DA")
+        if self.emb_rz != inp_file.emb_rz:
+            compare_items.append("*EMB_RZ")
         if self.clamped_parts != inp_file.clamped_parts:
             compare_items.append("*CLAMPED_PARTS(i)")
         if self.fos_y != inp_file.fos_y:
@@ -115,10 +121,12 @@ class GuiInputHandler:
             # project entries
             output_str += "*PROJECT_NAME = {0:^}\n".format(self.project_name)
             output_str += "*METHOD = {0:^} # {comment:^}\n\n".format(self.method, \
-                comment="ECSS or VDI2230 (not implemented)")
+                comment="VDI2230 (not implemented)")
             # definition of used bolts
             output_str += "# Definition of used bolt\n"
             output_str += "*BOLT_DEFINITION\n"
+            output_str += "    *JOINT_TYPE = {0:^} # {comment:^}\n".format(self.joint_type, \
+                comment="connection type [TBJ: through-bolt joint, TTJ: tapped thread joint]")
             output_str += "    *JOINT_MOS_TYPE = {0:^} # {comment:^}\n".format(self.joint_mos_type, \
                 comment="min (STD) or mean: use min or mean preload for slippage MOS calculation")
             output_str += "    *BOLT = {0:^} # {comment:^}\n".format(self.bolt, \
@@ -127,7 +135,8 @@ class GuiInputHandler:
             cof_bolt_str = str(self.cof_bolt).replace('(','[').replace(')',']')
             output_str += "    *COF_BOLT = {0:^} # {comment:^}\n".format(cof_bolt_str, \
                 comment="[mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]")
-            output_str += "    *TIGHT_TORQUE = {0:.2f}\n".format(self.tight_torque)
+            output_str += "    *TIGHT_TORQUE = {0:.2f} # {comment:^}\n".format(self.tight_torque,\
+                comment="tightening torque WITH prevailing torque")
             output_str += "    *TORQUE_TOL_TIGHT_DEVICE = {0:.2f} # {comment:^}\n".format(self.torque_tol_tight_device, \
                 comment="torque wrench tolerance")
             output_str += "    *LOCKING_MECHANISM = {0:^} # {comment:^}\n".format(self.locking_mechanism, \
@@ -150,8 +159,10 @@ class GuiInputHandler:
                 comment="e.g. [Shim-Material, Shim-Type] out of database or use \"no\"")
             output_str += "    *THROUGH_HOLE_DIAMETER = {0:.2f} # {comment:^}\n".format(self.through_hole_diameter, \
                 comment="D_B, drilled hole diameter in clamped parts")
-            output_str += "    *SUBST_DA = {0:^} # {comment:^}\n".format(self.subst_da, \
-                comment="\"no\" or define substitutional outside diameter of of the basic solid at the interface")
+            output_str += "    *SUBST_DA = {0:.2f} # {comment:^}\n".format(self.subst_da, \
+                comment="substitutional outside diameter of of the basic solid")
+            output_str += "    *EMB_RZ = {0:^} # {comment:^}\n".format(self.emb_rz, \
+                comment="embedding avg. surface roughness Rz [<10, 10-40, 40-160]mu")
             output_str += "    # define n-clamped parts; use ascending index and start at (1)\n"
             for key, value in self.clamped_parts.items():
                 if key != 0: # ignore shim
@@ -208,6 +219,7 @@ class GuiInputHandler:
     def print(self):
         print("*PROJECT_NAME:               {0:^}".format(self.project_name))
         print("*METHOD:                     {0:^}".format(self.method))
+        print("*JOINT_TYPE:                 {0:^}".format(self.joint_type))
         print("*JOINT_MOS_TYPE:             {0:^}".format(self.joint_mos_type))
         print("*BOLT:                       {0:^}".format(self.bolt))
         print("*BOLT_MATERIAL:              {0:^}".format(self.bolt_material))
@@ -221,7 +233,8 @@ class GuiInputHandler:
         print("*NMBR_SHEAR_PLANES:          {0:^}".format(str(self.nmbr_shear_planes)))
         print("*USE_SHIM:                   {0:^}".format(str(self.use_shim)))
         print("*THROUGH_HOLE_DIAMETER:      {0:^}".format(str(self.through_hole_diameter)))
-        print("*SUBST_DA:                   {0:^}".format(self.subst_da))
+        print("*SUBST_DA:                   {0:^}".format(str(self.subst_da)))
+        print("*EMB_RZ:                     {0:^}".format(str(self.emb_rz)))
         print("*CLAMPED_PARTS(i):           {0:^}".format(str(self.clamped_parts)))
         print("*FOS_Y:                      {0:^}".format(str(self.fos_y)))
         print("*FOS_U:                      {0:^}".format(str(self.fos_u)))

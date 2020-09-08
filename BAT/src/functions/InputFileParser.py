@@ -29,8 +29,7 @@ class InputFileParser:
         self.nmbr_shear_planes = 0
         self.use_shim = None
         self.through_hole_diameter = 0.0
-        self.subst_da = ""
-        self.egde_dist_flange = 0.0
+        self.subst_da = 0.0
         self.emb_rz = ""
         self.clamped_parts = {}
         # FOS-definition-block
@@ -122,9 +121,7 @@ class InputFileParser:
                             elif tmp_line[0]=="*THROUGH_HOLE_DIAMETER":
                                 self.through_hole_diameter = float(tmp_line[1])
                             elif tmp_line[0]=="*SUBST_DA":
-                                self.subst_da = tmp_line[1]
-                            elif tmp_line[0]=="*EDGE_DIST_FLANGE":
-                                self.egde_dist_flange = float(tmp_line[1])
+                                self.subst_da = float(tmp_line[1])
                             elif tmp_line[0]=="*EMB_RZ":
                                 self.emb_rz = tmp_line[1]
                             elif tmp_line[0][:-3]=="*CLAMPED_PART":
@@ -226,8 +223,7 @@ class InputFileParser:
         print("*NMBR_SHEAR_PLANES:          {0:^}".format(str(self.nmbr_shear_planes)))
         print("*USE_SHIM:                   {0:^}".format(str(self.use_shim)))
         print("*THROUGH_HOLE_DIAMETER:      {0:^}".format(str(self.through_hole_diameter)))
-        print("*SUBST_DA:                   {0:^}".format(self.subst_da))
-        print("*EDGE_DIST_FLANGE:           {0:^}".format(str(self.egde_dist_flange)))
+        print("*SUBST_DA:                   {0:^}".format(str(self.subst_da)))
         print("*EMB_RZ:                     {0:^}".format(self.emb_rz))
         print("*CLAMPED_PARTS(i):           {0:^}".format(str(self.clamped_parts)))
         print("*FOS_Y:                      {0:^}".format(str(self.fos_y)))
