@@ -10,9 +10,7 @@ class TorqueTable:
         # main analysis inputs
         self.materials = materials
         self.bolts = bolts
-        # used bolt and bolt-material for analysis (set by input-file)
-        #self.used_bolt = bolts.bolts[self.inp_file.bolt]
-        #self.used_bolt_mat = self.materials.materials[self.inp_file.bolt_material]
+        # calculate torque table
         self._calc_torque_table()
 
     def _calc_torque_table(self):
@@ -42,9 +40,16 @@ class TorqueTable:
             used_bolt = self.bolts.bolts[b]
             for m in bolt_mat_list:
                 used_bolt_mat = self.materials.materials[m]
-                # sig_m_zul acc. equ. (143)
+                # sig_m_zul acc. equ. (143) VDI2230
+                # uses: Wp = d^3*pi/12 --> full tau plasticity 
                 sig_m_zul = used_bolt_mat.sig_y/math.sqrt(1+3*(3/2*used_bolt.d2/used_bolt.ds*\
                     (used_bolt.p/(math.pi*used_bolt.d2)+1.155*mu_GK))**2)
+                print("{0:.1f} MPa with Wp=d^3*pi/12".format(sig_m_zul))
+                # uses: Wp = d^3*pi/16 --> tau fully elastic
+                # use for ECSS / ESA PSS
+                sig_m_zul = used_bolt_mat.sig_y/math.sqrt(1+3*(2*used_bolt.d2/used_bolt.ds*\
+                    (used_bolt.p/(math.pi*used_bolt.d2)+1.155*mu_GK))**2)
+                print("{0:.1f} MPa with Wp=d^3*pi/16".format(sig_m_zul))
                 # permissible assembly preload
                 F_M_zul = sig_m_zul*used_bolt.As*nue
                 # tightening torque

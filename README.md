@@ -37,6 +37,10 @@ $ python bat_main.py --gui
 ![Example Screenshot BAT v0.6](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
 
 ## Changelog
+### v0.7.1
+>13.09.2020
+- Torque table generator added
+
 ### v0.7
 >08.09.2020
 - Base-Class for analysis methods

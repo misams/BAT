@@ -13,9 +13,11 @@ import src.TorqueTable as torque_table
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.7"
+__version__ = "0.7.1"
 """
 Change Log:
+v0.7.1 - 13.09.2020
+- Torque table py added
 v0.7 - 08.09.2020
 - Base-Class for analysis methods
 - ESA-PSS converted to base-class
