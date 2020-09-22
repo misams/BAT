@@ -15,20 +15,22 @@ class TorqueTable:
 
     def _calc_torque_table(self):
         # define bolt list
-        bolt_list = ["S_M4", "S_M5", "S_M6", "S_M8", "S_M10", "S_M12", "S_M14", "S_M16", \
-                     "S_M18", "S_M20", "S_M22", "S_M24", "S_M27", "S_M30", "S_M36"]
-        bolt_list = ["H_M4", "H_M5", "H_M6", "H_M8", "H_M10", "H_M12", "H_M14", "H_M16", \
-                     "H_M18", "H_M20", "H_M22", "H_M24", "H_M27", "H_M30", "H_M36",]
+        #bolt_list = ["S_M4", "S_M5", "S_M6", "S_M8", "S_M10", "S_M12", "S_M14", "S_M16", \
+        #             "S_M18", "S_M20", "S_M22", "S_M24", "S_M27", "S_M30", "S_M36"]
+        #bolt_list = ["H_M4", "H_M5", "H_M6", "H_M8", "H_M10", "H_M12", "H_M14", "H_M16", \
+        #             "H_M18", "H_M20", "H_M22", "H_M24", "H_M27", "H_M30", "H_M36",]
+        bolt_list = ["CS_M2"]
         # define bolt material list
-        bolt_mat_list = ["8.8"]
+        bolt_mat_list = ["A2-70"]
         # define mu_G and mu_K
-        mu_GK_list = [0.08, 0.1, 0.12, 0.14, 0.16, 0.2, 0.24]
+        #mu_GK_list = [0.08, 0.1, 0.12, 0.14, 0.16, 0.2, 0.24]
+        mu_GK_list = [0.1, 0.12]
         # define bolt utilization
-        nue = 0.7
+        nue = 0.8
         # Wp-option for shear stress analysis
         # "VDI"  : Wp=d^3*pi/12 full plasticity
         # "ECSS" : Wp=d^3*pi/16 fully elastic
-        WP_OPTION = "VDI"
+        WP_OPTION = "ECSS"
         #
         # calculate table for metric threads
         # define header (unicode mu: \u00B5G; nu: \u03BD)
@@ -54,6 +56,7 @@ class TorqueTable:
                 #if used_bolt.d > 16: used_bolt_mat.sig_y = 660 # VDI 2230 hack
                 F_M_zul = [] # F_M_tab for each mu
                 M_A = [] # M_A for each mu
+                #used_bolt_mat.sig_y = 1100 # hack for VDI2230 torque table
                 for mu in mu_GK_list:
                     if WP_OPTION == "VDI":
                         # sig_m_zul acc. equ. (143) VDI2230
