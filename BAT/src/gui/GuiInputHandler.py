@@ -162,7 +162,7 @@ class GuiInputHandler:
             output_str += "    *SUBST_DA = {0:.2f} # {comment:^}\n".format(self.subst_da, \
                 comment="substitutional outside diameter of of the basic solid")
             output_str += "    *EMB_RZ = {0:^} # {comment:^}\n".format(self.emb_rz, \
-                comment="embedding avg. surface roughness Rz [<10, 10-40, 40-160]mu")
+                comment="embedding avg. surface roughness Rz [5%, <10, 10-40, 40-160]mu")
             output_str += "    # define n-clamped parts; use ascending index and start at (1)\n"
             for key, value in self.clamped_parts.items():
                 if key != 0: # ignore shim

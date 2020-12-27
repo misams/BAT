@@ -2,6 +2,9 @@
 #
 # pyinstaller --onefile blbla.py --> damn slow; --onedir messy but faster
 #
+
+- include "fitting-factor" (NASA) for loads
+- check clamped part stiffness for more (>2) clamped parts!
 - docu ;-)
 - check global slippage margin
 - check Asub with newer SHM-Excel!

@@ -2,7 +2,7 @@
 #                                      #
 # BAT Input File                       #
 #                                      #
-# Created: 08-09-2020 12:35:48         #
+# Created: 27-12-2020 22:08:50         #
 # Unit System: mm, N, Nm               #
 #                                      #
 ########################################
@@ -20,7 +20,7 @@
     *TIGHT_TORQUE = 15.00 # tightening torque WITH prevailing torque
     *TORQUE_TOL_TIGHT_DEVICE = 1.00 # torque wrench tolerance
     *LOCKING_MECHANISM = yes # "yes" or "no", e.g. yes for Helicoil
-    *PREVAILING_TORQUE = 0.60 # only used if *LOCKING_MECHANISM = yes
+    *PREVAILING_TORQUE = 1.00 # only used if *LOCKING_MECHANISM = yes
     *LOADING_PLANE_FACTOR = 0.500
 *BOLT_DEFINITION_END
 
@@ -31,9 +31,9 @@
     *USE_SHIM = [8.8, LN9016_M8] # e.g. [Shim-Material, Shim-Type] out of database or use "no"
     *THROUGH_HOLE_DIAMETER = 8.40 # D_B, drilled hole diameter in clamped parts
     *SUBST_DA = 30.00 # substitutional outside diameter of of the basic solid
-    *EMB_RZ = 10-40 # embedding avg. surface roughness Rz [<10, 10-40, 40-160]mu
+    *EMB_RZ = 5% # embedding avg. surface roughness Rz [5%, <10, 10-40, 40-160]mu
     # define n-clamped parts; use ascending index and start at (1)
-    *CLAMPED_PART(1) = [Titan, 100.00]
+    *CLAMPED_PART(1) = [Titan, 3.00]
     *CLAMPED_PART(2) = [S355, 5.00]
     *CLAMPED_PART(3) = [S355, 5.00]
 *CLAMPED_PARTS_DEFINITION_END
@@ -60,7 +60,7 @@ Bolt-5 55.00 0.00 0.00
 # temperature difference defined in K or deg-C
 # reference temperature == assembly temperature
 *TEMP_DEFINITION
-    *DELTA_T = 100.00 # +K/degC means higher temperature at service
+    *DELTA_T = 0.00 # +K/degC means higher temperature at service
     #
     # VDI method takes temperature dependency of 
     # Young's Modulus and strength values into account
@@ -69,7 +69,7 @@ Bolt-5 55.00 0.00 0.00
     *TEMP_BOLT_MATERIAL = A4-80
     *TEMP_USE_SHIM = [8.8, LN9016_M8] # e.g. [Shim-Material, Shim-Type] out of database or use "no"
     # define n-clamped parts at temp. T; use ascending index and start at (1)
-    *TEMP_CLAMPED_PART(1) = [Titan, 100.00]
+    *TEMP_CLAMPED_PART(1) = [Titan, 3.00]
     *TEMP_CLAMPED_PART(2) = [S355, 5.00]
     *TEMP_CLAMPED_PART(3) = [S355, 5.00]
 *TEMP_DEFINITION_END

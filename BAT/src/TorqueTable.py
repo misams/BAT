@@ -72,7 +72,7 @@ class TorqueTable:
                     F_M_zul.append(sig_m_zul*used_bolt.As*nue/1000)
                     # tightening torque for metric threads in [Nm]
                     # with 1/sin(2*lambda) for countersunk bolts
-                    Dkm = (used_bolt.dh+used_bolt.d)/2
+                    Dkm = (used_bolt.dh+used_bolt.d)/2 # approximate value; through hole dia. not used
                     M_A.append(F_M_zul[-1]*(0.16*used_bolt.p+0.58*used_bolt.d2*mu+\
                         Dkm/(2*math.sin(used_bolt.lbd*math.pi/180/2))*mu))
                 # print table for Excel

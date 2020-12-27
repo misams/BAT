@@ -264,6 +264,7 @@ class Ui(QtWidgets.QMainWindow):
                 self.comboRz.addItem("-")
             elif radioButton.text()=="ECSS-E-HB-32-23A":
                 # fill embedding Rz combo-box
+                self.comboRz.addItem("5%")
                 self.comboRz.addItem("<10")
                 self.comboRz.addItem("10-40")
                 self.comboRz.addItem("40-160")

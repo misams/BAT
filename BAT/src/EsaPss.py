@@ -154,9 +154,10 @@ class EsaPss(BoltAnalysisBase):
         self.F_M = [(TAmin-self.M_p)/Kmax*1000, (TAmax-self.M_p)/Kmin*1000]
         # calculate tightening factor (preload scatter incl. friction and tight. dev. tolerance)
         self.alpha_A = self.F_M[1]/self.F_M[0]
-        # check if VDI thermal method is used
+        # check if VDI thermal method is used 
         if self.inp_file.temp_use_vdi_method.casefold() == "yes":
-            self.dF_V_th = self._calc_thermal_loss_VDI(self.F_M[0], self.F_M[1])
+            # [FPreMin, FPreMax]
+            self._calc_thermal_VDI(self.F_M[0], self.F_M[1])
         # service preload with embedding and thermal loss (ECSS ch. 6.3.2.2)
         self.F_V = [ self.F_M[0] + self.F_Z + self.dF_V_th[0],\
                      self.F_M[1] + self.dF_V_th[1] ]
@@ -167,10 +168,13 @@ class EsaPss(BoltAnalysisBase):
         # max. torsional stress after tightening - see VDI2230 p.24
         Wp = (self.used_bolt.ds**3)*math.pi/16
         # NOTE: only applicable for metric threads
-        MG_max = self.F_M[1]*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
-            1.155*mu_thmin)
-        MG_min = self.F_M[0]*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
-            1.155*mu_thmax)
+        #MG_max = self.F_M[1]*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
+        #    1.155*mu_thmin)
+        #MG_min = self.F_M[0]*self.used_bolt.d2/2*(self.used_bolt.p/(self.used_bolt.d2*math.pi)+\
+        #    1.155*mu_thmax)
+        # ECSS equations used
+        MG_max = TAmax*1000 - self.F_M[1]*mu_uhmin*Dkm/math.sin(self.used_bolt.lbd*math.pi/180/2)/2
+        MG_min = TAmin*1000 - self.F_M[0]*mu_uhmax*Dkm/math.sin(self.used_bolt.lbd*math.pi/180/2)/2
         self.tau = [MG_min/Wp, MG_max/Wp] # [min, max] torsional stress aft. tightening
         # max. normal stress after tightening
         self.sig_n = [self.F_M[0]/self.used_bolt.As, self.F_M[1]/self.used_bolt.As]

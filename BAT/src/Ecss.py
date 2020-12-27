@@ -51,6 +51,7 @@ class Ecss(BoltAnalysisBase):
             w = 2
         # limit diameter of compression cone
         D_lim = self.used_bolt.dh + w*self.l_K*tan_phi
+        #
         # existence of cone and sleeve
         # calculate A_sub (substitution are of clamped parts compliance)
         # delta_c = l_K/(E_c * A_sub) ...compliance equation
@@ -60,8 +61,7 @@ class Ecss(BoltAnalysisBase):
             tmp_log_D = ((self.used_bolt.dh+self.used_bolt.d)*(D_lim-self.used_bolt.d)) \
                       / ((self.used_bolt.dh-self.used_bolt.d)*(D_lim+self.used_bolt.d))
             # Equ. [7.6.10]
-            x_c = 2*math.log(tmp_log_D)\
-                           / (w*math.pi*self.used_bolt.d*tan_phi) # x_c = l_K/A_sub
+            x_c = 2*math.log(tmp_log_D)/(w*math.pi*self.used_bolt.d*tan_phi) # x_c = l_K/A_sub
         elif self.used_bolt.dh > D_avail:
             print("CASE 2: sleeve only")
             print("d_uh > D_avail : {0:.2f} > {1:.2f}".format(self.used_bolt.dh, D_avail))
@@ -88,33 +88,35 @@ class Ecss(BoltAnalysisBase):
 
     # @Override: calculate embedding preload loss
     def _calc_embedding(self):
-        # apprx. values for plastic deformation caused by embedding
-        # Table 6-3 (larger value axial/shear used)
-        if self.inp_file.emb_rz == "<10":
-            f_Z_i = [3,3,2]
-        elif self.inp_file.emb_rz == "10-40":
-            f_Z_i = [3,4.5,2.5]
-        elif self.inp_file.emb_rz == "40-160":
-            f_Z_i = [3,6.5,3.5]
-        else:
-            f_Z_i = [999,999,999]
-            # outside tabled values
-            err_str = "Embedding: outside tabled values of Rz"
-            logging.error(err_str)
-            raise EmbeddingInterfacesError(err_str)
-        #
-        # calculate number of embedding interfaces (micron to mm: 1/1000)
-        # 1 x thread
-        # TBJ: 2 x under-head interface / TTJ: 1 x under-head interface
-        # TBJ: #CP-1 / TTJ: #CP
-        if self.inp_file.joint_type == "TBJ":
-            self.f_Z = (f_Z_i[0] + 2*f_Z_i[1] + (len(self.inp_file.clamped_parts)-1)*f_Z_i[2])/1000
-        else: # TTJ
-            self.f_Z = (f_Z_i[0] + 1*f_Z_i[1] + len(self.inp_file.clamped_parts)*f_Z_i[2])/1000
-        #
-        # calculate embedding force
-        # sigen-convention: minus (-) is loss in preload
-        self.F_Z = -self.f_Z/(self.delta_b+self.delta_c)
+        # if 5%-option NOT used calculate embedding acc. to Table 6-3
+        if self.inp_file.emb_rz != "5%":
+            # apprx. values for plastic deformation caused by embedding
+            # Table 6-3 (larger value axial/shear used)
+            if self.inp_file.emb_rz == "<10":
+                f_Z_i = [3,3,2]
+            elif self.inp_file.emb_rz == "10-40":
+                f_Z_i = [3,4.5,2.5]
+            elif self.inp_file.emb_rz == "40-160":
+                f_Z_i = [3,6.5,3.5]
+            else:
+                f_Z_i = [999,999,999]
+                # outside tabled values
+                err_str = "Embedding: outside tabled values of Rz"
+                logging.error(err_str)
+                raise EmbeddingInterfacesError(err_str)
+            #
+            # calculate number of embedding interfaces (micron to mm: 1/1000)
+            # 1 x thread
+            # TBJ: 2 x under-head interface / TTJ: 1 x under-head interface
+            # TBJ: #CP-1 / TTJ: #CP
+            if self.inp_file.joint_type == "TBJ":
+                self.f_Z = f_Z_i[0] + 2*f_Z_i[1] + (len(self.inp_file.clamped_parts)-1)*f_Z_i[2]
+            else: # TTJ
+                self.f_Z = f_Z_i[0] + 1*f_Z_i[1] + len(self.inp_file.clamped_parts)*f_Z_i[2]
+            #
+            # calculate embedding force
+            # sigen-convention: minus (-) is loss in preload
+            self.F_Z = -self.f_Z/1000/(self.delta_b+self.delta_c)
 
     # @Override: calculate joint results 
     def _calc_joint_results(self):
@@ -145,15 +147,21 @@ class Ecss(BoltAnalysisBase):
         TAmax = TA + Tscatter
         # min / max init. preload after tightening (*1000 to get N)
         # includes prevailing-torque
-        # F_M: preload after tightening [min, max]
+        # F_M: preload after tightening [min, max]; equ.6.3.14 / 6.3.15
         self.F_M = [(TAmin-self.M_p)/Kmax*1000, (TAmax-self.M_p)/Kmin*1000]
         # calculate tightening factor (preload scatter incl. friction and tight. dev. tolerance)
         self.alpha_A = self.F_M[1]/self.F_M[0]
         # check if VDI thermal method is used
         if self.inp_file.temp_use_vdi_method.casefold() == "yes":
             # [FPreMin, FPreMax]
-            self.dF_V_th = self._calc_thermal_VDI(self.F_M[0], self.F_M[1])
+            self._calc_thermal_VDI(self.F_M[0], self.F_M[1])
+        # check if 5%-embedding used
+        if self.inp_file.emb_rz == "5%":
+            self.F_Z = -0.05*self.F_M[1] # 5% of F_M_max used for F_Z
+            self.f_Z = -self.F_Z*(self.delta_b+self.delta_c)*1000 # in micron
+            print("5%-embedding used: {0:.1f} N".format(self.F_Z))
         # service preload with embedding and thermal loss (ECSS ch. 6.3.2.2)
+        # see equ.6.3.14 / 6.3.15
         self.F_V = [ self.F_M[0] + self.F_Z + self.dF_V_th[0],\
                      self.F_M[1] + self.dF_V_th[1] ]
         # mean preload in the complete joint (incl. all bolts)
@@ -164,7 +172,8 @@ class Ecss(BoltAnalysisBase):
         # max. torsional stress after tightening
         Wp = (self.used_bolt.ds**3)*math.pi/16 #  polar section modulus
         # NOTE: only applicable for metric threads
-        # ECSS Equ. [6.5.3] without thermal term
+        # ECSS Equ. [6.5.3] without thermal term (not thermal load during preloading)
+        # equ.[6.3.4 & 6.5.2] used
         MG_max = TAmax*1000 - self.F_M[1]*mu_uhmin*D_Km/math.sin(self.used_bolt.lbd*math.pi/180/2)/2
         MG_min = TAmin*1000 - self.F_M[0]*mu_uhmax*D_Km/math.sin(self.used_bolt.lbd*math.pi/180/2)/2
         self.tau = [MG_min/Wp, MG_max/Wp] # [min, max] torsional stress aft. tightening
