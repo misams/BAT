@@ -17,6 +17,7 @@ Ti>m4; 110000; 1100; 1030; 9.0e-6; 3.7164.7, bolt
 Ti<m5; 110000; 900; 830; 9.0e-6; 3.7164.1, bolt
 Inconel 718; 202700; 1240; 1035; 1.23e-5; bolt at RT
 Inconel 718 975K; 162160; 869; 725; 1.525e-5; at 975K / 702C
+A286ECSSTEST; 201000; 1100; 950; 1.68e-5; material for example in §7.14
 A286; 200600; 896; 586; 1.613e-5; at RT
 A286 975K; 120000; 538; 352; 1.829e-5; at 975K / 702C
 # more clamped part materials
@@ -27,6 +28,7 @@ Vetronite; 20000; 400; 300; 1.5E-05; -
 1.4305; 200000; 500; 190; 1.6E-05; X10CrNiS18-9, stainless steel
 AL5754; 70000; 240; 180; 2.37E-05; AlMg3, 3.3535, EN AW-5754 H14
 AL6060; 70000; 170; 140; 2.34E-05; AlMgSi, 3.3206, EN AW-6060 T6
+AL7075ECSSTEST; 71000; 454; 390; 2.2e-5; material for example in §7.14
 AL7075; 71000; 475; 390; 2.33E-05; AlZn5.5MgCu, 3.4365, EN AW-7075 T7351
 AL6061; 68300;290;240;2.34E-05; AlMg1SiCu, 3.3211, EN AW-6061 T651
 Vespel SP1; 2413; 86; 51; 4.5E-05; values not checked

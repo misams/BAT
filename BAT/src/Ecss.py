@@ -34,9 +34,14 @@ class Ecss(BoltAnalysisBase):
             self.l_K += c[1] # add thickness of all clamped parts to l_K
         #
         # compliance of bolt / fastener [7.5.5, p.74]
+        if self.inp_file.joint_type == "TBJ":
+            L_eng_sub = 0.4*self.used_bolt.d
+        else: # TTJ
+            L_eng_sub = 0.33*self.used_bolt.d
         # 0.4*d used for head and nut/locking-device; see Table 7-1
         self.delta_b = 1/self.used_bolt_mat.E*( 0.4*self.used_bolt.d/self.used_bolt.A1 +\
-            self.l_K/self.used_bolt.A3 + 0.4*self.used_bolt.d/self.used_bolt.A3)
+            self.l_K/self.used_bolt.A3 + 0.4*self.used_bolt.d/self.used_bolt.A1 +\
+            L_eng_sub/self.used_bolt.A3)
         #
         # compliance of clamped parts
         D_avail = self.inp_file.subst_da
@@ -80,7 +85,7 @@ class Ecss(BoltAnalysisBase):
         self.A_sub = self.l_K/x_c # substitutional area of clamped part compliance
         # calculate overall clamped part compliance
         self.delta_c = 0.0
-        for _, c in self.inp_file.temp_clamped_parts.items():
+        for _, c in self.inp_file.clamped_parts.items():
             self.delta_c += c[1]/(self.A_sub*self.materials.materials[c[0]].E)
         # calculate force ratio
         self.Phi = self.delta_c/(self.delta_b+self.delta_c)
@@ -136,10 +141,10 @@ class Ecss(BoltAnalysisBase):
         # VDI2230 D_Km; ECSS d_uh [5.4.6]
         D_Km = (self.inp_file.through_hole_diameter+self.used_bolt.dh)/2
         # min / max joint coefficient (with CoF-min and max)
-        Kmax = self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_max) +\
-            mu_uhmax*D_Km/(2*math.sin(self.used_bolt.lbd*math.pi/180/2))
-        Kmin = self.used_bolt.d2/2*math.tan(self.used_bolt.slope+rho_min) +\
-            mu_uhmin*D_Km/(2*math.sin(self.used_bolt.lbd*math.pi/180/2))
+        Kmax = self.used_bolt.d2/2*(math.tan(self.used_bolt.slope)+\
+            math.tan(rho_max)) + mu_uhmax*D_Km/(2*math.sin(self.used_bolt.lbd*math.pi/180/2))
+        Kmin = self.used_bolt.d2/2*(math.tan(self.used_bolt.slope)+\
+            math.tan(rho_min)) + mu_uhmin*D_Km/(2*math.sin(self.used_bolt.lbd*math.pi/180/2))
         # calculate bolt preload for tightening torque
         TA = self.inp_file.tight_torque # tight. torque with prevailing included
         Tscatter = self.inp_file.torque_tol_tight_device
