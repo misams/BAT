@@ -10,6 +10,7 @@ from src.gui.GuiInputHandler import GuiInputHandler
 from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.Qt import Qt, QApplication, QClipboard
+from src.gui.FlangeGuiWindow import AnotherWindow
 
 # TODO: implement consitent logging
 
@@ -43,6 +44,8 @@ class Ui(QtWidgets.QMainWindow):
         self.actionSave.triggered.connect(self.menuSave)
         self.actionSave_as.triggered.connect(self.menuSaveAs)
         self.actionQuit.triggered.connect(self.close)
+        self.actionBolted_Flange.triggered.connect(self.menuBoltedFlange)
+        self.w_bolted_flange = None # bolted flange window
         self.actionAbout_BAT.triggered.connect(self.menuAboutBat)
         # base options
         self.radioEsaPss = self.findChild(QtWidgets.QRadioButton, "radioEsaPss")
@@ -92,6 +95,7 @@ class Ui(QtWidgets.QMainWindow):
         self.fosU= self.findChild(QtWidgets.QLineEdit, "fosU")
         self.fosSlip= self.findChild(QtWidgets.QLineEdit, "fosSlip")
         self.fosGap= self.findChild(QtWidgets.QLineEdit, "fosGap")
+        self.fosFit= self.findChild(QtWidgets.QLineEdit, "fosFit")
         # Loads tab
         self.loadsTable = self.findChild(QtWidgets.QTableWidget, "loadsTable")
         self.addRowButton = self.findChild(QtWidgets.QPushButton, "addRowButton")
@@ -151,6 +155,7 @@ class Ui(QtWidgets.QMainWindow):
         self.fosU.setText("1.25")
         self.fosSlip.setText("1.1")
         self.fosGap.setText("1.0")
+        self.fosFit.setText("NOT USED")
         # set delta-T
         self.deltaT.setText("0")
         # loads-table init
@@ -237,6 +242,7 @@ class Ui(QtWidgets.QMainWindow):
         self.fosU.setText("1.25")
         self.fosSlip.setText("1.1")
         self.fosGap.setText("1.0")
+        self.fosFit.setText("NOT USED")
         # loads tab
         self.deltaT.setText("0")
         self.loadsTable.clearContents()
@@ -757,6 +763,14 @@ class Ui(QtWidgets.QMainWindow):
             "Author: Michael Sams\nProject: https://github.com/misams/BAT")
         msg.setStandardButtons(QMessageBox.Ok)
         retval = msg.exec_()
+
+    # MENU - Bolted-flange
+    def menuBoltedFlange(self, checked):
+        if self.w_bolted_flange is None:
+            print("Bolted-Flange window created")
+            self.w_bolted_flange = AnotherWindow()
+        self.w_bolted_flange.setWindowModality(Qt.ApplicationModal) # lock main window
+        self.w_bolted_flange.show()
 
     # display gui error-messagebox
     # QMessageBox.Information, Warning, Critical

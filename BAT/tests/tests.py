@@ -17,9 +17,9 @@ def tests():
     # handle bolt db files - read all available bolts and washers
     bolts = bm.BoltManager(p)
 
-    #
-    # TEST --> ECSS-E-HB-32-23A
-    #
+    """
+    TEST --> ECSS-E-HB-32-23A
+    """
     # working example chapter 7.14
     ecss_test_inp = os.path.dirname( __file__ )+"/ECSS_WorkEx_714.inp"
     inp_file = fp.InputFileParser(ecss_test_inp, bolts)
