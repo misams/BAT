@@ -17,7 +17,10 @@ def tests():
     # handle bolt db files - read all available bolts and washers
     bolts = bm.BoltManager(p)
 
-    # calc ECSS-E-HB-32-23A
+    #
+    # TEST --> ECSS-E-HB-32-23A
+    #
+    # working example chapter 7.14
     ecss_test_inp = os.path.dirname( __file__ )+"/ECSS_WorkEx_714.inp"
     inp_file = fp.InputFileParser(ecss_test_inp, bolts)
     ana_ecss = ecss.Ecss(inp_file, materials, bolts, "TEST")
@@ -32,7 +35,29 @@ def tests():
     print("F_M_min:                  {0:.1f} mm/N".format(ana_ecss.F_M[0]))
     print("F_M_max:                  {0:.1f} mm/N".format(ana_ecss.F_M[1]))
     print("F_V_max:                  {0:.1f} mm/N".format(ana_ecss.F_V[1]))
-    print(ana_ecss.A_sub)
+    #
+    # THERMAL PRELOAD LOSS
+    #
+    # method ECSS §6.3.5; equ.[6.3.27]
+    # 
+    a_L = 0.0
+    for _, c in ana_ecss.inp_file.clamped_parts.items():
+        a_L += ana_ecss.materials.materials[c[0]].alpha * c[1]
+    a_L = (a_L - ana_ecss.used_bolt_mat.alpha * ana_ecss.l_K) / ana_ecss.l_K
+    F_th_ecss1 = a_L * ana_ecss.inp_file.delta_t * ana_ecss.used_bolt_mat.E *\
+        ana_ecss.used_bolt.A3 * (1-ana_ecss.Phi) # with Asm = A3 as defined in ECSS
+    A_sm = ana_ecss.l_K/ana_ecss.delta_b/ana_ecss.used_bolt_mat.E 
+    F_th_ecss2 = a_L * ana_ecss.inp_file.delta_t * ana_ecss.used_bolt_mat.E *\
+        A_sm * (1-ana_ecss.Phi) # with Asm acc. to delta_b; equal to VDI
+    print("F_th ECSS_A3: {0:.2f} N".format(F_th_ecss1))
+    print("F_th ECSS_Asm: {0:.2f} N".format(F_th_ecss2))
+    #
+    # method VDI §5.4.2.3; equ.[118]
+    F_th_VDI = ana_ecss.l_K*(ana_ecss.used_bolt_mat.alpha -\
+        ana_ecss.materials.materials["AL7075ECSSTEST"].alpha)*ana_ecss.inp_file.delta_t /\
+            (ana_ecss.delta_b+ana_ecss.delta_c)
+    print("F_th VDI: {0:.2f} N".format(F_th_VDI))
+    print("F_th SHM: " + str(ana_ecss.dF_V_th))
 
     #ana_ecss.print_results()
 
