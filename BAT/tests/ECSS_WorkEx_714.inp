@@ -20,13 +20,13 @@
     *TIGHT_TORQUE = 13.65 # tightening torque WITH prevailing torque
     *TORQUE_TOL_TIGHT_DEVICE = 0.65 # torque wrench tolerance
     *LOCKING_MECHANISM = yes # "yes" or "no", e.g. yes for Helicoil
-    *PREVAILING_TORQUE = 0.4 #2.0 # only used if *LOCKING_MECHANISM = yes
+    *PREVAILING_TORQUE = 2.0 #0.4 # only used if *LOCKING_MECHANISM = yes
     *LOADING_PLANE_FACTOR = 0.500
 *BOLT_DEFINITION_END
 
 # Definition of clamped parts
 *CLAMPED_PARTS_DEFINITION
-    *COF_CLAMP = 0.34 # min. coefficient of friction between clamped parts
+    *COF_CLAMP = 0.3 # min. coefficient of friction between clamped parts
     *NMBR_SHEAR_PLANES = 1
     *USE_SHIM = no #[8.8, LN9016_M8] # e.g. [Shim-Material, Shim-Type] out of database or use "no"
     *THROUGH_HOLE_DIAMETER = 6.5 # D_B, drilled hole diameter in clamped parts
@@ -41,7 +41,7 @@
 *FOS_DEFINITION
     *FOS_Y = 1.4375 # yield
     *FOS_U = 2.3 # ultimate
-    *FOS_SLIP = 1.00 # slippage
+    *FOS_SLIP = 2.3 # slippage
     *FOS_GAP = 1.00 # gapping
     *FOS_FIT = 1.00 # fitting-factor
 *FOS_DEFINITION_END
@@ -49,7 +49,7 @@
 # Definition of bolt loads
 # load/bolt-ID (max. 12 char.), axial-force, lateral-force-1, lateral-force-2 (optional)
 *BOLT_LOAD_DEFINITION
-Bolt-1 1000.00 0.00 0.00
+Bolt-1 1000.00 1000.00 0.00
 *BOLT_LOAD_DEFINITION_END
 
 # Definition of temperature environment

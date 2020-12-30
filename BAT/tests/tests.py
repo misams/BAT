@@ -26,7 +26,7 @@ def tests():
     ana_ecss = ecss.Ecss(inp_file, materials, bolts, "TEST")
     # print test results
     print("#\n# BAT ECSS Working Example §7.14 TEST-RESULTS\n#")
-    print("fastener compliance:      {0:.3e} mm/N".format(ana_ecss.delta_b))        
+    print("fastener compliance:      {0:.3e} mm/N".format(ana_ecss.delta_b))
     print("clamped parts compliance: {0:.3e} mm/N".format(ana_ecss.delta_c))
     print("force ratio PHI:          {0:.3f} mm/N".format(ana_ecss.Phi))
     print("Torque incl. Mp:          {0:.2f} mm/N".format(ana_ecss.inp_file.tight_torque))
@@ -49,15 +49,23 @@ def tests():
     A_sm = ana_ecss.l_K/ana_ecss.delta_b/ana_ecss.used_bolt_mat.E 
     F_th_ecss2 = a_L * ana_ecss.inp_file.delta_t * ana_ecss.used_bolt_mat.E *\
         A_sm * (1-ana_ecss.Phi) # with Asm acc. to delta_b; equal to VDI
-    print("F_th ECSS_A3: {0:.2f} N".format(F_th_ecss1))
-    print("F_th ECSS_Asm: {0:.2f} N".format(F_th_ecss2))
+    print("F_th ECSS_A3:             {0:.2f} N".format(F_th_ecss1))
+    print("F_th ECSS_Asm:            {0:.2f} N".format(F_th_ecss2))
     #
     # method VDI §5.4.2.3; equ.[118]
     F_th_VDI = ana_ecss.l_K*(ana_ecss.used_bolt_mat.alpha -\
         ana_ecss.materials.materials["AL7075ECSSTEST"].alpha)*ana_ecss.inp_file.delta_t /\
             (ana_ecss.delta_b+ana_ecss.delta_c)
-    print("F_th VDI: {0:.2f} N".format(F_th_VDI))
-    print("F_th SHM: " + str(ana_ecss.dF_V_th))
+    print("F_th VDI:                 {0:.2f} N".format(F_th_VDI))
+    print("F_th SHM:                [{0:.2f}, {1:.2f}] N".format(ana_ecss.dF_V_th[0], ana_ecss.dF_V_th[1]))
+    #
+    # stress
+    #
+    print("Sig_n:                   [{0:.1f}, {1:.1f}] N".format(ana_ecss.sig_n[0], ana_ecss.sig_n[1]))
+    print("Tau:                     [{0:.1f}, {1:.1f}] N".format(ana_ecss.tau[0], ana_ecss.tau[1]))
+    print("Sig_v:                   [{0:.1f}, {1:.1f}] N".format(ana_ecss.sig_v[0], ana_ecss.sig_v[1]))
+    print("MOS_slip_loc:             {0:.2f}".format(ana_ecss.bolt_results['Bolt-1'][4]))
+    print("MOS_slip_global:          {0:.2f}".format(ana_ecss.MOS_glob_slip))
 
     #ana_ecss.print_results()
 
