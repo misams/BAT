@@ -43,12 +43,13 @@
     *FOS_U = 2.3 # ultimate
     *FOS_SLIP = 1.00 # slippage
     *FOS_GAP = 1.00 # gapping
+    *FOS_FIT = 1.00 # fitting-factor
 *FOS_DEFINITION_END
 
 # Definition of bolt loads
 # load/bolt-ID (max. 12 char.), axial-force, lateral-force-1, lateral-force-2 (optional)
 *BOLT_LOAD_DEFINITION
-Bolt-1 1000.00 1.00 0.00
+Bolt-1 1000.00 0.00 0.00
 *BOLT_LOAD_DEFINITION_END
 
 # Definition of temperature environment

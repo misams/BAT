@@ -30,6 +30,7 @@ class GuiInputHandler:
         self.fos_u = 0.0
         self.fos_slip = 0.0
         self.fos_gap = 0.0
+        self.fos_fit = 0.0
         # bolt-loads
         self.bolt_loads = [] # 2d-array
         # temperature input
@@ -88,6 +89,8 @@ class GuiInputHandler:
             compare_items.append("*FOS_SLIP")
         if self.fos_gap != inp_file.fos_gap:
             compare_items.append("*FOS_GAP")
+        if self.fos_fit != inp_file.fos_fit:
+            compare_items.append("*FOS_FIT")
         if self.bolt_loads != inp_file.bolt_loads:
             compare_items.append("BOLT-LOADS")
         if self.delta_t != inp_file.delta_t:
@@ -179,6 +182,8 @@ class GuiInputHandler:
                 comment="slippage")
             output_str += "    *FOS_GAP = {0:.2f} # {comment:^}\n".format(self.fos_gap, \
                 comment="gapping")
+            output_str += "    *FOS_FIT = {0:.2f} # {comment:^}\n".format(self.fos_fit, \
+                comment="fitting-factor")
             output_str += "*FOS_DEFINITION_END\n\n"
             # definition of bolt loads
             output_str += "# Definition of bolt loads\n"
@@ -240,6 +245,7 @@ class GuiInputHandler:
         print("*FOS_U:                      {0:^}".format(str(self.fos_u)))
         print("*FOS_SLIP:                   {0:^}".format(str(self.fos_slip)))
         print("*FOS_GAP:                    {0:^}".format(str(self.fos_gap)))
+        print("*FOS_FIT:                    {0:^}".format(str(self.fos_fit)))
         print("BOLT-LOADS:                  {0:^}".format(str(self.bolt_loads)))
         print("*DELTA_T:                    {0:^}".format(str(self.delta_t)))
         print("#\n# VDI method for thermal preload loss with E\n#")

@@ -10,9 +10,7 @@ from src.gui.GuiInputHandler import GuiInputHandler
 from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.Qt import Qt, QApplication, QClipboard
-from src.gui.FlangeGuiWindow import AnotherWindow
-
-# TODO: implement consitent logging
+from src.gui.FlangeGuiWindow import AnotherWindow # currently dummy-only
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
@@ -155,7 +153,7 @@ class Ui(QtWidgets.QMainWindow):
         self.fosU.setText("1.25")
         self.fosSlip.setText("1.1")
         self.fosGap.setText("1.0")
-        self.fosFit.setText("NOT USED")
+        self.fosFit.setText("1.0")
         # set delta-T
         self.deltaT.setText("0")
         # loads-table init
@@ -242,7 +240,7 @@ class Ui(QtWidgets.QMainWindow):
         self.fosU.setText("1.25")
         self.fosSlip.setText("1.1")
         self.fosGap.setText("1.0")
-        self.fosFit.setText("NOT USED")
+        self.fosFit.setText("1.0")
         # loads tab
         self.deltaT.setText("0")
         self.loadsTable.clearContents()
@@ -567,6 +565,7 @@ class Ui(QtWidgets.QMainWindow):
         self.fosU.setText(str(self.openedInputFile.fos_u))
         self.fosSlip.setText(str(self.openedInputFile.fos_slip))
         self.fosGap.setText(str(self.openedInputFile.fos_gap))
+        self.fosFit.setText(str(self.openedInputFile.fos_fit))
         # loads tab
         self.deltaT.setText(str(self.openedInputFile.delta_t))
         if self.openedInputFile.temp_use_vdi_method != "no": # VDI method checkbox
@@ -732,6 +731,7 @@ class Ui(QtWidgets.QMainWindow):
         self.gih.fos_u = float(self.fosU.text())
         self.gih.fos_slip = float(self.fosSlip.text())
         self.gih.fos_gap = float(self.fosGap.text())
+        self.gih.fos_fit = float(self.fosFit.text())
         # Loads tab
         loads = [] # load table
         rows = self.loadsTable.rowCount()

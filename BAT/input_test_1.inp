@@ -2,7 +2,7 @@
 #                                      #
 # BAT Input File                       #
 #                                      #
-# Created: 27-12-2020 22:08:50         #
+# Created: 30-12-2020 10:50:10         #
 # Unit System: mm, N, Nm               #
 #                                      #
 ########################################
@@ -44,6 +44,7 @@
     *FOS_U = 3.00 # ultimate
     *FOS_SLIP = 2.00 # slippage
     *FOS_GAP = 2.00 # gapping
+    *FOS_FIT = 1.50 # fitting-factor
 *FOS_DEFINITION_END
 
 # Definition of bolt loads

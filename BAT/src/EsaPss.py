@@ -192,9 +192,10 @@ class EsaPss(BoltAnalysisBase):
         sum_FPA = 0.0
         sum_FQ = 0.0
         for bi in self.inp_file.bolt_loads:
-            # bi : ['Bolt-ID', FN, FQ1, FQ2]
-            FA = bi[1] # axial bolt force
-            FQ = math.sqrt(bi[2]**2+bi[3]**2) # shear bolt force
+            ffit = self.inp_file.fos_fit # fitting-factor
+            # bi : ['Bolt-ID', FN, FQ1, FQ2] --> bolt forces for each bolt 'bi'
+            FA = bi[1]*ffit # axial bolt force
+            FQ = math.sqrt((bi[2]*ffit)**2+(bi[3]*ffit)**2) # shear bolt force
             FPA = FA*(1-self.Phi_n) # reduction in clamping force
             FSA = FA*self.Phi_n # additional bolt force
             # required clamping force for friction grip
@@ -247,7 +248,11 @@ class EsaPss(BoltAnalysisBase):
         # calculate global slippage margin
         # total lateral joint force which can be transmitted via friction
         F_tot_lat = (sum_F_V_mean-sum_FPA)*self.inp_file.cof_clamp*self.inp_file.nmbr_shear_planes
-        self.MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
+        # global slippage margin
+        if sum_FQ != 0.0:
+            self.MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
+        else:
+            self.MOS_glob_slip = math.inf
 
     # get analysis input (file) string for printout
     def _get_input_str(self):
@@ -293,6 +298,8 @@ class EsaPss(BoltAnalysisBase):
             "Factor of safety slippage", "FOS_slip:", self.inp_file.fos_slip)
         output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
             "Factor of safety gapping", "FOS_gap:", self.inp_file.fos_gap)
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Fitting-Factor", "FOS_fit:", self.inp_file.fos_fit)
         output_str += "|{0:-^93}|\n".format('-') # empty line within section
         # list clamped parts with properties
         cp = self.inp_file.clamped_parts
