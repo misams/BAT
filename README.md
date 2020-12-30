@@ -10,6 +10,9 @@ Standards implemented in BAT (current status; concentric axially loaded joints o
 It supports Python 3.0+ and uses pyQT5.
 
 [![PyPI status](https://img.shields.io/pypi/status/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Python 3.0+](https://img.shields.io/badge/Python-3.0%2B-success)](https://www.python.org)
+[![pyQT5](https://img.shields.io/badge/GUI-pyQT5-success)](https://pypi.org/project/PyQt5)
 
 ## Run BAT without GUI
  
@@ -79,8 +82,6 @@ $ python bat_main.py --gui
 - first revision of beta software status
 
 ## License
-
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 - **[GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.txt)**
 - Copyright 2020 © misams
