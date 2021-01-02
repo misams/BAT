@@ -13,9 +13,16 @@ import src.TorqueTable as torque_table
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 """
 Change Log:
+v0.7.2 - 02.01.2021
+- ECSS / ESA-PSS some bugs corrected (Mp implementation)
+- ECSS: 5% embedding added
+- fitting factor added (applied to loads)
+- Flange-GUI-window added (dummy status)
+- tests.py added (ECSS worked example 7.14 added)
+- BAT User-Manual (LaTex) created
 v0.7.1 - 13.09.2020
 - Torque table py added
 v0.7 - 08.09.2020

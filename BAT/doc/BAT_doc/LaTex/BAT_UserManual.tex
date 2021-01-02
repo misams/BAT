@@ -1,0 +1,165 @@
+\documentclass[12pt,a4paper,oneside,DIV12]{scrreprt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Author, Title
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\myAuthor}{Michael Sams}
+\newcommand{\myTitle}{BAT - Bolt Analysis Tool}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Used packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frenchspacing
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,amssymb,amstext,bm}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{geometry}
+\graphicspath{{pictures/}}
+\usepackage{listings}
+\usepackage{units}
+\usepackage[T1]{fontenc}
+\usepackage{threeparttable}
+\usepackage{wasysym}
+\usepackage[final]{pdfpages}
+\usepackage{lmodern}
+\usepackage{courier}
+\usepackage[    pdfauthor={\myAuthor},
+                pdftitle={\myTitle},
+                colorlinks=true,
+                linkcolor=black,
+                citecolor=black,
+                urlcolor=black]{hyperref}
+\usepackage{bibgerm}
+% packages for pseudocode
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\renewcommand{\algorithmiccomment}[1]{{\color{gray}  // \textit{#1}}}
+\usepackage{setspace}
+\usepackage{xcolor}
+\definecolor{light-gray}{gray}{0.95}
+% subfigure
+\usepackage[hang]{subfigure}
+\usepackage{rotating}
+% packages for definitions
+\usepackage{shadethm}
+% Tables
+\usepackage{longtable,lscape}
+\usepackage{setspace} %Fußnoten in Tabellen
+\usepackage{threeparttable} %Fußnoten in Tabellen
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{booktabs} %JCUmgebung für Tabellen in Wissenschaftlichen Publikationen
+\usepackage{paralist}
+\usepackage{array}
+\usepackage{footnote}
+\makesavenoteenv{table}
+% multicolumn
+\usepackage{multicol}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Definitions 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% theorem / definition
+\newshadetheorem{definitions}{Definition}%[section]
+\newenvironment{definition}[1][]{
+  \definecolor{shadethmcolor}{rgb}{0.9,0.9,0.9}
+  %\definecolor{shaderulecolor}{rgb}{0.0,0.0,0.4}
+  %\setlength{\shadeboxrule}{1.5pt}
+  \begin{definitions}[#1]\hspace*{1mm}
+}{\end{definitions}}
+\newshadetheorem{theorems}{Theorem}%[section]
+\newenvironment{theorem}[1][]{
+  \definecolor{shadethmcolor}{rgb}{0.9,0.9,0.9}
+  %\definecolor{shaderulecolor}{rgb}{0.0,0.0,0.4}
+  %\setlength{\shadeboxrule}{1.5pt}
+  \begin{theorems}[#1]\hspace*{1mm}
+}{\end{theorems}}
+% command-definitions 
+\newcommand{\sspace}{\mathcal{S}}
+\newcommand{\real}{\mathbb{R}}
+\newcommand{\expec}[2]{\mathbb{E}_{#2}[#1]}
+\newcommand{\entropy}[1]{\mathbb{H}[#1]}
+\newcommand{\expecij}[1]{\underset{i\neq j}{\mathbb{E}}[#1]}
+\newcommand{\expecijm}[2]{\underset{i\neq #1}{\mathbb{E}}[#2]}
+\newcommand{\vari}[1]{\text{var}[#1]}
+\newcommand{\covari}[2]{\text{cov}[#1,#2]}
+\newcommand{\kl}[2]{\text{KL}(#1||#2)}
+\newcommand{\lowbound}[1]{\mathcal{L}(#1)}
+
+% Abbreviations
+\usepackage[printonlyused]{acronym}
+
+% Footnote numbering
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
+
+% Seitenumbruch: Verhindert Hurenkinder und Schusterjungen voellig
+\widowpenalty=10000
+\clubpenalty=10000
+\displaywidowpenalty=10000
+
+% caption of figures
+\usepackage{caption}
+\renewcommand{\capfont}{\footnotesize}
+\renewcommand{\caplabelfont}{\footnotesize\bfseries}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hyphenation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\hyphenation{Ver-sag-ens-kri-ter-ium}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+% shortcuts for ref
+%\newcommand{\equ}[1]{Equ.~\ref{#1}}
+\newcommand{\equ}[1]{(\ref{#1})}
+\newcommand{\defi}[1] {{\small\textsf{Definition~\ref{#1}}}}
+\newcommand{\chapt}[1]{{\small\textsf{Chapter~\ref{#1}}}}
+\newcommand{\sect}[1] {{\small\textsf{Section~\ref{#1}}}}
+\newcommand{\fig}[1]  {{\small\textsf{Figure~\ref{#1}}}}
+\newcommand{\alg}[1]  {{\small\textsf{Algorithm~\ref{#1}}}}
+\newcommand{\tab}[1]  {{\small\textsf{Table~\ref{#1}}}}
+\newcommand{\myspacing}{1.0}
+\newcommand{\myfontsize}{10}
+\newcommand{\myfontskip}{17}
+
+\pagenumbering{roman}
+
+%% title page 
+\include{chapter/titlepage}
+%\thispagestyle{empty}   % nichts auf der Seite
+%\mbox{}\cleardoublepage % leere Seite
+
+%% table of contents
+\tableofcontents
+
+%% symbols and abbreviations 
+\include{chapter/symbols}
+%\mbox{}\cleardoublepage % leere Seite
+
+%% figure and tab-list
+\include{chapter/figtablist}
+
+\setcounter{page}{1}
+\pagenumbering{arabic}
+%% Chapters
+\include{chapter/00_intro}
+
+%% Appendix
+%\appendix
+%\include{chapter/99_appendix}
+
+%%%%
+\chapter{References}
+\begingroup 
+  \let\chapter=\section
+  \let\addchap=\addsec
+  \renewcommand{\bibname}{}
+  % literature
+  \bibliographystyle{plain}
+  \bibliography{bibtex/bat_bibtex}
+\endgroup
+
+\end{document}

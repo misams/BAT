@@ -22,4 +22,4 @@
 - bending loads / eccentric loadings?
 - VDI2230
 - output: print directly to a PDF / or PIC for easy and beautiful reporting (single page)
-          Templating / Jinja2 (HTML, Latex?!)
+          Reportlab or templating / Jinja2 (HTML, Latex?!)

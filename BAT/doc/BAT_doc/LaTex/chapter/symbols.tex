@@ -1,0 +1,130 @@
+\chapter*{Symbols and Abbreviations}
+
+\subsubsection*{Symbols}
+\begin{longtable}{p{4cm} l}
+
+  $\bm{0}$ & zero vector \\
+  $\nabla^2$ & Laplacian or Laplace operator \\
+  & \\
+  $\alpha$ & damping parameter for Levenberg-Marquardt algorithm \\
+  $\Gamma(\cdot)$ & Gamma function \\
+  $\delta_{nm}$ & Kronecker delta \\
+  $\delta_{per}$ & small perturbation for $\bm{J}$ evaluation \\
+  $\bm{\Delta}_{dLM}$ & right-hand side of deterministic LM algorithm \\
+  $\bm{\Delta}$ & right-hand side of VB LM algorithm \\
+  $\varepsilon$ & numerical error for LM algorithm termination \\
+  $\zeta$ & i.i.d. Gaussian random variable \\
+  $\eta$ & correlation length of stochastic process \\
+  $\bm{\Theta}, \bm{\theta}$ & (model) parameters \\
+  $\bm{\Theta}^{(i)}$ & drawn samples for MCMC \\
+  $\varkappa$ & offset parameter \\
+  $\kappa$ & regularization parameter (Tikhonov) \\
+  $\lambda_n$ & eigenvalues of spectral decomposed stochastic process \\
+  $\lambda_1, \lambda_2$ & model parameters for biexponential example \\
+  $\bm{\Lambda}$ & precision matrix of parameters $\bm{\theta}$ \\
+  $\bm{\Lambda}_0$ & prior precision matrix of parameters $\bm{\theta}$ \\
+  $\bm{\Lambda}_{dLM}$ & gradient for deterministic LM algorithm \\
+  $\xi_n(\omega)$ & orthogonal, random variables \\
+  $\sigma$ & standard deviation \\
+  $\sigma_Y^2$ & variance of stochastic process \\
+  $\underline{\bm{\sigma}}$ & stress tensor \\
+  $\bm{\Sigma}$ & covariance matrix \\
+  $\phi$ & precision of added Gaussian noise \\
+  $\psi(\cdot)$ & di-gamma function \\
+  $\bm{\psi}$ & linearization of nonlinear model $\bm{\psi} = \bm{y}-\bm{g}(\bm{m})$ \\
+  $\omega$ & stochastic outcome \\
+  $\Omega$ & domain \\
+  $\partial\Omega$ & boundary of domain \\
+  & \\
+  $A_i, B_i$ & probabilistic events \\
+  $\bm{A}$ & matrix for FDM in Poisson problem \\
+  $b, \bm{b}$ & right-hand side of Poisson equation \\
+  $\underline{\hat{\bm{b}}}$ & body loads \\
+  $c$ & shape parameter of Gamma distribution for model noise \\
+  $c_0$ & prior shape parameter of Gamma distribution for model noise \\
+  $C(\bm{x},\bm{x}')$, $C_Y$ & covariance function \\
+  $D$ & dimension \\
+  $\mathcal{D}$ & space domain \\
+  $\bm{e}$ & additive Gaussian noise vector \\
+  $e_{\bm{\psi}}$ & error norm for result comparison \\
+  $\expec{\cdot}{}$ & expectation or mean \\
+  $\mathcal{F}$ & set of events \\
+  $F(\cdot)$ & cumulative distribution function \\
+  $f(\cdot)$ & arbitrary function \\
+  $f_n$ & eigenfunctions of spectral decomposed stochastic process \\
+  $\bm{g}(\cdot)$ & nonlinear forward model \\
+  $\mathcal{GP}(m(\bm{x}), C(\bm{x},\bm{x}^{\prime}))$ & Gaussian process \\
+  $h$ & mesh size \\
+  $\bm{h}$ & search direction for optimization \\
+  $\entropy{\cdot}=\entropy{p,p}$ & differential or relative entropy \\
+  $\entropy{p,q}$ & cross entropy \\
+  $i_{max}$ & maximum number of iterations for algorithms \\
+  $\bm{I}$ & identity matrix \\
+  $\mathcal{J}$ & dimension of $\bm{y}$ \\
+  $\bm{J}(\cdot)$ & Jacobi matrix, Jacobian \\
+  $k(\bm{x})$ & material parameter \\
+  $\kl{\cdot}{\cdot}$ & Kullback-Leibler divergence \\
+  $l_i$ & length for geometrical pipe transformation \\
+  $L$ & length/dimension of domain \\
+  $\lowbound{\cdot}$ & lower bound \\
+  $m(\bm{x})$ & mean function \\
+  $m, \bm{m}$ & mean (vector), optimization vector in algorithms \\
+  $\bm{m}_0$ & prior mean vector of parameters $\bm{\theta}$\\
+  $\bm{m}_{new}$ & new mean/optimization vector for parameters $\bm{\theta}$ in iteration \\
+  $\bm{m}_{old}$ & old mean/optimization vector for parameters $\bm{\theta}$ in iteration \\
+  $M_1, M_2$ & model parameters for biexponential example \\
+  $N$ & number of used terms in KL-expansion \\
+  $\mathcal{O}$ & higher-order-terms in Taylor approximation \\
+  $p(\bm{\Theta})$ & prior distribution \\
+  $p(\bm{\Theta}|\bm{y})$ & posterior distribution \\
+  $p(\bm{y})$ & normalization constant, model evidence, \\
+                     & marginal likelihood, Bayes factor \\
+  $p(\bm{y}|\bm{\Theta})$ & likelihood function \\
+  $p(\cdot)$ & probability measure, probability distribution/density,\\
+             & marginal probability \\
+  $p(\cdot|\cdot)$ & conditional probability \\
+  $p(\cdot,\cdot) = p(\cdot \cap \cdot)$ & joint probability \\
+  $p_n(x)$ & Taylor polynomial of n-th order \\
+  $\tilde{p}(\cdot,\cdot)$ & defined distribution in VB derivation \\
+  $q(\cdot)$ & arbitrary or factorized probability distribution \\
+  $q^{opt}_j(\bm{\Theta}_j)$ & optimal solution for variational inference in VB derivation \\
+  $q(\bm{\Theta}|\bm{y})$ & approximate posterior distribution in VB derivation \\
+  $q_{\bm{\theta}}(\bm{\theta}|\bm{y})$ & factorized prior for model parameters in VB derivation \\
+  $q_{\phi}(\phi|\bm{y})$ & factorized prior for model noise in VB derivation \\
+  $r_P$ & radius of pipe model \\
+  $s$ & scale parameter of Gamma distribution for model noise \\
+  $s_0$ & prior scale parameter of Gamma distribution for model noise \\
+  $\sspace$ & sample space \\
+  $(\sspace,\mathcal{F},p)$ & probability space \\
+  $t$ & time \\
+  $\mathcal{T}$ & time domain \\
+  $u, \bm{u}$ & solution (vector) of Poisson problem \\
+  $\text{var}[\cdot]$ & variance \\
+  $w_n$ & positive roots of characteristic equation in KL-expansion \\
+  $X, X(\cdot)$ & random variable \\
+  $\bm{X}$ & random vector \\
+  $\bm{y}$ & measurement \\
+  $Y$ & stochastic process \\
+\end{longtable}
+
+\subsubsection*{Abbreviations}
+\begin{tabular}{p{3cm} l}
+  AWGN & additive white Gaussian noise \\
+  BACI & C++ research code \\
+  CDF & cumulative distribution function \\
+  (d)LM & (deterministic) Levenberg-Marquardt \\
+  dTikLM & deterministic, elementwise optimization with \\
+         & Tikhonov regularization \\
+  FE(A) & finite element (analysis) \\
+  Gam & Gamma distribution \\
+  GN & Gauss-Newton \\
+  GP & Gaussian process \\
+  i.i.d. & independent, identically distributed \\
+  KL-divergence & Kullback-Leibler-divergence \\
+  KL-expansion & Karhunen-Lo\`{e}ve-expansion \\
+  NLLS & nonlinear least squares \\
+  MCMC & Markov Chain Monte Carlo \\
+  MVN & multivariate normal distribution \\
+  SNR & signal-to-noise ratio \\
+  VB & Variational Bayes \\
+\end{tabular}

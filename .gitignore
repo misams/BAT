@@ -9,3 +9,6 @@ BAT/doc/dev_helper/LN 9016 Scheiben angesenkt.pdf
 BAT/doc/dev_helper/DIN 433 Teil 1 Scheiben.pdf
 test_.inp
 BAT_TPLE_files.zip
+BAT/doc/BAT_doc/LaTex/aux
+*.bib.bak
+*.bib.sav

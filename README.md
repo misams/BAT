@@ -40,6 +40,15 @@ $ python bat_main.py --gui
 ![Example Screenshot BAT v0.6](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
 
 ## Changelog
+### v0.7.2
+>02.01.2021
+- ECSS / ESA-PSS some bugs corrected (Mp implementation)
+- ECSS: 5% embedding added
+- fitting factor added (applied to loads)
+- Flange-GUI-window added (dummy status)
+- tests.py added (ECSS worked example 7.14 added)
+- BAT User-Manual (LaTex) created
+
 ### v0.7.1
 >13.09.2020
 - Torque table generator added
