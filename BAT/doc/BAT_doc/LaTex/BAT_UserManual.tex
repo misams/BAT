@@ -140,8 +140,14 @@
 %\mbox{}\cleardoublepage % leere Seite
 
 %% figure and tab-list
-\include{chapter/figtablist}
+{ \listoffigures
+    \let\clearpage\relax
+  \listoftables
+    \let\clearpage\relax
+  \listofalgorithms
+}
 
+% reset page counter to "1" and include chapters
 \setcounter{page}{1}
 \pagenumbering{arabic}
 %% Chapters
@@ -151,7 +157,7 @@
 %\appendix
 %\include{chapter/99_appendix}
 
-%%%%
+%% References / Citations
 \chapter{References}
 \begingroup 
   \let\chapter=\section

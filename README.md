@@ -7,6 +7,8 @@ Standards implemented in BAT (current status; concentric axially loaded joints o
 - ESA PSS-03-208 Issue 1 (December 1989)
 - ECSS-E-HB-32-23A 16 April 2010
 
+The user manual can be found here: [BAT User-Manual](https://github.com/misams/BAT/blob/master/BAT/doc/BAT_doc/LaTex/BAT_UserManual.pdf)
+
 It supports Python 3.0+ and uses pyQT5.
 
 [![PyPI status](https://img.shields.io/pypi/status/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
