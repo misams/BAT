@@ -11,5 +11,94 @@ This document will include the BAT (Bolt Analysis Tool) User Manual \cite{ESAPSS
   \label{fig:joint_diagram}
 \end{figure}
 
-\chapter{Joint Geometry}
-text
+\chapter{Bolt and Thread Geometry}
+$D_{Km}$ is the \emph{effective diameter of under head/nut friction torque} and is defined by 
+\begin{equation}
+  D_{Km} = \frac{D_{hole}+d_h}{2}
+  \label{equ:dkm}
+\end{equation}
+where $D_{hole}$ is the \emph{through-hole diameter} in the clamped parts and $d_h$ is the 
+\emph{minimum bearing surface outer diamter} of the bolt head or nut.
+\begin{figure}[!htpb]
+  \centering
+  \includegraphics[width=0.5\textwidth]{ECSS_uh_brg_angle.png}
+  \caption{Definition of under head bearing angle \cite{ECSS_HB_32_23A}}
+  \label{fig:ecss_uh_brg_angle}
+\end{figure}
+
+\chapter{Method B: ECSS-E-HB-32-23A}
+This chapter provides a quick overview and summary of the equations used in \bat. A detailed description
+can be found in the complete ECSS-E-HB-32-23A ESA handbook \cite{ECSS_HB_32_23A}. Some used variables
+in the following equations have been changed compared to \cite{ECSS_HB_32_23A} by the author to increase
+clarity and consistency.
+\section{Preload and Torques}
+The torque present at the thread interface $M_{th}$ is dependent of the \emph{axial bolt preload} $F_V$ 
+and is given by
+\begin{equation}
+  M_{th} = F_V \tan(\varphi+\rho)\frac{d_2}{2}
+\end{equation}
+and the \emph{under-head torque} $M_{uh}$ due to friction between bolt head or nut and the adjacent 
+clamped part (or shim) is defined by
+\begin{equation}
+  M_{uh} = F_V \frac{\mu_{uh} D_{Km}}{2} \frac{1}{\sin{\nicefrac{\lambda}{2}}}
+\end{equation}
+where $\lambda$ is the \emph{under head bearing angle} seen in \fig{fig:ecss_uh_brg_angle}.
+It is assumed that the friction force for $M_{uh}$ is acting at mean bearing radius of the bolt head 
+$D_{Km}$ \equ{equ:dkm}. $\varphi$ is the helix angle of the thread and $\rho$ is given by the relation
+\begin{equation}
+  \tan\rho = \frac{\mu_{th}}{\cos\nicefrac{\theta}{2}}
+\end{equation}
+where $\theta$ is the half angle of the thread groves (for Unified or Metric threads $\theta=60^\circ$).
+
+The \emph{total installation torque} $T_A$ (without torque device scatter) applied to bolt head or nut
+during tightening to produce the axial bolt preload $F_V$ is 
+\begin{equation}
+  T_A = M_{th} + M_{uh} + M_p
+  \label{equ:TA}
+\end{equation}
+where $M_p$ is the \emph{prevailing torque} of the locking device. 
+With the approximation $\tan\varphi \tan\rho \ll 1$ the expression $\tan(\varphi+\rho)$ can be written
+as $\tan(\varphi+\rho) \approx \tan\varphi + \tan\rho$. Now equation \equ{equ:TA} can be rewritten to
+\begin{equation}
+  T_A = F_V \underbrace{ \left[ \frac{d_2}{2} \left( \tan\varphi + \frac{\mu_{th}}{\cos\nicefrac{\theta}{2}} \right) 
+  + \frac{\mu_{uh} D_{Km}}{2 \sin\nicefrac{\lambda}{2}} \right]}_{K} + M_p
+  \label{equ:TA2}
+\end{equation}
+where $K$ is the \emph{joint coefficient}.
+
+For calculation of the minimum and maximum axial bolt preload, BAT implements the \emph{experimental coefficient method}
+\cite{ECSS_HB_32_23A} with an explicit torque scatter torque of the tightening device $T_{scatter}$. Therefore
+the minimum and maximum total installation torques are defined 
+\begin{equation}
+  T_A^{min} = T_A - T_{scatter} , \qquad T_A^{max} = T_A + T_{scatter}.
+  \label{equ:Tscatter}
+\end{equation}
+To calculate the minimum and maximum \emph{axial bolt preload after tightening} $F_M^{min/max}$, 
+\equ{equ:TA2} and \equ{equ:Tscatter} are combined 
+\begin{equation}
+  F_M^{min} = \frac{T_A^{min}-M_p^{max}}{K^{max}} ,\qquad
+  F_M^{max} = \frac{T_A^{max}-M_p^{min}}{K^{min}}.
+\end{equation}
+If also the thermal influence and embedding is considered, this leads to the minimum and maximum
+\emph{axial bolt preload at service} $F_V^{min/max}$
+\begin{subequations}
+  \begin{align}
+    F_V^{min} &= \frac{T_A^{min}-M_p^{max}}{K^{max}}+\Delta F_{Vth}-F_Z \\
+    F_V^{min} &= F_M^{min}+\Delta F_{Vth}-F_Z \\
+    &= \frac{T_A^{min}-M_p^{max}}{\frac{d_2}{2} \left( \tan\varphi + \frac{\mu_{th}^{max}}
+    {\cos\nicefrac{\theta}{2}} \right) + \frac{\mu_{uh}^{max} D_{Km}}
+    {2 \sin\nicefrac{\lambda}{2}}}+\Delta F_{Vth}-F_Z
+    \label{equ:FVmin}
+  \end{align}
+\end{subequations}
+\begin{subequations}
+  \begin{align}
+    F_V^{max} &= \frac{T_A^{max}-M_p^{min}}{K^{min}}+\Delta F_{Vth} \\
+    F_V^{max} &= F_M^{max}+\Delta F_{Vth} \\
+    &= \frac{T_A^{max}-M_p^{min}}{\frac{d_2}{2} \left( \tan\varphi + \frac{\mu_{th}^{min}}
+    {\cos\nicefrac{\theta}{2}} \right) + \frac{\mu_{uh}^{min} D_{Km}}
+    {2 \sin\nicefrac{\lambda}{2}}}+\Delta F_{Vth}
+    \label{equ:FVmax}
+  \end{align}
+\end{subequations}
+where $\Delta F_{Vth}$ is thermal preload change and $F_Z$ is the preload loss due to embedding.
