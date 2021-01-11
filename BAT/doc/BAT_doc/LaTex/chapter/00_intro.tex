@@ -32,6 +32,7 @@ can be found in the complete ECSS-E-HB-32-23A ESA handbook \cite{ECSS_HB_32_23A}
 in the following equations have been changed compared to \cite{ECSS_HB_32_23A} by the author to increase
 clarity and consistency.
 \section{Preload and Torques}
+\label{sec:preload}
 The torque present at the thread interface $M_{th}$ is dependent of the \emph{axial bolt preload} $F_V$ 
 and is given by
 \begin{equation}
@@ -41,6 +42,7 @@ and the \emph{under-head torque} $M_{uh}$ due to friction between bolt head or n
 clamped part (or shim) is defined by
 \begin{equation}
   M_{uh} = F_V \frac{\mu_{uh} D_{Km}}{2} \frac{1}{\sin{\nicefrac{\lambda}{2}}}
+  \label{equ:Muh}
 \end{equation}
 where $\lambda$ is the \emph{under head bearing angle} seen in \fig{fig:ecss_uh_brg_angle}.
 It is assumed that the friction force for $M_{uh}$ is acting at mean bearing radius of the bolt head 
@@ -66,7 +68,7 @@ as $\tan(\varphi+\rho) \approx \tan\varphi + \tan\rho$. Now equation \equ{equ:TA
 \end{equation}
 where $K$ is the \emph{joint coefficient}.
 
-For calculation of the minimum and maximum axial bolt preload, BAT implements the \emph{experimental coefficient method}
+For calculation of the minimum and maximum axial bolt preload, \bat implements the \emph{experimental coefficient method}
 \cite{ECSS_HB_32_23A} with an explicit torque scatter torque of the tightening device $T_{scatter}$. Therefore
 the minimum and maximum total installation torques are defined 
 \begin{equation}
@@ -82,6 +84,7 @@ To calculate the minimum and maximum \emph{axial bolt preload after tightening} 
 If also the thermal influence and embedding is considered, this leads to the minimum and maximum
 \emph{axial bolt preload at service} $F_V^{min/max}$
 \begin{subequations}
+  \setlength{\jot}{10pt}
   \begin{align}
     F_V^{min} &= \frac{T_A^{min}-M_p^{max}}{K^{max}}+\Delta F_{Vth}-F_Z \\
     F_V^{min} &= F_M^{min}+\Delta F_{Vth}-F_Z \\
@@ -92,13 +95,88 @@ If also the thermal influence and embedding is considered, this leads to the min
   \end{align}
 \end{subequations}
 \begin{subequations}
+  \setlength{\jot}{10pt}
   \begin{align}
     F_V^{max} &= \frac{T_A^{max}-M_p^{min}}{K^{min}}+\Delta F_{Vth} \\
     F_V^{max} &= F_M^{max}+\Delta F_{Vth} \\
     &= \frac{T_A^{max}-M_p^{min}}{\frac{d_2}{2} \left( \tan\varphi + \frac{\mu_{th}^{min}}
-    {\cos\nicefrac{\theta}{2}} \right) + \frac{\mu_{uh}^{min} D_{Km}}
-    {2 \sin\nicefrac{\lambda}{2}}}+\Delta F_{Vth}
+    {\cos \nicefrac{\theta}{2}} \right) + \frac{\mu_{uh}^{min} D_{Km}}
+    {2 \sin \nicefrac{\lambda}{2}}}+\Delta F_{Vth}
     \label{equ:FVmax}
   \end{align}
 \end{subequations}
-where $\Delta F_{Vth}$ is thermal preload change and $F_Z$ is the preload loss due to embedding.
+where $\Delta F_{Vth}$ is thermal preload change (see \equ{equ:dFVth}) and 
+$F_Z$ is the preload loss due to embedding (see equXX).
+
+\section{Thermal Influcence}
+If a thermal load is applied to a bolted joint, the bolt sees a change $\Delta F_{Vth}$ in the preload
+force due to the CTE mismatch of bolt and clamped parts seen in \equ{equ:FVmin} and \equ{equ:FVmax}.
+\subsection{Linear Thermal Influence}
+For the following derivation it is assumed that the Young's Modulus $E$ of bolt and clamped parts does 
+not change with temperature (temperature independent material properties). $c_b=\nicefrac{1}{\delta_b}$
+and $c_c=\nicefrac{1}{\delta_c}$ are defined as bolt stiffness and clamp-part stiffness respectively.
+Linear thermal elongation is defined
+\begin{equation*}
+  \varepsilon_{th} = \alpha \Delta T = \frac{\Delta l}{l_0}
+\end{equation*}
+The thermal elongation for bolt (index $b$) and clamped-parts (index $c$) are given to
+\begin{subequations}
+  \begin{align*}
+    \Delta l_b &= \alpha_b \cdot \Delta T \cdot l_{0b} \\
+    \Delta l_c &= \sum_i \alpha_{ci} \cdot \Delta T \cdot l_{0ci}
+  \end{align*}
+\end{subequations}
+where $l_K = l_{0b} = \sum_i l_{0ci}$ is the clamping length of the joint. The sign definition
+in \bat is $\Delta L = \Delta l_c - \Delta l_b$ and this leads to 
+\begin{subequations}
+  \begin{align*}
+    \alpha_c > \alpha_b &\Rightarrow \pmb{+}\Delta F_{Vth} \\
+    \alpha_c < \alpha_b &\Rightarrow \pmb{-}\Delta F_{Vth}
+  \end{align*}
+\end{subequations}
+where $\pmb{+}\Delta F_{Vth}$ defines an increase and $\pmb{-}\Delta F_{Vth}$ a loss in bolt preload.
+If the standard stiffness equation $F=c \cdot \Delta x$ is used for the bolt / clamp-part joint, this leads to
+\begin{subequations}
+  \setlength{\jot}{10pt}
+  \begin{align}
+    \Delta F_{Vth} &= c \cdot \Delta L \\
+    &= \frac{\Delta L}{\frac{1}{c_b}+\frac{1}{c_c}} \\
+    &= \frac{\Delta L c_b c_c}{c_b + c_c} = \frac{\Delta L}{\delta_b + \delta_c}
+    \label{equ:dFVth}
+  \end{align}
+\end{subequations}
+\subsection{VDI Method}
+to be filled
+
+\section{Embedding}
+to be filled
+
+\section{Stesses in Bolt and Clamped-Parts}
+\subsection{Stress in bolt after tightening}
+Based on §\ref{sec:preload} the stresses in the bolt after tightening can be derived. 
+The minimum and maximum shear stress in the bolt $\tau^{min/max}$ after tightening can be calculated
+as follows
+\begin{equation}
+  \tau^{min} = \frac{T_A^{min}-M_{uh}^{max}}{W_p} , \qquad \tau^{max} = \frac{T_A^{max}-M_{uh}^{min}}{W_p}
+  \label{equ:Tscatter}
+\end{equation}
+where $T_A$ is defined in \equ{equ:Tscatter}, $M_{uh}$ in \equ{equ:Muh} with $F_V=F_M$ and 
+$W_p = \nicefrac{\pi d_s^3}{16}$ is the polar section modulus. The minimum and maximum normal 
+stress $\sigma_n^{min/max}$ in the bolt caused by the preload is defined
+\begin{equation}
+  \sigma_n^{min/max} = \frac{F_M^{min/max}}{A_s}
+\end{equation}
+The minimum and maximum von-Mises equivalent stress $\sigma_v^{min/max}$ in the bolt after tightening
+(with $100\%$ shear stress contribution / $0\%$ shear stress relaxation) is defined 
+\begin{equation}
+  \sigma_v^{min/max} = \sqrt{\left(\sigma_n^{min/max}\right)^2 + 3\left(\tau^{min/max}\right)^2}
+\end{equation}
+Based on the von-Mises equivalent stress in the bolt the minimum and maximum 
+\emph{bolt utilization} $\nu^{min/max}$ is defined
+\begin{equation}
+  \nu^{min/max} = \frac{\sigma_v^{min/max}}{\sigma_y}
+\end{equation}
+where $\sigma_y$ is the bolt material yield strength and this defines the tightening status of the joint. 
+
+\subsection{Stress in bolt at service}
+to be filled
