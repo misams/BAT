@@ -206,6 +206,7 @@ class Ecss(BoltAnalysisBase):
             FPA = FA*(1-self.Phi_n) # reduction in clamping force
             FSA = FA*self.Phi_n # additional bolt force
             # required clamping force for friction grip per bolt
+            # VDI2230: nmbr_shear_planes == q_F; cof_clamp == mu_T
             FKreq = FQ/(self.inp_file.nmbr_shear_planes*self.inp_file.cof_clamp)
             # calc sums for global slippage margin
             sum_FPA += FPA

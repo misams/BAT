@@ -1,15 +1,5 @@
 \chapter{Introduction}
 This document will include the BAT (Bolt Analysis Tool) User Manual \cite{ESAPSS} \cite{ECSS_HB_32_23A} \cite{VDI2230_1}.
-\begin{equation}
-  p(\bm{\Theta}|\bm{y}) = \frac{p(\bm{y}|\bm{\Theta})\ p(\bm{\Theta})}{p(\bm{y})}\ ,
-\end{equation}
-
-\begin{figure}[!htpb]
-  \centering
-  \includegraphics[width=0.7\textwidth]{VDI2230_Bild24.png}
-  \caption{Joint diagram for the working state of a concentrically loaded \\ bolted joint with $n=1$ \cite{VDI2230_1}}
-  \label{fig:joint_diagram}
-\end{figure}
 
 \chapter{Bolt and Thread Geometry}
 $D_{Km}$ is the \emph{effective diameter of under head/nut friction torque} and is defined by 
@@ -18,7 +8,9 @@ $D_{Km}$ is the \emph{effective diameter of under head/nut friction torque} and 
   \label{equ:dkm}
 \end{equation}
 where $D_{hole}$ is the \emph{through-hole diameter} in the clamped parts and $d_h$ is the 
-\emph{minimum bearing surface outer diamter} of the bolt head or nut.
+\emph{minimum bearing surface outer diamter} of the bolt head or nut. An other input value to calculate
+the under-head friction torque \equ{equ:Muh} is the \emph{under head bearing angle} $\lambda$ seen in 
+\fig{fig:ecss_uh_brg_angle}.
 \begin{figure}[!htpb]
   \centering
   \includegraphics[width=0.5\textwidth]{ECSS_uh_brg_angle.png}
@@ -26,11 +18,39 @@ where $D_{hole}$ is the \emph{through-hole diameter} in the clamped parts and $d
   \label{fig:ecss_uh_brg_angle}
 \end{figure}
 
+\chapter{Joint Diagram}
+\label{ch:jointdiag}
+The \emph{joint diagram} seen in \fig{fig:joint_diagram} \cite{VDI2230_1} visualizes the forces and 
+displacements and helps to understand the loading conditions of a concentrically loaded bolted joint. 
+\begin{figure}[!htpb]
+  \centering
+  \includegraphics[width=0.7\textwidth]{VDI2230_Bild24.png}
+  \caption{Joint diagram for the working state of a concentrically loaded \\ bolted joint with $n=1$ \cite{VDI2230_1}}
+  \label{fig:joint_diagram}
+\end{figure}
+
+The preload force $F_V$ (see §\ref{sec:preload}) compresses the clamped parts $f_P$ and elongates
+the bolt $f_S$ during tightening. If an external load $F_A$ is acting on the bolted joint the bolt
+is streched much further and the clamped parts are relaxed ($f_{SA}=f_{PA}$) due to the loading. 
+The \emph{additional axial bolt load} $F_{SA}$ and the \emph{additional axial plate load}\footnotemark[1]
+\footnotetext[1]{If the bolt is loaded in tension $F_{PA}$ is better described as an 
+\emph{axial plate relaxation force}.} $F_{PA}$ are given to
+\begin{equation}
+  F_{SA} = n \Phi F_A, \qquad F_{PA} = (1-n \Phi) F_A
+  \label{equ:FSA_FPA}
+\end{equation}
+where $\Phi$ is the load factor, which is defined as the quotient of the additional bolt load $F_{SA}$ 
+and the axial working load component $F_A$. $n$ is the \emph{load introduction factor} and is crucial
+for determining the size of the additional botl loads. As seen in \fig{fig:joint_diagram} $F_{KR}$ is the residual
+clamping load at the interface during relief or loading by $F_{PA}$ and after embedding in service and 
+$F_S$ is the maximum bolt load. 
+
 \chapter{Method B: ECSS-E-HB-32-23A}
 This chapter provides a quick overview and summary of the equations used in \bat. A detailed description
 can be found in the complete ECSS-E-HB-32-23A ESA handbook \cite{ECSS_HB_32_23A}. Some used variables
 in the following equations have been changed compared to \cite{ECSS_HB_32_23A} by the author to increase
 clarity and consistency.
+
 \section{Preload and Torques}
 \label{sec:preload}
 The torque present at the thread interface $M_{th}$ is dependent of the \emph{axial bolt preload} $F_V$ 
@@ -105,10 +125,11 @@ If also the thermal influence and embedding is considered, this leads to the min
     \label{equ:FVmax}
   \end{align}
 \end{subequations}
-where $\Delta F_{Vth}$ is thermal preload change (see \equ{equ:dFVth}) and 
-$F_Z$ is the preload loss due to embedding (see equXX).
+where $\Delta F_{Vth}$ is thermal preload change (see §\ref{sec:thermal}) and 
+$F_Z$ is the preload loss due to embedding (see §\ref{sec:embedding}).
 
 \section{Thermal Influcence}
+\label{sec:thermal}
 If a thermal load is applied to a bolted joint, the bolt sees a change $\Delta F_{Vth}$ in the preload
 force due to the CTE mismatch of bolt and clamped parts seen in \equ{equ:FVmin} and \equ{equ:FVmax}.
 \subsection{Linear Thermal Influence}
@@ -141,14 +162,16 @@ If the standard stiffness equation $F=c \cdot \Delta x$ is used for the bolt / c
   \begin{align}
     \Delta F_{Vth} &= c \cdot \Delta L \\
     &= \frac{\Delta L}{\frac{1}{c_b}+\frac{1}{c_c}} \\
-    &= \frac{\Delta L c_b c_c}{c_b + c_c} = \frac{\Delta L}{\delta_b + \delta_c}
+    &= \Delta L \frac{c_b c_c}{c_b + c_c} = \Delta L \frac{1}{\delta_b + \delta_c}
     \label{equ:dFVth}
   \end{align}
 \end{subequations}
+
 \subsection{VDI Method}
 to be filled
 
 \section{Embedding}
+\label{sec:embedding}
 to be filled
 
 \section{Stesses in Bolt and Clamped-Parts}
@@ -178,5 +201,42 @@ Based on the von-Mises equivalent stress in the bolt the minimum and maximum
 \end{equation}
 where $\sigma_y$ is the bolt material yield strength and this defines the tightening status of the joint. 
 
-\subsection{Stress in bolt at service}
-to be filled
+\subsection{Stress and margins of safety in bolt at service}
+The bolted joint can be loaded with an axial force $F_A$ and a shear force $F_Q$. For
+the axial loading the additional bolt load is defined in \equ{equ:FSA_FPA} and for the shar loading
+the required clamping force for friction grip per bolt is defined 
+\begin{equation}
+  F_{Kreq} = \frac{F_Q}{q_F \mu_T}
+\end{equation}
+where $q_F$ is the number of force transmitting and $\mu_T$ the coefficient of friction in the clamped
+part interfaces. 
+\subsubsection{Local Slippage Margin $MOS_{slip}^{local}$}
+The \emph{local slippage margin} is defined for a minimum preload $F_V^{min}$
+\begin{equation}
+  MOS_{slip}^{local} = \frac{F_V^{min}-F_{PA}}{F_{Kreq} FOS_{slip}}-1
+\end{equation}
+where $FOS_{slip}$ is the factor of safety against slippage. It is also possible that the local slippage 
+margin is defined with the mean preload $F_V^{mean} = 0.5 (F_V^{min}+F_V^{max})$, based on engineering
+judgedment. 
+\subsubsection{Local Gapping Margin $MOS_{gap}$}
+The \emph{local gapping margin} is defined for a minimum preload $F_V^{min}$
+\begin{equation}
+  MOS_{gap} = \frac{F_V^{min}}{F_{PA} FOS_{gap}}-1
+\end{equation}
+where $FOS_{gap}$ is the factor of safety against gapping. 
+\subsubsection{Yield and Ultimate Bolt Margin $MOS_{y/u}$}
+The \emph{yield and ultimate margins} are defined for a maximum preload $F_V^{max}$ 
+\begin{subequations}
+  \setlength{\jot}{10pt}
+  \begin{align}
+    MOS_{y} &= \frac{\sigma_y}{\sqrt{\left(\frac{F_V^{max}+F_{SA} FOS_y}{A_s}\right)^2 + 
+      3\left(0.5 \tau^{max}\right)^2}}-1 \\
+    MOS_{u} &= \frac{\sigma_u}{\sqrt{\left(\frac{F_V^{max}+F_{SA} FOS_u}{A_s}\right)^2 + 
+      3\left(0.5 \tau^{max}\right)^2}}-1
+  \end{align}
+\end{subequations}
+where $FOS_{y/u}$ is the factor of safety against yield and ultimate. For the $MOS_{y/u}$ calculation
+a $50\%$ shear load reduction $\tau = 0.5 \tau^{max}$ is considered\footnotemark[2]
+\footnotetext[2]{After tightening the shear
+stress in the bolt relaxes significantly after a few minutes and a conservative $50\%$ relaxation
+is assumed for margin evaluation \cite{ECSS_HB_32_23A,VDI2230_1}.}.
