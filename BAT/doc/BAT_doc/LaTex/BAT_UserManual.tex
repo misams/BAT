@@ -59,6 +59,7 @@
 \makesavenoteenv{table}
 % multicolumn
 \usepackage{multicol}
+\usepackage{adjustbox}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Definitions 
@@ -78,6 +79,10 @@
   %\setlength{\shadeboxrule}{1.5pt}
   \begin{theorems}[#1]\hspace*{1mm}
 }{\end{theorems}}
+\newenvironment{colbox}[1]{%
+    \begin{adjustbox}{minipage=[b]{400px},margin=1ex,bgcolor={rgb}{0.9,0.9,0.9},env=center}
+        \textbf{#1}\\
+}{\end{adjustbox}}
 
 % command-definitions 
 \newcommand{\bat}{\textbf{BAT}}

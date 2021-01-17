@@ -174,6 +174,45 @@ to be filled
 \label{sec:embedding}
 to be filled
 
+\section{Compliance of Bolt and Clamped Parts}
+\subsection{Compliance of Bolt}
+The bolt consists of different sections with dedicated compliances seen in \fig{fig:ECSS_bolt_compliance}.
+\begin{figure}[!htpb]
+  \centering
+  \includegraphics[width=0.5\textwidth]{ECSS_bolt_compliance.png}
+  \caption{Dimensioning of the bolt for compliance calculation \cite{ECSS_HB_32_23A}}
+  \label{fig:ECSS_bolt_compliance}
+\end{figure}
+
+Applying the Hook's law to each segment of the bolt and combining the equations, the compliance of the 
+bolt $\delta_b$ can be written
+\begin{equation}
+  \delta_b = \frac{1}{c_b}=\frac{\Delta L_b}{F_V}=\frac{1}{E_b}\sum\frac{L_i}{A_i}
+  \label{equ:delta_b_1}
+\end{equation}
+where $c_b=\nicefrac{1}{\delta_b}$ is the bolt stiffness, $\Delta L_b=\sum \Delta L_i$ is the overall
+length for bolt compliance calculation with segment length $L_i$. $E_b$ is the bolt Young's Modulus and 
+$A_i$ are the cross sections for each bolt segement. Expanding \equ{equ:delta_b_1} and introducing 
+substitution lengths for deformation in the bolt head and engaged region in thread / nut the equation
+leads to
+\begin{equation}
+  \delta_b = \frac{1}{E_b}\left[\frac{L_{h,sub}}{A_1}+\frac{L_{eng,sub}}{A_3}+\frac{0.4d}{A_1}
+    +\frac{L_{eng,sub}}{A_3}\right]
+\end{equation}
+\begin{subequations}
+  \begin{align}
+    \delta_b &= \frac{1}{E_b}\left(\frac{0.4d}{A_1}+\frac{l_K}{A_3}+\frac{0.4d}{A_1}
+      +\frac{L_{eng,sub}}{A_3}\right) \\
+      &=
+  \end{align}
+\end{subequations}
+\begin{colbox}{BAT Info:}
+  The current BAT implementation does not include \emph{shank bolts} with different diameter sections; 
+  complete shaft length is threaded ($L_1=L_2=0$). Also for the bolt head compliance only cylindrical
+  head is considered $L_{h,sub}=0.4d$ for simplicity. 
+\end{colbox}
+
+
 \section{Stesses in Bolt and Clamped-Parts}
 \subsection{Stress in bolt after tightening}
 Based on §\ref{sec:preload} the stresses in the bolt after tightening can be derived. 
@@ -181,7 +220,6 @@ The minimum and maximum shear stress in the bolt $\tau^{min/max}$ after tighteni
 as follows
 \begin{equation}
   \tau^{min} = \frac{T_A^{min}-M_{uh}^{max}}{W_p} , \qquad \tau^{max} = \frac{T_A^{max}-M_{uh}^{min}}{W_p}
-  \label{equ:Tscatter}
 \end{equation}
 where $T_A$ is defined in \equ{equ:Tscatter}, $M_{uh}$ in \equ{equ:Muh} with $F_V=F_M$ and 
 $W_p = \nicefrac{\pi d_s^3}{16}$ is the polar section modulus. The minimum and maximum normal 
