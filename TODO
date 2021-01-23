@@ -3,6 +3,7 @@
 # pyinstaller --onefile blbla.py --> damn slow; --onedir messy but faster
 #
 
+- add min/max prevailing torque input
 - check clamped part stiffness for more (>2) clamped parts!
 - docu ;-)
 - check global slippage margin
@@ -15,6 +16,7 @@
 
 - check inputs are correct / consistent
 - logging for GUI
+- GUI for torque table?!
 
 # Future tasks
 

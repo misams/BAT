@@ -1,5 +1,9 @@
 \chapter{Introduction}
-This document will include the BAT (Bolt Analysis Tool) User Manual \cite{ESAPSS} \cite{ECSS_HB_32_23A} \cite{VDI2230_1}.
+This document will include the \textbf{BAT} (Bolt Analysis Tool) User Manual.
+\begin{colbox}{BAT Info:}
+  The current design status of the \emph{Bolt Analysis Tool} \textbf{BAT} only includes 
+  \emph{Concentric Axially Loaded Bolted Joints}. 
+\end{colbox}
 
 \chapter{Bolt and Thread Geometry}
 $D_{Km}$ is the \emph{effective diameter of under head/nut friction torque} and is defined by 
@@ -22,11 +26,17 @@ the under-head friction torque \equ{equ:Muh} is the \emph{under head bearing ang
 \label{ch:jointdiag}
 The \emph{joint diagram} seen in \fig{fig:joint_diagram} \cite{VDI2230_1} visualizes the forces and 
 displacements and helps to understand the loading conditions of a concentrically loaded bolted joint. 
-\begin{figure}[!htpb]
+\begin{figure}[!htbp]
   \centering
-  \includegraphics[width=0.7\textwidth]{VDI2230_Bild24.png}
-  \caption{Joint diagram for the working state of a concentrically loaded \\ bolted joint with $n=1$ \cite{VDI2230_1}}
-  \label{fig:joint_diagram}
+  \subfigure[without loading plane effect $n=1$ \cite{VDI2230_1}]{
+    \label{fig:joint_diagram}
+    \includegraphics[width=0.43\textwidth]{VDI2230_Bild24.png}
+  }
+  \subfigure[with loading plane effect $n<1$ \cite{ESAPSS}]{
+    \label{fig:joint_diagram_n}
+    \includegraphics[width=0.52\textwidth]{ESAPSS_joint_diagram_loading_loading_plane.png}
+  }
+  \caption{Joint diagram for the working state of a concentrically loaded bolted joint}
 \end{figure}
 
 The preload force $F_V$ (see §\ref{sec:preload}) compresses the clamped parts $f_P$ and elongates
@@ -40,10 +50,38 @@ The \emph{additional axial bolt load} $F_{SA}$ and the \emph{additional axial pl
   \label{equ:FSA_FPA}
 \end{equation}
 where $\Phi$ is the load factor, which is defined as the quotient of the additional bolt load $F_{SA}$ 
-and the axial working load component $F_A$. $n$ is the \emph{load introduction factor} and is crucial
-for determining the size of the additional botl loads. As seen in \fig{fig:joint_diagram} $F_{KR}$ is the residual
+and the axial working load component $F_A$. $n$ is the \emph{loading plane factor} and is crucial
+for determining the size of the additional bolt loads. As seen in \fig{fig:joint_diagram} $F_{KR}$ is the residual
 clamping load at the interface during relief or loading by $F_{PA}$ and after embedding in service and 
 $F_S$ is the maximum bolt load. 
+\section{Loading Plane Factor}
+A simple explanation of the \emph{loading plane effect} is given in \cite{ESAPSS} and this text is 
+used directly for the description in this document. 
+
+\fig{fig:esapss_lpf_1} shows the external load applied at planes under the bolt head and under the nut. 
+The extreme case where the external bolt force $F_A$ is acting directly under head / nut is rare
+($n=1$), usually the effective loading planes are considered to be within the joint as seen in 
+\fig{fig:esapss_lpf_1}, $n l_K$ apart ($n<1$). 
+
+Between the loading planes the joint is reliefed by $F_A$ but outside of the loading planes the clamped
+material is subjected to $F_A$ in addition to $F_K$ the clamping load. The effect of this to the loading 
+diagram is shown in \fig{fig:joint_diagram_n}. The effective bolt stiffness is reduced and the 
+effective joint stiffness increased as $n$ reduces. Hence the closer the load application is to the 
+joint interface the smaller is the external force seen by the bolt $F_{SA}$. 
+
+For a more detailed explanation of the \emph{loading plane factor} and for the correct derivation
+and analysis of $n$ see \cite{VDI2230_1,ECSS_HB_32_23A}.
+\begin{figure}[!htpb]
+  \centering
+  \includegraphics[width=0.99\textwidth]{ESAPSS_loading_plane_factor.png}
+  \caption{Tension joint loading planes and the forces acting within the joint \cite{ESAPSS}}
+  \label{fig:esapss_lpf_1}
+\end{figure}
+\begin{colbox}{Approximate Method \cite{ECSS_HB_32_23A}:}
+  The loading plane factor depends on the deformation of the joint caused by preload. For uncritical
+  verification purposes with simple joint geometry the loading plane factor may be set to $n=0.5$,
+  which assumes that the loading planes are at the center of each flange.
+\end{colbox}
 
 \chapter{Method B: ECSS-E-HB-32-23A}
 This chapter provides a quick overview and summary of the equations used in \bat. A detailed description
@@ -88,9 +126,12 @@ as $\tan(\varphi+\rho) \approx \tan\varphi + \tan\rho$. Now equation \equ{equ:TA
 \end{equation}
 where $K$ is the \emph{joint coefficient}.
 
-For calculation of the minimum and maximum axial bolt preload, \bat implements the \emph{experimental coefficient method}
-\cite{ECSS_HB_32_23A} with an explicit torque scatter torque of the tightening device $T_{scatter}$. Therefore
-the minimum and maximum total installation torques are defined 
+\begin{colbox}{BAT Info:}
+  For calculation of the minimum and maximum axial bolt preload, BAT implements the 
+  \emph{experimental coefficient method} \cite{ECSS_HB_32_23A} with an explicit torque scatter torque
+  of the tightening device $T_{scatter}$.
+\end{colbox}
+The minimum and maximum total installation torques with included torque scatter are defined 
 \begin{equation}
   T_A^{min} = T_A - T_{scatter} , \qquad T_A^{max} = T_A + T_{scatter}.
   \label{equ:Tscatter}
@@ -147,15 +188,17 @@ The thermal elongation for bolt (index $b$) and clamped-parts (index $c$) are gi
     \Delta l_c &= \sum_i \alpha_{ci} \cdot \Delta T \cdot l_{0ci}
   \end{align*}
 \end{subequations}
-where $l_K = l_{0b} = \sum_i l_{0ci}$ is the clamping length of the joint. The sign definition
-in \bat is $\Delta L = \Delta l_c - \Delta l_b$ and this leads to 
-\begin{subequations}
-  \begin{align*}
-    \alpha_c > \alpha_b &\Rightarrow \pmb{+}\Delta F_{Vth} \\
-    \alpha_c < \alpha_b &\Rightarrow \pmb{-}\Delta F_{Vth}
-  \end{align*}
-\end{subequations}
-where $\pmb{+}\Delta F_{Vth}$ defines an increase and $\pmb{-}\Delta F_{Vth}$ a loss in bolt preload.
+where $l_K = l_{0b} = \sum_i l_{0ci}$ is the clamping length of the joint.
+\begin{colbox}{BAT Info:}
+  The sign definition in BAT is $\Delta L = \Delta l_c - \Delta l_b$ and this leads to 
+  \begin{subequations}
+    \begin{align*}
+      \alpha_c > \alpha_b &\Rightarrow \pmb{+}\Delta F_{Vth} \\
+      \alpha_c < \alpha_b &\Rightarrow \pmb{-}\Delta F_{Vth}
+    \end{align*}
+  \end{subequations}
+  where $\pmb{+}\Delta F_{Vth}$ defines an increase and $\pmb{-}\Delta F_{Vth}$ a loss in bolt preload.
+\end{colbox}
 If the standard stiffness equation $F=c \cdot \Delta x$ is used for the bolt / clamp-part joint, this leads to
 \begin{subequations}
   \setlength{\jot}{10pt}
@@ -172,10 +215,54 @@ to be filled
 
 \section{Embedding}
 \label{sec:embedding}
-to be filled
+When bolts are first tightened the male and female thread, the under-head and under-nut surfaces and the 
+clamped parts interface contact each other only on microscopically small high spots (surface roughness).
+The material at these hight spots will be overloaded, well past their yield point, during initial 
+tightening and will subsequently creep until a large enough area of the available contact surface has 
+been engaged to stabilize the process. In addition, plastic flow will often occur at the highest stressed 
+points such as thread roots or at the first engaged thread in the nut. These relatively short-term 
+relaxation effects are known as \emph{embedding}. After tightening the rate of relaxation is a maximum, 
+reducing exponentially, usually over the first few minutes, to a constant very low rate of creep. 
+Typically embedding accounts for only a few percent loss of initial preload, however $5\%$ to $10\%$ are
+not uncommon \cite{ECSS_HB_32_23A}. The value significantly depends on the amount and hardness of the 
+clamping parts. 
+
+The \emph{embedding preload loss} $F_Z$ depends on the plastic deformation $f_Z$ of the joint.
+\begin{equation*}
+  \frac{F_Z}{F_V}=\frac{f_Z}{\left(\delta_b+\delta_c\right)F_V}
+\end{equation*}
+This it follows that, 
+\begin{equation}
+  F_Z=\frac{f_Z}{\delta_b+\delta_c}
+\end{equation}
+where $f_Z$ depends on surface roughness, the number of clamped parts interfaces in the joint and the 
+material type (and hardness). For uncritical cases a value of $5\%$ of the preload can be used for 
+calculation purposes \cite{ECSS_HB_32_23A}.
+\begin{colbox}{BAT Info:}
+  In BAT, the $5\%$ embedding preload loss is defined for the maximum bolt preload after tightening.
+  \begin{equation*}
+    F_Z = 0.05 F_M^{max}
+  \end{equation*}
+\end{colbox}
+It is always recommended that the correct embedding preload loss is determined by experiment. If no 
+experimental data is available \tab{tab:vdi_embedding} can be used to find approximate values. 
+This table may only be used if the service temperatures are below $50\%$ of the recrystallization
+temperatures of the used materials. The table used in ECSS-E-HB-32-23A \cite{ECSS_HB_32_23A} is used 
+out of the VDI 2230 guideline \cite{VDI2230_1}. 
+\begin{table}[!htpb]
+  \centering
+  \includegraphics[width=0.5\textwidth]{VDI2230_embedding.png}
+  \caption{Guide values for amounts of embedding of bolts, nuts and compact clamped parts made of steel, without coatings \cite{VDI2230_1}}
+  \label{tab:vdi_embedding}
+\end{table}
+\begin{colbox}{BAT Info:}
+  Only the maximum embedding values listed in \tab{tab:vdi_embedding} for tension/compression and shear 
+  are used in BAT (no distinction between external loading types).
+\end{colbox}
 
 \section{Compliance of Bolt and Clamped Parts}
 \subsection{Compliance of Bolt}
+\label{ssec:compl_bolts}
 The bolt consists of different sections with dedicated compliances seen in \fig{fig:ECSS_bolt_compliance}.
 \begin{figure}[!htpb]
   \centering
@@ -187,31 +274,129 @@ The bolt consists of different sections with dedicated compliances seen in \fig{
 Applying the Hook's law to each segment of the bolt and combining the equations, the compliance of the 
 bolt $\delta_b$ can be written
 \begin{equation}
-  \delta_b = \frac{1}{c_b}=\frac{\Delta L_b}{F_V}=\frac{1}{E_b}\sum\frac{L_i}{A_i}
+  \delta_b = \frac{1}{c_b}=\frac{1}{E_b}\sum\frac{L_i}{A_i}
   \label{equ:delta_b_1}
 \end{equation}
-where $c_b=\nicefrac{1}{\delta_b}$ is the bolt stiffness, $\Delta L_b=\sum \Delta L_i$ is the overall
-length for bolt compliance calculation with segment length $L_i$. $E_b$ is the bolt Young's Modulus and 
+where $c_b=\nicefrac{1}{\delta_b}$ is the bolt stiffness, $A_i$ and $L_i$ are the segment cross section 
+and segement lengths respectively. $E_b$ is the bolt Young's Modulus and 
 $A_i$ are the cross sections for each bolt segement. Expanding \equ{equ:delta_b_1} and introducing 
-substitution lengths for deformation in the bolt head and engaged region in thread / nut the equation
+substitution lengths for deformation in the bolt head and engaged region in thread and nut the equation
 leads to
 \begin{equation}
-  \delta_b = \frac{1}{E_b}\left[\frac{L_{h,sub}}{A_1}+\frac{L_{eng,sub}}{A_3}+\frac{0.4d}{A_1}
-    +\frac{L_{eng,sub}}{A_3}\right]
+  \delta_b = \frac{1}{E_b}\left[\frac{L_{h,sub}}{A_1}+\frac{L_{eng,sub}}{A_3}+\left(
+    \frac{L_1}{A_{L_1}}+\frac{L_2}{A_{L_2}}+\dots+\frac{L_i}{A_{L_i}}\right)\right]
+    +\frac{L_{n,sub}}{E_n A_1}
 \end{equation}
-\begin{subequations}
-  \begin{align}
-    \delta_b &= \frac{1}{E_b}\left(\frac{0.4d}{A_1}+\frac{l_K}{A_3}+\frac{0.4d}{A_1}
-      +\frac{L_{eng,sub}}{A_3}\right) \\
-      &=
-  \end{align}
-\end{subequations}
+where $L_{h,sub}$ and $L_{n,sub}$ are substitutional lengths of bolt head and nut (locking device) 
+respectively. $L_{eng,sub}$ is the substitution length for the engaged thread and the value depends 
+on the type of joint. For through bolt joint (TBJ) $L_{eng,sub}^{TBJ}=0.4d$ and for tapped thread 
+joints (TTJ) $L_{eng,sub}^{TTJ}=0.33d$.
 \begin{colbox}{BAT Info:}
   The current BAT implementation does not include \emph{shank bolts} with different diameter sections; 
-  complete shaft length is threaded ($L_1=L_2=0$). Also for the bolt head compliance only cylindrical
-  head is considered $L_{h,sub}=0.4d$ for simplicity. 
+  complete shaft length is threaded ($\sum \nicefrac{L_i}{A_i} = \nicefrac{l_K}{A_3}$). Also for the bolt head compliance only cylindrical
+  head is considered $L_{h,sub}=0.4d$ for simplicity. The same substitution length is used for the
+  locking device (nut) $L_{n,sub}=0.4d$ according to \cite{ECSS_HB_32_23A}. It is assumed that the nut
+  has the same Young's Modulus than the bolt $E_n=E_b$. 
+  \begin{subequations}
+    \begin{align}
+      \delta_b &= \frac{1}{E_b}\left(\frac{L_{h,sub}}{A_1}+\frac{L_{eng,sub}}{A_3}
+        +\frac{L_i}{A_{L_i}}+\frac{L_{n,sub}}{A_1}\right) \\
+        &= \frac{1}{E_b}\left(\frac{0.4d}{A_1}+\frac{L_{eng,sub}}{A_3}
+        +\frac{l_K}{A_3}+\frac{0.4d}{A_1}\right)
+    \end{align}
+  \end{subequations}
 \end{colbox}
 
+\subsection{Compliance of Clamped Parts}
+The calculation of the compliance of the clamped parts $\delta_c$ is more complicated than that of the 
+bolts presented in §\ref{ssec:compl_bolts} because of the 3-dimensional stress state in the joint that 
+is induced by the preload. The presented method \cite{ECSS_HB_32_23A} neglects the compliance of the 
+interfaces and therefore it is most accurate for joints with a small number of clamped parts. If more
+clamped parts are required the correct compliance can be determined by test or finite element analysis.
+
+\begin{figure}[!htpb]
+  \centering
+  \includegraphics[width=0.9\textwidth]{ECSS_compr_zones_1.png}
+  \caption{Compression zones in cylindrical clamped parts \cite{ECSS_HB_32_23A}}
+  \label{fig:ECSS_compr_zones_1}
+\end{figure}
+The configuration of the \emph{compression zone} depends on the geometry of the clamped parts (joint
+geometry). \fig{fig:ECSS_compr_zones_1} shows the three possible compression zones for cylindrical 
+clamped parts\footnotemark[3]\footnotetext[3]{The figure assumes that the flanges are compressed
+between infinitely stiff washers with the diameter equal to the \emph{minimal diameter under bolt
+head} $d_h$ for the compression zone. In BAT the washer is considered as clamp part.}. 
+The configuration on the left of \fig{fig:ECSS_compr_zones_1} has flanges that are sufficiently wide to
+allow full spreading of the compression zone to the limiting diameter $D_{lim}$. In reality, the shape 
+of the 3-dimensional zone of compression in an isotropic material is a paraboloid. The used 
+approximate method simplifies the shape to a pair of compression cones. The two cones are symmetric 
+about the mid-point of the clamped parts length $l_K$, which does not necessarily correspond to the 
+interface between the flanges. If the flanges are too small for the compression cone to fully develop
+$D_{avail}<D_{lim}$, a full or partial \emph{compression sleeve} develops. For \emph{tapped thread joints}
+(TTJ) the analysis model assumes only one compression cone in the non-threaded clamped parts. 
+For the general case with clamped parts that are not axially symmetric about the bolt axis, multiple 
+edge distances are present; here the configuration of the deformation zone $D_{avail}^{min}$
+should be determined by the minimum edge distance (inscribed diameter).
+\subsubsection{Analysis Method}
+If the edge distance of the flanges and hence the available diameter for the compression zone $D_{avail}$
+is known, it can be compared with the \emph{limit diameter of the compression cone} $D_{lim}$, given by
+\begin{equation}
+  D_{lim} = d_h + w l_K \tan \varphi_c
+\end{equation}
+where $\varphi_c$ is the \emph{compression cone half angle} and the parameter $w$ is defined according
+to the joint type. For through bolt joints $TBJ: w=1$ and for tapped thread joints $TTJ: w=2$. 
+The compression cone half angle $\varphi_c$ can be derived with an empirical equation \cite{ECSS_HB_32_23A}
+\begin{subequations}
+  \begin{align}
+    TBJ: \qquad \tan \varphi_c &= 0.362+0.032\ln\left(\nicefrac{x}{2}\right)+0.153\ln y \\
+    TTJ: \qquad \tan \varphi_c &= 1.295-0.246\ln x +0.94\ln y
+  \end{align}
+\end{subequations}
+where the following non-dimensional parameters are used $x=\nicefrac{l_K}{d_h}$, 
+$y=\nicefrac{D_{avail}}{d_h}$. The existence of a compression sleeve is determined as follows:
+\begin{description}
+  \item[\textbf{CASE 1:} $\mathbf{D_{avail}>D_{lim}}$] the compression zone is fully developed into a cone or a pair 
+    of cones for TBJ joints. The compliance of the clamped parts $\delta_c$ for a compression cone is given by 
+    \begin{equation}
+      \delta_c = \frac{2\ln\left[\frac{(d_h+d)(D_{lim}-d)}{(d_h-d)(D_{lim}+d)}\right]}
+        {w E_c \pi d \tan \varphi_c}
+      \label{equ:case_1}
+    \end{equation}
+  \item[\textbf{CASE 2:} $\mathbf{D_{avail}<d_h}$] only a compression sleeve and no compression cone
+    develops due to small clamped part dimesions. The compliance of the clamped parts $\delta_c$ 
+    for a compression sleeve is given by 
+    \begin{equation}
+      \delta_c = \frac{4 l_K}{E_c \pi \left( D_{avail}^2-d^2 \right)}
+      \label{equ:case_2}
+    \end{equation}
+  \item[\textbf{CASE 3:} $\mathbf{d_h<D_{avail}<D_{lim}}$] partial compression sleeve and cone(s) develops.
+    The compliance of the clamped parts $\delta_c$ for a combined cone / sleeve compression zone is given by 
+    \begin{equation}
+      \delta_c = \frac{\frac{2}{w d \tan \varphi_c}\ln\left[\frac{(d_h+d)(D_{avail}-d)}
+        {(d_h-d)(D_{avail}+d)}\right] + \frac{4}{D_{avail}^2-d^2}\left[
+          l_k - \frac{D_{avail}-d_h}{w \tan \varphi_c} \right]}{E_c \pi}
+      \label{equ:case_3}
+    \end{equation}
+    This equation includes the effect of both the compression cone(s) and sleeve and is therefore 
+    appropriate when the clamped parts have the same Young's Modulus. If the compliances of the cone and 
+    sleeve should be calculated separately (multiple materials / different Young's Moduli present in the 
+    clamped parts) the clamped part compliances should be calculated by a different method \cite{ECSS_HB_32_23A}
+    $\rightarrow$ \textbf{OPEN ISSUE IN BAT - TO BE CHECKED}. 
+\end{description}
+\begin{colbox}{BAT Info:}
+  Multiple clamped parts with different materials can be defined in BAT. To calculate the overall 
+  clamped part compliance $\delta_c$ the equations described above for \emph{CASE 1, 2 and 3} are
+  restructured. For each case a parameter $x_c$ is evaluated, which is simply the $\delta_c$-equations 
+  \equ{equ:case_1}, \equ{equ:case_2} and \equ{equ:case_3} without the Young's Modulus $E_c$
+  \begin{equation}
+    \delta_c = \frac{l_K}{E_c A_{sub}}=\frac{x_c}{E_c} \qquad \rightarrow \qquad A_{sub}=\frac{l_K}{x_c}
+  \end{equation}
+  where $A_{sub}$ is the derived \emph{substitutional compliance area} of the clamped parts.
+  It is assumed that $A_{sub}$ can be used to calculate the overall clamped part compliance for multiple 
+  clamped parts with different Young's Moduli $E_{ci}$ and thicknesses $l_{ci}$
+  \begin{equation}
+    \delta_c = \frac{l_K}{\tilde{E_c} A_{sub}} = \sum_i \frac{l_{ci}}{E_{ci} A_{sub}}
+  \end{equation}
+\end{colbox}
 
 \section{Stesses in Bolt and Clamped-Parts}
 \subsection{Stress in bolt after tightening}
@@ -246,8 +431,8 @@ the required clamping force for friction grip per bolt is defined
 \begin{equation}
   F_{Kreq} = \frac{F_Q}{q_F \mu_T}
 \end{equation}
-where $q_F$ is the number of force transmitting and $\mu_T$ the coefficient of friction in the clamped
-part interfaces. 
+where $q_F$ is the number of shear force transmitting interfaces and $\mu_T$ the coefficient of 
+friction in the clamped part interfaces. 
 \subsubsection{Local Slippage Margin $MOS_{slip}^{local}$}
 The \emph{local slippage margin} is defined for a minimum preload $F_V^{min}$
 \begin{equation}
