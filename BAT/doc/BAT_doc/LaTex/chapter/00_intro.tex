@@ -95,6 +95,7 @@ The torque present at the thread interface $M_{th}$ is dependent of the \emph{ax
 and is given by
 \begin{equation}
   M_{th} = F_V \tan(\varphi+\rho)\frac{d_2}{2}
+  \label{equ:M_th}
 \end{equation}
 and the \emph{under-head torque} $M_{uh}$ due to friction between bolt head or nut and the adjacent 
 clamped part (or shim) is defined by
@@ -168,6 +169,12 @@ If also the thermal influence and embedding is considered, this leads to the min
 \end{subequations}
 where $\Delta F_{Vth}$ is thermal preload change (see §\ref{sec:thermal}) and 
 $F_Z$ is the preload loss due to embedding (see §\ref{sec:embedding}).
+
+The tightening factor $\alpha_A$ (assembly uncertainty factor) which takes into account the scatter 
+of the achievable assembly preload between $F_M^{max}$ and $F_M^{min}$ is introduced in the following form 
+\begin{equation}
+  \alpha_A = \frac{F_M^{max}}{F_M^{min}}
+\end{equation}
 
 \section{Thermal Influcence}
 \label{sec:thermal}
@@ -400,27 +407,32 @@ $y=\nicefrac{D_{avail}}{d_h}$. The existence of a compression sleeve is determin
 
 \section{Stesses in Bolt and Clamped-Parts}
 \subsection{Stress in bolt after tightening}
+\label{ssec:stresses}
 Based on §\ref{sec:preload} the stresses in the bolt after tightening can be derived. 
-The minimum and maximum shear stress in the bolt $\tau^{min/max}$ after tightening can be calculated
+The minimum and maximum shear stress in the bolt $\tau_M^{min/max}$ after tightening can be calculated
 as follows
 \begin{equation}
-  \tau^{min} = \frac{T_A^{min}-M_{uh}^{max}}{W_p} , \qquad \tau^{max} = \frac{T_A^{max}-M_{uh}^{min}}{W_p}
+  \tau_M^{min} = \frac{T_A^{min}-M_{uh}^{max}}{W_p} , \qquad \tau_M^{max} = \frac{T_A^{max}-M_{uh}^{min}}{W_p}
+  \label{equ:tau_M}
 \end{equation}
 where $T_A$ is defined in \equ{equ:Tscatter}, $M_{uh}$ in \equ{equ:Muh} with $F_V=F_M$ and 
 $W_p = \nicefrac{\pi d_s^3}{16}$ is the polar section modulus. The minimum and maximum normal 
-stress $\sigma_n^{min/max}$ in the bolt caused by the preload is defined
+stress $\sigma_M^{min/max}$ in the bolt caused by the preload is defined
 \begin{equation}
-  \sigma_n^{min/max} = \frac{F_M^{min/max}}{A_s}
+  \sigma_M^{min/max} = \frac{F_M^{min/max}}{A_s}
+  \label{equ:sig_M}
 \end{equation}
-The minimum and maximum von-Mises equivalent stress $\sigma_v^{min/max}$ in the bolt after tightening
+The minimum and maximum von-Mises equivalent stress $\sigma_{v,M}^{min/max}$ in the bolt after tightening
 (with $100\%$ shear stress contribution / $0\%$ shear stress relaxation) is defined 
 \begin{equation}
-  \sigma_v^{min/max} = \sqrt{\left(\sigma_n^{min/max}\right)^2 + 3\left(\tau^{min/max}\right)^2}
+  \sigma_{v,M}^{min/max} = \sqrt{\left(\sigma_M^{min/max}\right)^2 + 3\left(\tau_M^{min/max}\right)^2}
+  \label{equ:sig_vM}
 \end{equation}
 Based on the von-Mises equivalent stress in the bolt the minimum and maximum 
 \emph{bolt utilization} $\nu^{min/max}$ is defined
 \begin{equation}
-  \nu^{min/max} = \frac{\sigma_v^{min/max}}{\sigma_y}
+  \nu^{min/max} = \frac{\sigma_{v,M}^{min/max}}{\sigma_y}
+  \label{equ:nu}
 \end{equation}
 where $\sigma_y$ is the bolt material yield strength and this defines the tightening status of the joint. 
 
