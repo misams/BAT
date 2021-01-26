@@ -27,7 +27,7 @@ class BoltAnalysisBase(ABC):
         self.used_bolt = bolts.bolts[self.inp_file.bolt]
         self.used_bolt_mat = self.materials.materials[self.inp_file.bolt_material]
         # calculated variables
-        self.M_p = 0.0 # prevailing torque (VDI2230:M_ue)
+        self.M_p = None # prevailing torque (VDI2230:M_ue)
         self.l_K = 0.0 # joint / clamped length (ECSS:L_j)
         self.A_sub = 0.0 # substitution area of clamped parts compliance
         self.delta_b = 0.0 # bolt compliance (VDI2230:delta_S)

@@ -20,7 +20,7 @@
     *TIGHT_TORQUE = 13.65 # tightening torque WITH prevailing torque
     *TORQUE_TOL_TIGHT_DEVICE = 0.65 # torque wrench tolerance
     *LOCKING_MECHANISM = yes # "yes" or "no", e.g. yes for Helicoil
-    *PREVAILING_TORQUE = 2.0 #0.4 # only used if *LOCKING_MECHANISM = yes
+    *PREVAILING_TORQUE = [0.4, 2.0] # only used if *LOCKING_MECHANISM = yes
     *LOADING_PLANE_FACTOR = 0.500
 *BOLT_DEFINITION_END
 

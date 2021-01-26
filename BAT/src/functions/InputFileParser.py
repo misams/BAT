@@ -22,7 +22,7 @@ class InputFileParser:
         self.tight_torque = 0.0 # also use "STD"
         self.torque_tol_tight_device = 0.0 # optional
         self.locking_mechanism = "" # e.g. Helicoil
-        self.prevailing_torque = 0.0 # only used if *LOCKING_MECHANISM = yes
+        self.prevailing_torque = None # only used if *LOCKING_MECHANISM = yes
         self.loading_plane_factor = 0.0
         # clamped-parts-definition-block
         self.cof_clamp = 0.0 # min. coefficient of friction between clamped parts
@@ -94,7 +94,9 @@ class InputFileParser:
                             elif tmp_line[0]=="*LOCKING_MECHANISM":
                                 self.locking_mechanism = tmp_line[1]
                             elif tmp_line[0]=="*PREVAILING_TORQUE":
-                                self.prevailing_torque = float(tmp_line[1])
+                                tmp_mp_str = tmp_line[1].replace('[','').replace(']','').split(',')
+                                self.prevailing_torque = (float(tmp_mp_str[0].lstrip().rstrip()), \
+                                    float(tmp_mp_str[1].lstrip().rstrip()))
                             elif tmp_line[0]=="*LOADING_PLANE_FACTOR":
                                 self.loading_plane_factor = float(tmp_line[1])
                             line = fid.readline()

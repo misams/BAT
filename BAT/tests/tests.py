@@ -28,13 +28,14 @@ def tests():
     print("#\n# BAT ECSS Working Example §7.14 TEST-RESULTS\n#")
     print("fastener compliance:      {0:.3e} mm/N".format(ana_ecss.delta_b))
     print("clamped parts compliance: {0:.3e} mm/N".format(ana_ecss.delta_c))
-    print("force ratio PHI:          {0:.3f} mm/N".format(ana_ecss.Phi))
-    print("Torque incl. Mp:          {0:.2f} mm/N".format(ana_ecss.inp_file.tight_torque))
-    print("Torque wrench scatter: +/-{0:.2f} mm/N".format(ana_ecss.inp_file.torque_tol_tight_device))
-    print("Prevailing torque Mp:     {0:.2f} mm/N".format(ana_ecss.inp_file.prevailing_torque))
-    print("F_M_min:                  {0:.1f} mm/N".format(ana_ecss.F_M[0]))
-    print("F_M_max:                  {0:.1f} mm/N".format(ana_ecss.F_M[1]))
-    print("F_V_max:                  {0:.1f} mm/N".format(ana_ecss.F_V[1]))
+    print("force ratio PHI:          {0:.3f}".format(ana_ecss.Phi))
+    print("Torque incl. Mp:          {0:.2f} Nm".format(ana_ecss.inp_file.tight_torque))
+    print("Torque wrench scatter: +/-{0:.2f} Nm".format(ana_ecss.inp_file.torque_tol_tight_device))
+    print("Prevailing torque Mp:     {0:.2f} / {1:.2f} Nm".format(\
+        ana_ecss.inp_file.prevailing_torque[0], ana_ecss.inp_file.prevailing_torque[1]))
+    print("F_M_min:                  {0:.1f} N".format(ana_ecss.F_M[0])) # 5717.85N FM_min p.106
+    print("F_M_max:                  {0:.1f} N".format(ana_ecss.F_M[1])) # 12078.55N FM_max p.105
+    print("F_V_max:                  {0:.1f} N".format(ana_ecss.F_V[1]))
     #
     # THERMAL PRELOAD LOSS
     #

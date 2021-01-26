@@ -13,9 +13,12 @@ import src.TorqueTable as torque_table
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.7.2"
+__version__ = "0.7.3-ALPHA"
 """
 Change Log:
+v0.7.3 - xx.xx.2021
+- MIN / MAX prevailing torque M_p added
+- TODO: update GUI!! DOES not work currently!
 v0.7.2 - 02.01.2021
 - ECSS / ESA-PSS some bugs corrected (Mp implementation)
 - ECSS: 5% embedding added

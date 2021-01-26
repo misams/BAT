@@ -153,7 +153,7 @@ class Ecss(BoltAnalysisBase):
         # min / max init. preload after tightening (*1000 to get N)
         # includes prevailing-torque
         # F_M: preload after tightening [min, max]; equ.6.3.14 / 6.3.15
-        self.F_M = [(TAmin-self.M_p)/Kmax*1000, (TAmax-self.M_p)/Kmin*1000]
+        self.F_M = [(TAmin-self.M_p[1])/Kmax*1000, (TAmax-self.M_p[0])/Kmin*1000]
         # calculate tightening factor (preload scatter incl. friction and tight. dev. tolerance)
         self.alpha_A = self.F_M[1]/self.F_M[0]
         # check if VDI thermal method is used
@@ -342,14 +342,6 @@ class Ecss(BoltAnalysisBase):
         output_str += "{0:=^95}\n".format('=') # global splitter
         output_str += "| {0:^91} |\n".format("ECSS-E-HB-32-23A, 16.04.2010 ANALYSIS RESULTS")
         output_str += "{0:=^95}\n".format('=')
-        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
-            "Tightening torque with prevailing torque [Nm]:", self.inp_file.tight_torque, "")
-        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
-            "Prevailing torque [Nm]:", self.M_p, "")
-        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
-            "Tightening torque w/o prevailing torque [Nm]:", \
-                self.inp_file.tight_torque-self.M_p, "")
-        output_str += "|{0:-^93}|\n".format('-') # empty line within section
         output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
             "Clamped length l_K [mm]:", self.l_K, "")
         output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
@@ -379,12 +371,20 @@ class Ecss(BoltAnalysisBase):
         output_str += "{0:=^95}\n".format('=') # global splitter
         output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("", "MIN (mu_max)", "MAX (mu_min)")
         output_str += "{0:=^95}\n".format('=')
+        output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
+            "Tightening torque with prevailing torque [Nm]:", self.inp_file.tight_torque)
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Prevailing torque (max | min) [Nm]:", self.M_p[1], self.M_p[0])
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Tightening torque w/o prevailing torque [Nm]:", self.inp_file.tight_torque-self.M_p[1],\
+                self.inp_file.tight_torque-self.M_p[0])
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-") # empty line in table
         output_str += "| {0:<50}|{1:^20.3f}|{2:^20.3f}|\n".format(\
-            "Coefficient of friction under bolt head:", self.inp_file.cof_bolt[2],\
-                self.inp_file.cof_bolt[0])
+            "Coefficient of friction under bolt head:", self.inp_file.cof_bolt[0],\
+                self.inp_file.cof_bolt[2])
         output_str += "| {0:<50}|{1:^20.3f}|{2:^20.3f}|\n".format(\
-            "Coefficient of friction in thread:", self.inp_file.cof_bolt[3],\
-                self.inp_file.cof_bolt[1])
+            "Coefficient of friction in thread:", self.inp_file.cof_bolt[1],\
+                self.inp_file.cof_bolt[3])
         output_str += "| {0:<50}|{1:^41.2f}|\n".format(\
             "Coefficient of friction between clamped parts:", self.inp_file.cof_clamp)
         output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-") # empty line in table
