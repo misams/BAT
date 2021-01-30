@@ -15,7 +15,7 @@ class GuiInputHandler:
         self.tight_torque = 0.0 # also use "STD"
         self.torque_tol_tight_device = 0.0 # optional
         self.locking_mechanism = "" # e.g. Helicoil
-        self.prevailing_torque = 0.0 # only used if *LOCKING_MECHANISM = yes
+        self.prevailing_torque = None # [min, max] only used if *LOCKING_MECHANISM = yes
         self.loading_plane_factor = 0.0
         # clamped-parts-definition-block
         self.cof_clamp = 0.0 # min. coefficient of friction between clamped parts
@@ -144,8 +144,9 @@ class GuiInputHandler:
                 comment="torque wrench tolerance")
             output_str += "    *LOCKING_MECHANISM = {0:^} # {comment:^}\n".format(self.locking_mechanism, \
                 comment="\"yes\" or \"no\", e.g. yes for Helicoil")
-            output_str += "    *PREVAILING_TORQUE = {0:.2f} # {comment:^}\n".format(self.prevailing_torque, \
-                comment="only used if *LOCKING_MECHANISM = yes")
+            output_str += "    *PREVAILING_TORQUE = [{0:.2f}, {1:.2f}] # {comment:^}\n".format(\
+                self.prevailing_torque[0], self.prevailing_torque[1],\
+                comment="[min, max] only used if *LOCKING_MECHANISM = yes")
             output_str += "    *LOADING_PLANE_FACTOR = {0:.3f}\n".format(self.loading_plane_factor)
             output_str += "*BOLT_DEFINITION_END\n\n"
             # definition of clamped parts

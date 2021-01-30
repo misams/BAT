@@ -39,9 +39,13 @@ $ python bat_main.py --help
 ```shell
 $ python bat_main.py --gui
 ```
-![Example Screenshot BAT v0.6](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
+![Example Screenshot BAT v0.7.3](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
 
 ## Changelog
+### v0.7.3
+>30.01.2021
+- MIN / MAX prevailing torque M_p added
+
 ### v0.7.2
 >02.01.2021
 - ECSS / ESA-PSS some bugs corrected (Mp implementation)

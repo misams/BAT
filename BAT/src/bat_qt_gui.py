@@ -70,7 +70,8 @@ class Ui(QtWidgets.QMainWindow):
         self.radioLockYes.toggled.connect(self.lockRadioClicked)
         self.radioLockNo = self.findChild(QtWidgets.QRadioButton, "radioLockNo")
         self.radioLockNo.toggled.connect(self.lockRadioClicked)
-        self.prevailingTorque = self.findChild(QtWidgets.QLineEdit, "prevailingTorque")
+        self.Mp_min = self.findChild(QtWidgets.QLineEdit, "Mp_min")
+        self.Mp_max = self.findChild(QtWidgets.QLineEdit, "Mp_max")
         self.loadingPlaneFactor = self.findChild(QtWidgets.QLineEdit, "loadingPlaneFactor")
         # Clamped Parts tab
         self.cofClampedParts = self.findChild(QtWidgets.QLineEdit, "cofClampedParts")
@@ -222,7 +223,8 @@ class Ui(QtWidgets.QMainWindow):
         self.tightTorque.setText('')
         self.tightTorqueTol.setText('')
         self.radioLockYes.setChecked(True)
-        self.prevailingTorque.setText('')
+        self.Mp_min.setText('')
+        self.Mp_max.setText('')
         self.loadingPlaneFactor.setText("0.5")
         # clamped parts tab
         self.cofClampedParts.setText('')
@@ -278,9 +280,11 @@ class Ui(QtWidgets.QMainWindow):
         radioButton = self.sender()
         if radioButton.isChecked():
             if radioButton.text()=="YES":
-                self.prevailingTorque.setEnabled(True)
+                self.Mp_min.setEnabled(True)
+                self.Mp_max.setEnabled(True)
             elif radioButton.text()=="NO":
-                self.prevailingTorque.setEnabled(False)
+                self.Mp_min.setEnabled(False)
+                self.Mp_max.setEnabled(False)
 
     # use-shim checkbox (includes useVdiChecked() method)
     def useShimChecked(self):
@@ -453,6 +457,8 @@ class Ui(QtWidgets.QMainWindow):
     def openInput(self, openedFileName):
         # read and parse input file
         self.openedInputFile = InputFileParser(openedFileName, self.bolts)
+        # reset self.inp_dir and save new directory-path
+        self.inp_dir = os.path.dirname(openedFileName)
         #
         # fill gui
         if self.openedInputFile.method == "ESAPSS":
@@ -494,10 +500,12 @@ class Ui(QtWidgets.QMainWindow):
         self.tightTorqueTol.setText(str(self.openedInputFile.torque_tol_tight_device))
         if self.openedInputFile.locking_mechanism == "yes":
             self.radioLockYes.setChecked(True)
-            self.prevailingTorque.setText(str(self.openedInputFile.prevailing_torque))
+            self.Mp_min.setText(str(self.openedInputFile.prevailing_torque[0]))
+            self.Mp_max.setText(str(self.openedInputFile.prevailing_torque[1]))
         else:
             self.radioLockNo.setChecked(True)
-            self.prevailingTorque.setEnabled(False)
+            self.Mp_min.setEnabled(False)
+            self.Mp_max.setEnabled(False)
         self.loadingPlaneFactor.setText(str(self.openedInputFile.loading_plane_factor))
         #
         # clamped parts tab
@@ -696,7 +704,7 @@ class Ui(QtWidgets.QMainWindow):
             self.gih.locking_mechanism = "no"
         else:
             self.gih.locking_mechanism = "yes"
-            self.gih.prevailing_torque = float(self.prevailingTorque.text())
+            self.gih.prevailing_torque = (float(self.Mp_min.text()),float(self.Mp_max.text()))
         self.gih.loading_plane_factor = float(self.loadingPlaneFactor.text())
         # Clamped Parts tab
         self.gih.cof_clamp = float(self.cofClampedParts.text())

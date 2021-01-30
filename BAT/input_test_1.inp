@@ -2,7 +2,7 @@
 #                                      #
 # BAT Input File                       #
 #                                      #
-# Created: 03-01-2021 10:57:57         #
+# Created: 30-01-2021 15:13:27         #
 # Unit System: mm, N, Nm               #
 #                                      #
 ########################################
@@ -20,7 +20,7 @@
     *TIGHT_TORQUE = 15.00 # tightening torque WITH prevailing torque
     *TORQUE_TOL_TIGHT_DEVICE = 1.00 # torque wrench tolerance
     *LOCKING_MECHANISM = yes # "yes" or "no", e.g. yes for Helicoil
-    *PREVAILING_TORQUE = [0.2, 1.00] # [min, max] only used if *LOCKING_MECHANISM = yes
+    *PREVAILING_TORQUE = [0.30, 1.00] # [min, max] only used if *LOCKING_MECHANISM = yes
     *LOADING_PLANE_FACTOR = 0.500
 *BOLT_DEFINITION_END
 

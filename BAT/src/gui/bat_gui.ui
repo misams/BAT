@@ -93,7 +93,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>TBJ: through-bolt joint</string>
+              <string>TBJ: Through-Bolt Joint</string>
              </property>
              <attribute name="buttonGroup">
               <string notr="true">buttonGroupJointType</string>
@@ -106,7 +106,7 @@
            <item row="8" column="0">
             <widget class="QLabel" name="label_9">
              <property name="text">
-              <string>In Thread:</string>
+              <string>In Thread µ&lt;sub&gt;th&lt;/sub&gt;:</string>
              </property>
             </widget>
            </item>
@@ -116,7 +116,7 @@
               <enum>QFrame::NoFrame</enum>
              </property>
              <property name="text">
-              <string>Under Bolt Head:</string>
+              <string>Under Bolt Head µ&lt;sub&gt;uh&lt;/sub&gt;:</string>
              </property>
             </widget>
            </item>
@@ -136,7 +136,7 @@
            <item row="12" column="0">
             <widget class="QLabel" name="label_10">
              <property name="text">
-              <string>Tightening Torque (with Mp):</string>
+              <string>Tightening Torque T&lt;sub&gt;A&lt;/sub&gt; (incl. M&lt;sub&gt;p&lt;/sub&gt;):</string>
              </property>
             </widget>
            </item>
@@ -146,7 +146,7 @@
            <item row="12" column="2">
             <widget class="QLabel" name="label_11">
              <property name="text">
-              <string>Nm (with prevailing torque if locking dev. used)</string>
+              <string>Nm (incl. prevailing torque if locking dev. used)</string>
              </property>
             </widget>
            </item>
@@ -185,7 +185,10 @@
            <item row="13" column="0">
             <widget class="QLabel" name="label_12">
              <property name="text">
-              <string>Tolerance of Tightening Device:</string>
+              <string>Tolerance of Tightening Device &amp;plusmn;T&lt;sub&gt;scatter&lt;/sub&gt;:</string>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::RichText</enum>
              </property>
             </widget>
            </item>
@@ -195,7 +198,7 @@
            <item row="15" column="0">
             <widget class="QLabel" name="label_17">
              <property name="text">
-              <string>Loading Plane Factor:</string>
+              <string>Loading Plane Factor n:</string>
              </property>
             </widget>
            </item>
@@ -241,7 +244,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Coefficient of Friction</string>
+              <string>Coefficient of Friction µ</string>
              </property>
             </widget>
            </item>
@@ -274,7 +277,10 @@
            <item row="13" column="2">
             <widget class="QLabel" name="label_13">
              <property name="text">
-              <string>Nm</string>
+              <string>&lt;p&gt;Nm&lt;/p&gt;</string>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::RichText</enum>
              </property>
             </widget>
            </item>
@@ -307,11 +313,18 @@
            <item row="0" column="2">
             <widget class="QRadioButton" name="radioTTJ">
              <property name="text">
-              <string>TTJ: tapped thread joint</string>
+              <string>TTJ: Tapped Thread Joint</string>
              </property>
              <attribute name="buttonGroup">
               <string notr="true">buttonGroupJointType</string>
              </attribute>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_39">
+             <property name="text">
+              <string>Joint Type:</string>
+             </property>
             </widget>
            </item>
            <item row="14" column="0" colspan="2">
@@ -320,16 +333,6 @@
               <string>Locking Device</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_6">
-              <item row="1" column="1" colspan="2">
-               <widget class="QLineEdit" name="prevailingTorque">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="1" alignment="Qt::AlignHCenter">
                <widget class="QRadioButton" name="radioLockYes">
                 <property name="text">
@@ -353,7 +356,7 @@
               <item row="1" column="0">
                <widget class="QLabel" name="label_15">
                 <property name="text">
-                 <string>Prevailing Torque Mp:</string>
+                 <string>Prevailing Torque M&lt;sub&gt;p&lt;/sub&gt; (min | max):</string>
                 </property>
                </widget>
               </item>
@@ -377,14 +380,33 @@
                 </property>
                </widget>
               </item>
+              <item row="1" column="2">
+               <widget class="QLineEdit" name="Mp_max">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="Mp_min">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
              </layout>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_39">
-             <property name="text">
-              <string>Joint Type:</string>
-             </property>
             </widget>
            </item>
           </layout>
@@ -409,14 +431,14 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_19">
              <property name="text">
-              <string>Minimum CoF between Clamped Parts:</string>
+              <string>Minimum CoF between Clamped Parts µ&lt;sub&gt;T&lt;/sub&gt;:</string>
              </property>
             </widget>
            </item>
            <item row="3" column="0">
             <widget class="QLabel" name="label_23">
              <property name="text">
-              <string>Subst. outside diam. of basic solid DA:</string>
+              <string>Available diam. of basic solid D&lt;sub&gt;A&lt;/sub&gt;:</string>
              </property>
             </widget>
            </item>
@@ -430,7 +452,7 @@
            <item row="1" column="0">
             <widget class="QLabel" name="label_20">
              <property name="text">
-              <string>Number of Shear Planes:</string>
+              <string>Number of Shear Planes q&lt;sub&gt;F&lt;/sub&gt;:</string>
              </property>
             </widget>
            </item>
@@ -440,7 +462,7 @@
            <item row="2" column="0">
             <widget class="QLabel" name="label_21">
              <property name="text">
-              <string>Through Hole Diameter:</string>
+              <string>Through Hole Diameter D&lt;sub&gt;hole&lt;/sub&gt;:</string>
              </property>
             </widget>
            </item>
@@ -501,7 +523,7 @@
            <item row="4" column="0">
             <widget class="QLabel" name="label_40">
              <property name="text">
-              <string>Average surface roughness Rz:</string>
+              <string>Average surface roughness R&lt;sub&gt;z&lt;/sub&gt;:</string>
              </property>
             </widget>
            </item>
@@ -511,7 +533,7 @@
            <item row="4" column="2">
             <widget class="QLabel" name="label_41">
              <property name="text">
-              <string>µm</string>
+              <string>µm / %</string>
              </property>
             </widget>
            </item>
@@ -541,7 +563,7 @@
            <item row="0" column="2">
             <widget class="QLabel" name="label_29">
              <property name="text">
-              <string>FOS_y:</string>
+              <string>FOS&lt;sub&gt;y&lt;/sub&gt;:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -551,7 +573,7 @@
            <item row="1" column="2">
             <widget class="QLabel" name="label_30">
              <property name="text">
-              <string>FOS_u:</string>
+              <string>FOS&lt;sub&gt;u&lt;/sub&gt;:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -606,7 +628,7 @@
            <item row="2" column="2">
             <widget class="QLabel" name="label_31">
              <property name="text">
-              <string>FOS_slip:</string>
+              <string>FOS&lt;sub&gt;slip&lt;/sub&gt;:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -616,7 +638,7 @@
            <item row="3" column="2">
             <widget class="QLabel" name="label_32">
              <property name="text">
-              <string>FOS_gap:</string>
+              <string>FOS&lt;sub&gt;gap&lt;/sub&gt;:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -643,7 +665,7 @@
            <item row="4" column="2">
             <widget class="QLabel" name="label_43">
              <property name="text">
-              <string>FOS_fit:</string>
+              <string>FOS&lt;sub&gt;fit&lt;/sub&gt;:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -666,7 +688,7 @@
            <item row="4" column="0">
             <widget class="QLabel" name="label_42">
              <property name="text">
-              <string>Fitting Factor (will be applied to all loads FN &amp; FQ)</string>
+              <string>Fitting Factor (will be applied to all loads F&lt;sub&gt;N&lt;/sub&gt; &amp; F&lt;sub&gt;Q&lt;/sub&gt;)</string>
              </property>
             </widget>
            </item>
@@ -746,7 +768,7 @@ Excel</string>
            <item row="0" column="0">
             <widget class="QLabel" name="label_33">
              <property name="text">
-              <string>delta T:</string>
+              <string>&lt;p&gt;&amp;Delta;T:&lt;/p&gt;</string>
              </property>
             </widget>
            </item>
@@ -756,7 +778,7 @@ Excel</string>
            <item row="0" column="2">
             <widget class="QLabel" name="label_34">
              <property name="text">
-              <string>deg C / K</string>
+              <string>deg-C / K</string>
              </property>
             </widget>
            </item>
