@@ -465,13 +465,13 @@ The \emph{yield and ultimate margins} are defined for a maximum preload $F_V^{ma
   \setlength{\jot}{10pt}
   \begin{align}
     MOS_{y} &= \frac{\sigma_y}{\sqrt{\left(\frac{F_V^{max}+F_{SA} FOS_y}{A_s}\right)^2 + 
-      3\left(0.5 \tau^{max}\right)^2}}-1 \\
+      3\left(k_{\tau} \tau^{max}\right)^2}}-1 \\
     MOS_{u} &= \frac{\sigma_u}{\sqrt{\left(\frac{F_V^{max}+F_{SA} FOS_u}{A_s}\right)^2 + 
-      3\left(0.5 \tau^{max}\right)^2}}-1
+      3\left(k_{\tau} \tau^{max}\right)^2}}-1
   \end{align}
 \end{subequations}
 where $FOS_{y/u}$ is the factor of safety against yield and ultimate. For the $MOS_{y/u}$ calculation
-a $50\%$ shear load reduction $\tau = 0.5 \tau^{max}$ is considered\footnotemark[2]
+a $50\%$ shear load reduction $k_{\tau} = 0.5$ is considered\footnotemark[2]
 \footnotetext[2]{After tightening the shear
 stress in the bolt relaxes significantly after a few minutes and a conservative $50\%$ relaxation
 is assumed for margin evaluation \cite{ECSS_HB_32_23A,VDI2230_1}.}.

@@ -3,7 +3,6 @@
 # pyinstaller --onefile blbla.py --> damn slow; --onedir messy but faster
 #
 
-- add min/max prevailing torque input
 - check clamped part stiffness for more (>2) clamped parts!
 - docu ;-)
 - check global slippage margin
@@ -14,13 +13,14 @@
 
 # GUI
 
+- Material-Info Button
 - check inputs are correct / consistent
 - logging for GUI
-- GUI for torque table?!
+- GUI for torque table
+- Tools: more bolts in bolt pattern (flange and shear pattern)
 
 # Future tasks
 
-- Tools: more bolts in bolt pattern (flange and shear pattern)
 - bending loads / eccentric loadings?
 - VDI2230
 - output: print directly to a PDF / or PIC for easy and beautiful reporting (single page)

@@ -7,6 +7,7 @@ import logging
 
 class BoltManager:
     def __init__(self, db_path):
+        self.db_path = db_path # database-path
         # bolt-dict and washer-dict for all bolts in db-files available
         self.bolts = {}
         self.washers = {}

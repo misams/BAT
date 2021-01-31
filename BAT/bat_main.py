@@ -13,9 +13,11 @@ import src.TorqueTable as torque_table
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.7.3"
+__version__ = "0.7.4-ALPHA"
 """
 Change Log:
+v0.7.4 - xx.xx.2021
+- bolt and material info button added to GUI
 v0.7.3 - 30.01.2021
 - MIN / MAX prevailing torque M_p added
 v0.7.2 - 02.01.2021

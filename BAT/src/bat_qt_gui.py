@@ -60,6 +60,10 @@ class Ui(QtWidgets.QMainWindow):
         self.comboBolt = self.findChild(QtWidgets.QComboBox, "comboBolt")
         self.comboBoltMaterial = self.findChild(QtWidgets.QComboBox, "comboBoltMaterial")
         self.comboBoltMaterialT = self.findChild(QtWidgets.QComboBox, "comboBoltMaterialT")
+        self.toolButton_bolt_info = self.findChild(QtWidgets.QToolButton, "toolButton_bolt_info")
+        self.toolButton_bolt_info.clicked.connect(self.boltInfoPressed)
+        self.toolButton_mat_info = self.findChild(QtWidgets.QToolButton, "toolButton_mat_info")
+        self.toolButton_mat_info.clicked.connect(self.matInfoPressed)
         self.cofBoltHeadMin = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMin")
         self.cofBoltHeadMax = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMax")
         self.cofThreadMin = self.findChild(QtWidgets.QLineEdit, "cofThreadMin")
@@ -135,6 +139,7 @@ class Ui(QtWidgets.QMainWindow):
         # set radio-buttons
         self.radioEcss.setChecked(True)
         self.radioVdi.setEnabled(False) # not implemented yet
+        self.toolButton_mat_info.setEnabled(False) # not implemented yet
         self.radioJointMin.setChecked(True)
         self.radioJointMean.setEnabled(True)
         self.radioLockYes.setChecked(True)
@@ -828,3 +833,22 @@ class Ui(QtWidgets.QMainWindow):
                         "ERROR: Excel load format incorrect.")
                     break
 
+    # tool-Button: Bolt-Info
+    def boltInfoPressed(self):
+        # read "bolt.info" file
+        bolt_info_file = self.bolts.db_path + "/bolt.info"
+        bolt_info_text = ''
+        with open(bolt_info_file) as fid:
+            line = fid.readline() # first line in file
+            while line:
+                if line[0]=='#':
+                    pass # ignore comment lines --> more elegant version of while/if??
+                else:
+                    bolt_info_text += line
+                line = fid.readline()
+        # show bolt.info file in message-box
+        self.messageBox(QMessageBox.Information, "Bolt Info", bolt_info_text)
+
+    # tool-Button: Mat-Info
+    def matInfoPressed(self):
+        print("mat info")

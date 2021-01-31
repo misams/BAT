@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
+    <width>830</width>
     <height>636</height>
    </rect>
   </property>
@@ -59,6 +59,40 @@
       </property>
      </widget>
     </item>
+    <item row="0" column="1" colspan="2">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QRadioButton" name="radioEsaPss">
+        <property name="text">
+         <string>ESA PSS-03-208</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupMethods</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioEcss">
+        <property name="text">
+         <string>ECSS-E-HB-32-23A</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupMethods</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioVdi">
+        <property name="text">
+         <string>VDI 2230</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupMethods</string>
+        </attribute>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item row="2" column="0" colspan="3">
      <widget class="QTabWidget" name="tabWidget">
       <property name="sizePolicy">
@@ -101,7 +135,26 @@
             </widget>
            </item>
            <item row="3" column="2">
-            <widget class="QComboBox" name="comboBoltMaterialT"/>
+            <widget class="QComboBox" name="comboBoltMaterialT">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>240</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>240</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item row="8" column="0">
             <widget class="QLabel" name="label_9">
@@ -121,7 +174,20 @@
             </widget>
            </item>
            <item row="8" column="1">
-            <widget class="QLineEdit" name="cofThreadMin"/>
+            <widget class="QLineEdit" name="cofThreadMin">
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item row="3" column="0">
             <widget class="QLabel" name="label_5">
@@ -141,7 +207,20 @@
             </widget>
            </item>
            <item row="8" column="2">
-            <widget class="QLineEdit" name="cofThreadMax"/>
+            <widget class="QLineEdit" name="cofThreadMax">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item row="12" column="2">
             <widget class="QLabel" name="label_11">
@@ -180,7 +259,26 @@
             <widget class="QLineEdit" name="loadingPlaneFactor"/>
            </item>
            <item row="7" column="2">
-            <widget class="QLineEdit" name="cofBoltHeadMax"/>
+            <widget class="QLineEdit" name="cofBoltHeadMax">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item row="13" column="0">
             <widget class="QLabel" name="label_12">
@@ -192,9 +290,6 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="1" colspan="2">
-            <widget class="QComboBox" name="comboBolt"/>
-           </item>
            <item row="15" column="0">
             <widget class="QLabel" name="label_17">
              <property name="text">
@@ -204,6 +299,18 @@
            </item>
            <item row="6" column="1">
             <widget class="QLabel" name="label_7">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="text">
               <string>MIN</string>
              </property>
@@ -250,6 +357,18 @@
            </item>
            <item row="6" column="2">
             <widget class="QLabel" name="label_8">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="text">
               <string>MAX</string>
              </property>
@@ -272,7 +391,20 @@
             </spacer>
            </item>
            <item row="7" column="1">
-            <widget class="QLineEdit" name="cofBoltHeadMin"/>
+            <widget class="QLineEdit" name="cofBoltHeadMin">
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item row="13" column="2">
             <widget class="QLabel" name="label_13">
@@ -285,15 +417,46 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QComboBox" name="comboBoltMaterial"/>
+            <widget class="QComboBox" name="comboBoltMaterial">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>240</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>240</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item row="2" column="1">
             <widget class="QLabel" name="label_3">
+             <property name="minimumSize">
+              <size>
+               <width>240</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>240</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="layoutDirection">
               <enum>Qt::LeftToRight</enum>
              </property>
              <property name="text">
-              <string>at Room-Temperature</string>
+              <string>@ Room-Temperature</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -302,8 +465,20 @@
            </item>
            <item row="2" column="2">
             <widget class="QLabel" name="label_38">
+             <property name="minimumSize">
+              <size>
+               <width>240</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>240</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="text">
-              <string>at max. Temp. (VDI thermal method only)</string>
+              <string>@ max. Temp. (VDI thermal method)</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -383,7 +558,7 @@
               <item row="1" column="2">
                <widget class="QLineEdit" name="Mp_max">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -407,6 +582,73 @@
                </widget>
               </item>
              </layout>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QToolButton" name="toolButton_bolt_info">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Info about Bolt Type / Bolt Size...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>?</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QToolButton" name="toolButton_mat_info">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Info about Bolt Materials...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>?</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="1" colspan="2">
+            <widget class="QComboBox" name="comboBolt">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>485</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>485</width>
+               <height>16777215</height>
+              </size>
+             </property>
             </widget>
            </item>
           </layout>
@@ -944,40 +1186,6 @@ Excel</string>
       </widget>
      </widget>
     </item>
-    <item row="0" column="1" colspan="2">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QRadioButton" name="radioEsaPss">
-        <property name="text">
-         <string>ESA PSS-03-208</string>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroupMethods</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="radioEcss">
-        <property name="text">
-         <string>ECSS-E-HB-32-23A</string>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroupMethods</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="radioVdi">
-        <property name="text">
-         <string>VDI 2230</string>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroupMethods</string>
-        </attribute>
-       </widget>
-      </item>
-     </layout>
-    </item>
    </layout>
    <zorder>label</zorder>
    <zorder>projectName</zorder>
@@ -989,7 +1197,7 @@ Excel</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>799</width>
+     <width>830</width>
      <height>22</height>
     </rect>
    </property>
@@ -1067,9 +1275,9 @@ Excel</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupMosType"/>
-  <buttongroup name="buttonGroupLocking"/>
   <buttongroup name="buttonGroupMethods"/>
+  <buttongroup name="buttonGroupLocking"/>
   <buttongroup name="buttonGroupJointType"/>
+  <buttongroup name="buttonGroupMosType"/>
  </buttongroups>
 </ui>
