@@ -42,59 +42,20 @@ $ python bat_main.py --gui
 ![Example Screenshot BAT v0.7.3](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
 
 ## Changelog
-### v0.7.3
->30.01.2021
-- MIN / MAX prevailing torque M_p added
 
-### v0.7.2
->02.01.2021
-- ECSS / ESA-PSS some bugs corrected (Mp implementation)
-- ECSS: 5% embedding added
-- fitting factor added (applied to loads)
-- Flange-GUI-window added (dummy status)
-- tests.py added (ECSS worked example 7.14 added)
-- BAT User-Manual (LaTex) created
-
-### v0.7.1
->13.09.2020
-- Torque table generator added
-
-### v0.7
->08.09.2020
-- Base-Class for analysis methods
-- ESA-PSS converted to base-class
-- ECSS-E-HB-32-23A method included (GUI updated)
-
-### v0.6
->01.09.2020
-- Save-methods finished
-
-### v0.5
->26.07.2020
-- FQ bug corrected
-- Save-as method implemented
-
-### v0.4
->10.06.2020
-- pyQT5 GUI initial release
-- config file: bat.ini added
-
-### v0.3.1
->18.04.2020
-- GUI development started (--gui option added to launch BAT GUI)
-
-### v0.3
->13.04.2020
-- BAT input printed to output
-- error corrected if *USE_SHIM = no
-
-### v0.2
->08.04.2020
-- VDI 2230 thermal method added (takes Young's modulus temperature dependance into account)
-
-### v0.1
->April 2020
-- first revision of beta software status
+Release | Date | Info
+--- | --- | ---
+v0.7.3 | 30.01.2021 | - MIN / MAX prevailing torque M_p added
+v0.7.2 | 02.01.2021 | - ECSS / ESA-PSS some bugs corrected (Mp implementation)<br>- ECSS: 5% embedding added<br>- fitting factor added (applied to loads)<br>- Flange-GUI-window added (dummy status)<br>- tests.py added (ECSS worked example 7.14 added)<br>- BAT User-Manual (LaTex) created
+v0.7.1 | 13.09.2020 | - Torque table generator added
+v0.7 | 08.09.2020 | - Base-Class for analysis methods<br>- ESA-PSS converted to base-class<br>- ECSS-E-HB-32-23A method included (GUI updated)
+v0.6 | 01.09.2020 | - Save-methods finished
+v0.5 | 26.07.2020 | - FQ bug corrected<br>- Save-as method implemented
+v0.4 | 10.06.2020 | - pyQT5 GUI initial release<br>- config file: bat.ini added
+v0.3.1 | 18.04.2020 | - GUI development started (--gui option added to launch BAT GUI)
+v0.3 | 13.04.2020 | - BAT input printed to output<br>- error corrected if *USE_SHIM = no
+v0.2 | 08.04.2020 | - VDI 2230 thermal method added (takes Young's modulus temperature dependance into account)
+v0.1 | April 2020 | - first revision of beta software status
 
 ## License
 
