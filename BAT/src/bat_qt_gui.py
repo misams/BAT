@@ -10,7 +10,7 @@ from src.gui.GuiInputHandler import GuiInputHandler
 from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.Qt import Qt, QApplication, QClipboard
-from src.gui.FlangeGuiWindow import AnotherWindow # currently dummy-only
+from src.gui.FlangeGuiWindow import FlangeWindow # currently dummy-only
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
@@ -781,7 +781,7 @@ class Ui(QtWidgets.QMainWindow):
     def menuBoltedFlange(self, checked):
         if self.w_bolted_flange is None:
             print("Bolted-Flange window created")
-            self.w_bolted_flange = AnotherWindow()
+            self.w_bolted_flange = FlangeWindow()
         self.w_bolted_flange.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_bolted_flange.show()
 

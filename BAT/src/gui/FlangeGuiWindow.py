@@ -1,15 +1,15 @@
+from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget
 """
-For test purposes --> will include "Bolted-Flange"-Window
+Bolted-Flange-Window
 """
-class AnotherWindow(QWidget):
-    """
-    This "window" is a QWidget. If it has no parent, it
-    will appear as a free-floating window as we want.
-    """
+class FlangeWindow(QMainWindow):
     def __init__(self):
-        super().__init__()
-        layout = QVBoxLayout()
-        self.label = QLabel("Bolted-Flange Window TEST")
-        layout.addWidget(self.label)
-        self.setLayout(layout)
+        super(FlangeWindow, self).__init__()
+        # load *.ui file
+        uic.loadUi("/home/sams/git/BAT/BAT/src/gui/bat_flange.ui", self)
+        #
+        # set window title
+        #
+        self.setWindowTitle("Bolted Flange Definition")
+
