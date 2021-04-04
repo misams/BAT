@@ -11,6 +11,7 @@ from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.Qt import Qt, QApplication, QClipboard
 from src.gui.FlangeGuiWindow import FlangeWindow # currently dummy-only
+from src.gui.MatInfoWindow import MatInfoWindow
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
@@ -77,6 +78,7 @@ class Ui(QtWidgets.QMainWindow):
         self.Mp_min = self.findChild(QtWidgets.QLineEdit, "Mp_min")
         self.Mp_max = self.findChild(QtWidgets.QLineEdit, "Mp_max")
         self.loadingPlaneFactor = self.findChild(QtWidgets.QLineEdit, "loadingPlaneFactor")
+        self.w_mat_info = None # material info window
         # Clamped Parts tab
         self.cofClampedParts = self.findChild(QtWidgets.QLineEdit, "cofClampedParts")
         self.numberOfShearPlanes = self.findChild(QtWidgets.QSpinBox, "numberOfShearPlanes")
@@ -139,7 +141,7 @@ class Ui(QtWidgets.QMainWindow):
         # set radio-buttons
         self.radioEcss.setChecked(True)
         self.radioVdi.setEnabled(False) # not implemented yet
-        self.toolButton_mat_info.setEnabled(False) # not implemented yet
+        #self.toolButton_mat_info.setEnabled(False) # not implemented yet
         self.radioJointMin.setChecked(True)
         self.radioJointMean.setEnabled(True)
         self.radioLockYes.setChecked(True)
@@ -850,5 +852,10 @@ class Ui(QtWidgets.QMainWindow):
         self.messageBox(QMessageBox.Information, "Bolt Info", bolt_info_text)
 
     # tool-Button: Mat-Info
-    def matInfoPressed(self):
-        print("mat info")
+    def matInfoPressed(self, checked):
+        if self.w_mat_info is None:
+            print("Material-Info window created")
+            self.w_mat_info = MatInfoWindow(self.materials)
+        self.w_mat_info.setWindowModality(Qt.ApplicationModal) # lock main window
+        self.w_mat_info.show()
+
