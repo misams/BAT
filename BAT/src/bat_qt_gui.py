@@ -11,6 +11,7 @@ from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.Qt import Qt, QApplication, QClipboard
 from src.gui.FlangeGuiWindow import FlangeWindow # currently dummy-only
+from src.gui.BoltInfoWindow import BoltInfoWindow
 from src.gui.MatInfoWindow import MatInfoWindow
 
 # inherit correct QMainWindow class as defined in UI file (designer)
@@ -78,6 +79,7 @@ class Ui(QtWidgets.QMainWindow):
         self.Mp_min = self.findChild(QtWidgets.QLineEdit, "Mp_min")
         self.Mp_max = self.findChild(QtWidgets.QLineEdit, "Mp_max")
         self.loadingPlaneFactor = self.findChild(QtWidgets.QLineEdit, "loadingPlaneFactor")
+        self.w_bolt_info = None # bolt info window
         self.w_mat_info = None # material info window
         # Clamped Parts tab
         self.cofClampedParts = self.findChild(QtWidgets.QLineEdit, "cofClampedParts")
@@ -138,6 +140,8 @@ class Ui(QtWidgets.QMainWindow):
 
     # init gui - default settings
     def init_gui(self):
+        # disable flange menu (under development)
+        self.actionBolted_Flange.setEnabled(False)
         # set radio-buttons
         self.radioEcss.setChecked(True)
         self.radioVdi.setEnabled(False) # not implemented yet
@@ -837,19 +841,11 @@ class Ui(QtWidgets.QMainWindow):
 
     # tool-Button: Bolt-Info
     def boltInfoPressed(self):
-        # read "bolt.info" file
-        bolt_info_file = self.bolts.db_path + "/bolt.info"
-        bolt_info_text = ''
-        with open(bolt_info_file) as fid:
-            line = fid.readline() # first line in file
-            while line:
-                if line[0]=='#':
-                    pass # ignore comment lines --> more elegant version of while/if??
-                else:
-                    bolt_info_text += line
-                line = fid.readline()
-        # show bolt.info file in message-box
-        self.messageBox(QMessageBox.Information, "Bolt Info", bolt_info_text)
+        if self.w_bolt_info is None:
+            print("Bolt-Info window created")
+            self.w_bolt_info = BoltInfoWindow(self.bolts.db_path)
+        self.w_bolt_info.setWindowModality(Qt.ApplicationModal) # lock main window
+        self.w_bolt_info.show()
 
     # tool-Button: Mat-Info
     def matInfoPressed(self, checked):

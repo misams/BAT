@@ -39,3 +39,8 @@ class MaterialManager:
     def print(self):
         print("Materials DICT:")
         print(str(self.materials))
+
+    # get mat-file path
+    @property
+    def mat_file(self):
+        return self._mat_file
