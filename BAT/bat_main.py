@@ -14,9 +14,11 @@ import src.ThreadPullOut as thread_pull_out
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.7.4"
+__version__ = "0.7.5-ALPHA"
 """
 Change Log:
+v0.7.5 - xx.xx.2021
+- start work on Flange-GUI
 v0.7.4 - 04.04.2021
 - bolt and material info button and windows added to GUI
 - Tools/Bolted Flange disabled (under development)

@@ -141,7 +141,7 @@ class Ui(QtWidgets.QMainWindow):
     # init gui - default settings
     def init_gui(self):
         # disable flange menu (under development)
-        self.actionBolted_Flange.setEnabled(False)
+        #self.actionBolted_Flange.setEnabled(False)
         # set radio-buttons
         self.radioEcss.setChecked(True)
         self.radioVdi.setEnabled(False) # not implemented yet
@@ -787,7 +787,7 @@ class Ui(QtWidgets.QMainWindow):
     def menuBoltedFlange(self, checked):
         if self.w_bolted_flange is None:
             print("Bolted-Flange window created")
-            self.w_bolted_flange = FlangeWindow()
+            self.w_bolted_flange = FlangeWindow(self.cofBoltHeadMin)
         self.w_bolted_flange.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_bolted_flange.show()
 
