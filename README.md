@@ -14,7 +14,7 @@ It supports Python 3.0+ and uses pyQT5, matplotlib and numpy.
 [![PyPI status](https://img.shields.io/pypi/status/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python 3.0+](https://img.shields.io/badge/Python-3.0%2B-success)](https://www.python.org)
-[![required](https://img.shields.io/badge/required-pyQt5%2C%20matplotlib%2C%20numpy-success)]
+[![required](https://img.shields.io/badge/required-pyQt5%2C%20matplotlib%2C%20numpy-success)]()
 
 ## Run BAT without GUI
  
@@ -45,6 +45,7 @@ $ python bat_main.py --gui
 
 Release | Date | Info
 --- | --- | ---
+v0.7.5 | xx.xx.2021 | - Bolted flange window feature included (circular flange)
 v0.7.4 | 04.04.2021 | - bolt and material info button and windows added to GUI<br>- Tools/Bolted Flange disabled (under development)
 v0.7.3 | 30.01.2021 | - MIN / MAX prevailing torque M_p added
 v0.7.2 | 02.01.2021 | - ECSS / ESA-PSS some bugs corrected (Mp implementation)<br>- ECSS: 5% embedding added<br>- fitting factor added (applied to loads)<br>- Flange-GUI-window added (dummy status)<br>- tests.py added (ECSS worked example 7.14 added)<br>- BAT User-Manual (LaTex) created
