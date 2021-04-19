@@ -9,12 +9,12 @@ Standards implemented in BAT (current status includes concentric axially loaded 
 
 The user manual can be found here: [BAT User-Manual](https://github.com/misams/BAT/blob/master/BAT/doc/BAT_doc/LaTex/BAT_UserManual.pdf)
 
-It supports Python 3.0+ and uses pyQT5.
+It supports Python 3.0+ and uses pyQT5, matplotlib and numpy.
 
 [![PyPI status](https://img.shields.io/pypi/status/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python 3.0+](https://img.shields.io/badge/Python-3.0%2B-success)](https://www.python.org)
-[![pyQT5](https://img.shields.io/badge/GUI-pyQT5-success)](https://pypi.org/project/PyQt5)
+[![required](https://img.shields.io/badge/required-pyQt5%2C%20matplotlib%2C%20numpy-success)]
 
 ## Run BAT without GUI
  

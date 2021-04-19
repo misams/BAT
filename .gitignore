@@ -12,3 +12,4 @@ BAT_TPLE_files.zip
 BAT/doc/BAT_doc/LaTex/aux
 *.bib.bak
 *.bib.sav
+flange_test.py

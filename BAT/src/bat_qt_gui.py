@@ -787,7 +787,7 @@ class Ui(QtWidgets.QMainWindow):
     def menuBoltedFlange(self, checked):
         if self.w_bolted_flange is None:
             print("Bolted-Flange window created")
-            self.w_bolted_flange = FlangeWindow(self.cofBoltHeadMin)
+            self.w_bolted_flange = FlangeWindow(self.loadsTable, self.tabWidget)
         self.w_bolted_flange.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_bolted_flange.show()
 
