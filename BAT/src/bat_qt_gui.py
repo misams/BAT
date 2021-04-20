@@ -8,7 +8,7 @@ from src.EsaPss import EsaPss
 from src.Ecss import Ecss
 from src.gui.GuiInputHandler import GuiInputHandler
 from PyQt5 import QtWidgets, uic, QtCore, QtGui
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMenu
 from PyQt5.Qt import Qt, QApplication, QClipboard
 from src.gui.FlangeGuiWindow import FlangeWindow # currently dummy-only
 from src.gui.BoltInfoWindow import BoltInfoWindow
@@ -16,10 +16,11 @@ from src.gui.MatInfoWindow import MatInfoWindow
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
-    def __init__(self, ui_file, materials=None, bolts=None, inp_dir=None, bat_version="-"):
+    def __init__(self, ui_dir, materials=None, bolts=None, inp_dir=None, bat_version="-"):
         super(Ui, self).__init__()
         # load *.ui file
-        uic.loadUi(ui_file, self)
+        self.ui_dir = ui_dir
+        uic.loadUi(self.ui_dir+"/bat_gui.ui", self)
         #
         # INIT variables
         self.materials = materials # materials DB
@@ -111,6 +112,8 @@ class Ui(QtWidgets.QMainWindow):
         self.deleteRowButton.clicked.connect(self.deleteRowPressed)
         self.pasteLoadsExcel = self.findChild(QtWidgets.QPushButton, "pasteLoadsExcel")
         self.pasteLoadsExcel.clicked.connect(self.pasteFromExcel)
+        self.copyLoadsTable = self.findChild(QtWidgets.QPushButton, "copyLoadsTable")
+        self.copyLoadsTable.clicked.connect(self.copyLoadsTableToClipboard)
         self.deltaT = self.findChild(QtWidgets.QLineEdit, "deltaT")
         self.checkBoxVdiThermal = self.findChild(QtWidgets.QCheckBox, "checkBoxVdiThermal")
         self.checkBoxVdiThermal.stateChanged.connect(self.useVdiChecked)
@@ -787,7 +790,7 @@ class Ui(QtWidgets.QMainWindow):
     def menuBoltedFlange(self, checked):
         if self.w_bolted_flange is None:
             print("Bolted-Flange window created")
-            self.w_bolted_flange = FlangeWindow(self.loadsTable, self.tabWidget)
+            self.w_bolted_flange = FlangeWindow(self.ui_dir, self.loadsTable, self.tabWidget)
         self.w_bolted_flange.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_bolted_flange.show()
 
@@ -838,6 +841,23 @@ class Ui(QtWidgets.QMainWindow):
                     self.messageBox(QMessageBox.Warning, "Excel Load Error",\
                         "ERROR: Excel load format incorrect.")
                     break
+
+    # Button: copy loads-table to clipboard
+    def copyLoadsTableToClipboard(self):
+        # read values of loads-table
+        loadsTableStr = ""
+        rows = self.loadsTable.rowCount()
+        for row in range(0,rows): # get all load rows
+            loadsTableStr += "{0:^}\t{1:^}\t{2:^}\t{3:^}\n".format(\
+                self.loadsTable.item(row,0).text(), \
+                self.loadsTable.item(row,1).text(), \
+                self.loadsTable.item(row,2).text(), \
+                self.loadsTable.item(row,3).text())
+        # get global clipboard, clear it and set text
+        cb = QApplication.clipboard()
+        cb.clear(mode=cb.Clipboard)
+        cb.setText(loadsTableStr, mode=cb.Clipboard)
+        print("Loads-Table copied to Clipboard")
 
     # tool-Button: Bolt-Info
     def boltInfoPressed(self):

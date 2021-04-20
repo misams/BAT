@@ -124,14 +124,14 @@ def main():
             db_dir = work_dir+"/db"
         print("BAT DB directory  : " + db_dir)
         logging.info("BAT DB directory  : " + db_dir)
-        # location of bat_gui.ui
-        ui_file = config["PATHS"]["ui_file"]
-        if ui_file != "DEFAULT":
-            ui_file = os.path.abspath(ui_file)
+        # directory of *.ui-files
+        ui_dir = config["PATHS"]["ui_dir"]
+        if ui_dir != "DEFAULT":
+            ui_dir = os.path.abspath(ui_dir)
         else:
-            ui_file = work_dir+"/src/gui/bat_gui.ui"
-        print("BAT GUI ui-file   : " + ui_file)
-        logging.info("BAT GUI ui-file   : " + ui_file)
+            ui_dir = work_dir+"/src/gui"
+        print("BAT GUI ui-directory   : " + ui_dir)
+        logging.info("BAT GUI ui-directory   : " + ui_dir)
         # default input-file directory
         inp_dir = config["PATHS"]["inp_dir"]
         if inp_dir != "DEFAULT":
@@ -156,7 +156,7 @@ def main():
         if args.gui is True:
             print("BAT GUI initialized...rock it!")
             app = QtWidgets.QApplication(sys.argv)
-            window = bat_qt_gui.Ui(ui_file, materials, bolts, inp_dir, __version__)
+            window = bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__)
             window.show()
             sys.exit(app.exec_())
         elif args.torque_table is True:

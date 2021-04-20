@@ -12,13 +12,14 @@ from PyQt5.Qt import Qt
 Bolted-Flange-Window
 """
 class FlangeWindow(QtWidgets.QMainWindow):
-    def __init__(self, loadsTable, tabWidget):
+    def __init__(self, ui_dir, loadsTable=None, tabWidget=None):
         super(FlangeWindow, self).__init__()
         # item to be modified in main-window
         self.loadsTabletoBeModified = loadsTable
         self.tabWidgetToBeModified = tabWidget
         # load *.ui file
-        uic.loadUi("/home/sams/git/BAT/BAT/src/gui/bat_flange.ui", self)
+        self.ui_dir = ui_dir
+        uic.loadUi(self.ui_dir+"/bat_flange.ui", self)
         #
         # set window title
         #
@@ -108,8 +109,8 @@ class FlangeWindow(QtWidgets.QMainWindow):
             bolt_id_string = "Bolt:{0:d}".format(i+1)
             self.loadsTabletoBeModified.setItem(i,0,QtWidgets.QTableWidgetItem(bolt_id_string))
             self.loadsTabletoBeModified.setItem(i,1,QtWidgets.QTableWidgetItem("{0:.2f}".format(self.Fbn_array[i])))
-            self.loadsTabletoBeModified.setItem(i,2,QtWidgets.QTableWidgetItem("{0:.2f}".format(self.Fbs_lat_array[i])))
-            self.loadsTabletoBeModified.setItem(i,3,QtWidgets.QTableWidgetItem("{0:.2f}".format(self.Fbs_tors_array[i])))
+            self.loadsTabletoBeModified.setItem(i,2,QtWidgets.QTableWidgetItem("{0:.2f}".format(self.Fbs_array[i])))
+            self.loadsTabletoBeModified.setItem(i,3,QtWidgets.QTableWidgetItem("{0:.2f}".format(0)))
 
     # circular flange analysis
     def circ_flange(self):

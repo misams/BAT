@@ -105,7 +105,7 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabBolt">
        <attribute name="title">
@@ -951,7 +951,11 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_8">
            <item row="0" column="0">
-            <widget class="QTableWidget" name="loadsTable"/>
+            <widget class="QTableWidget" name="loadsTable">
+             <property name="contextMenuPolicy">
+              <enum>Qt::CustomContextMenu</enum>
+             </property>
+            </widget>
            </item>
            <item row="0" column="1">
             <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -981,6 +985,13 @@
                 </size>
                </property>
               </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="copyLoadsTable">
+               <property name="text">
+                <string>Copy Table</string>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QPushButton" name="pasteLoadsExcel">
@@ -1276,8 +1287,8 @@ Excel</string>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroupMethods"/>
-  <buttongroup name="buttonGroupLocking"/>
   <buttongroup name="buttonGroupJointType"/>
+  <buttongroup name="buttonGroupLocking"/>
   <buttongroup name="buttonGroupMosType"/>
  </buttongroups>
 </ui>
