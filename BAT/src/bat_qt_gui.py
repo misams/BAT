@@ -72,7 +72,10 @@ class Ui(QtWidgets.QMainWindow):
         self.cofThreadMin = self.findChild(QtWidgets.QLineEdit, "cofThreadMin")
         self.cofThreadMax = self.findChild(QtWidgets.QLineEdit, "cofThreadMax")
         self.tightTorque = self.findChild(QtWidgets.QLineEdit, "tightTorque")
+        self.tightTorque.textChanged.connect(self.torqueTolClicked)
+        self.tightTorqueTolCombo = self.findChild(QtWidgets.QComboBox, "tightTorqueTolCombo")
         self.tightTorqueTol = self.findChild(QtWidgets.QLineEdit, "tightTorqueTol")
+        self.tightTorqueTolCombo.activated.connect(self.torqueTolClicked)
         self.radioLockYes = self.findChild(QtWidgets.QRadioButton, "radioLockYes")
         self.radioLockYes.toggled.connect(self.lockRadioClicked)
         self.radioLockNo = self.findChild(QtWidgets.QRadioButton, "radioLockNo")
@@ -159,6 +162,10 @@ class Ui(QtWidgets.QMainWindow):
         for key in self.materials.materials:
             self.comboBoltMaterial.addItem(key)
             self.comboBoltMaterialT.addItem(key)
+        self.tightTorqueTol.setEnabled(False)
+        for key in ["0%", "1%", "2%", "3%", "4%", "5%"]: # fill torque device tolerance
+            self.tightTorqueTolCombo.addItem(key)
+        self.tightTorqueTolCombo.addItem("User Input")
         # set number of shear planes and loading plane factor
         self.numberOfShearPlanes.setValue(1)
         self.loadingPlaneFactor.setText("0.5")
@@ -875,3 +882,16 @@ class Ui(QtWidgets.QMainWindow):
         self.w_mat_info.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_mat_info.show()
 
+    # if tightTorqueTolCombo clicked
+    def torqueTolClicked(self):
+            if self.tightTorqueTolCombo.currentText() == "User Input":
+                self.tightTorqueTol.setEnabled(True)
+            else:
+                self.tightTorqueTol.setEnabled(False)
+                if self.tightTorque.text() != "":
+                    # calculate percentage of nominal tightening torque
+                    tightTol = float(self.tightTorque.text())\
+                        *float(self.tightTorqueTolCombo.currentText()[0])/100
+                    self.tightTorqueTol.setText("{0:.2f}".format(tightTol))
+                else:
+                    pass # empty self.tightTorque

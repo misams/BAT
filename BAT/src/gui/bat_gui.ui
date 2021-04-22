@@ -196,9 +196,6 @@
              </property>
             </widget>
            </item>
-           <item row="13" column="1">
-            <widget class="QLineEdit" name="tightTorqueTol"/>
-           </item>
            <item row="12" column="0">
             <widget class="QLabel" name="label_10">
              <property name="text">
@@ -241,19 +238,6 @@
               </size>
              </property>
             </spacer>
-           </item>
-           <item row="10" column="0" colspan="3">
-            <widget class="Line" name="line">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
            </item>
            <item row="15" column="1">
             <widget class="QLineEdit" name="loadingPlaneFactor"/>
@@ -403,16 +387,6 @@
                <width>200</width>
                <height>16777215</height>
               </size>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="2">
-            <widget class="QLabel" name="label_13">
-             <property name="text">
-              <string>&lt;p&gt;Nm&lt;/p&gt;</string>
-             </property>
-             <property name="textFormat">
-              <enum>Qt::RichText</enum>
              </property>
             </widget>
            </item>
@@ -648,6 +622,35 @@
                <width>485</width>
                <height>16777215</height>
               </size>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="3">
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string>&lt;p&gt;Nm&lt;/p&gt;</string>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::RichText</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="2">
+            <widget class="QLineEdit" name="tightTorqueTol"/>
+           </item>
+           <item row="13" column="1">
+            <widget class="QComboBox" name="tightTorqueTolCombo"/>
+           </item>
+           <item row="10" column="0" colspan="4">
+            <widget class="Line" name="line">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
             </widget>
            </item>
@@ -1287,8 +1290,8 @@ Excel</string>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroupMethods"/>
-  <buttongroup name="buttonGroupMosType"/>
   <buttongroup name="buttonGroupJointType"/>
   <buttongroup name="buttonGroupLocking"/>
+  <buttongroup name="buttonGroupMosType"/>
  </buttongroups>
 </ui>
