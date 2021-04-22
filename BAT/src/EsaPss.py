@@ -127,9 +127,8 @@ class EsaPss(BoltAnalysisBase):
     # @Override: calculate joint results 
     def _calc_joint_results(self):
         # check if prevailing torque is defined (e.g. helicoils used)
-        # prevailing torque if locking mechanism defined
-        if self.inp_file.locking_mechanism == "yes":
-            self.M_p = self.inp_file.prevailing_torque
+        # prevailing torque if locking mechanism defined, else M_p=(0,0)
+        self.M_p = self.inp_file.prevailing_torque
         # COF_BOLT = [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min] 
         mu_uhmax = self.inp_file.cof_bolt[0]
         mu_thmax = self.inp_file.cof_bolt[1]

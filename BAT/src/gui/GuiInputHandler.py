@@ -144,6 +144,9 @@ class GuiInputHandler:
                 comment="torque wrench tolerance")
             output_str += "    *LOCKING_MECHANISM = {0:^} # {comment:^}\n".format(self.locking_mechanism, \
                 comment="\"yes\" or \"no\", e.g. yes for Helicoil")
+            # if no locking device specified --> set M_p=(0,0)
+            if self.prevailing_torque is None:
+                self.prevailing_torque = [0.0,0.0]
             output_str += "    *PREVAILING_TORQUE = [{0:.2f}, {1:.2f}] # {comment:^}\n".format(\
                 self.prevailing_torque[0], self.prevailing_torque[1],\
                 comment="[min, max] only used if *LOCKING_MECHANISM = yes")

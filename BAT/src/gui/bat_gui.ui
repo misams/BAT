@@ -105,7 +105,7 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabBolt">
        <attribute name="title">
@@ -1287,8 +1287,8 @@ Excel</string>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroupMethods"/>
+  <buttongroup name="buttonGroupMosType"/>
   <buttongroup name="buttonGroupJointType"/>
   <buttongroup name="buttonGroupLocking"/>
-  <buttongroup name="buttonGroupMosType"/>
  </buttongroups>
 </ui>
