@@ -185,6 +185,9 @@ class Ui(QtWidgets.QMainWindow):
             ["Bolt-ID\n\nLoad-Case", "FN\n\n[N]", "FQ1\n\n[N]", "FQ2\n(optional)\n[N]"])
         self.loadsTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.loadsTable.setItem(0,0,QtWidgets.QTableWidgetItem("test bolt"))
+        self.loadsTable.setItem(0,1,QtWidgets.QTableWidgetItem("100.0"))
+        self.loadsTable.setItem(0,2,QtWidgets.QTableWidgetItem("10.0"))
+        self.loadsTable.setItem(0,3,QtWidgets.QTableWidgetItem("0.0"))
         self.checkBoxVdiThermal.setChecked(False)
         #
         # clamped-parts-table
@@ -440,34 +443,37 @@ class Ui(QtWidgets.QMainWindow):
 
     # calculate button pressed
     def calculatePressed(self):
-        self.readGuiInputs() # read gui inputs
-        compare = self.gih.compareInput(self.openedInputFile) # compare to opened input file
-        if self.openedInputFile and not compare:
-            if self.openedInputFile.method == "ESAPSS":
-                # calc ESA-PSS
-                ana_esapss = EsaPss(\
-                    self.openedInputFile, self.materials, self.bolts, self.bat_version)
-                output_results = ana_esapss.print_results(\
-                    self.outputFile.text(), print_to_cmd=False)
-                # enable output-tab and fill with results
-                self.tabWidget.setTabEnabled(5, True)
-                self.textEditOutput.setText(output_results)
-            elif self.openedInputFile.method == "ECSS":
-                # calc ESA-PSS
-                ana_ecss = Ecss(\
-                    self.openedInputFile, self.materials, self.bolts, self.bat_version)
-                output_results = ana_ecss.print_results(\
-                    self.outputFile.text(), print_to_cmd=False)
-                # enable output-tab and fill with results
-                self.tabWidget.setTabEnabled(5, True)
-                self.textEditOutput.setText(output_results)
+        try:
+            self.readGuiInputs() # read gui inputs
+            compare = self.gih.compareInput(self.openedInputFile) # compare to opened input file
+            if self.openedInputFile and not compare:
+                if self.openedInputFile.method == "ESAPSS":
+                    # calc ESA-PSS
+                    ana_esapss = EsaPss(\
+                        self.openedInputFile, self.materials, self.bolts, self.bat_version)
+                    output_results = ana_esapss.print_results(\
+                        self.outputFile.text(), print_to_cmd=False)
+                    # enable output-tab and fill with results
+                    self.tabWidget.setTabEnabled(5, True)
+                    self.textEditOutput.setText(output_results)
+                elif self.openedInputFile.method == "ECSS":
+                    # calc ESA-PSS
+                    ana_ecss = Ecss(\
+                        self.openedInputFile, self.materials, self.bolts, self.bat_version)
+                    output_results = ana_ecss.print_results(\
+                        self.outputFile.text(), print_to_cmd=False)
+                    # enable output-tab and fill with results
+                    self.tabWidget.setTabEnabled(5, True)
+                    self.textEditOutput.setText(output_results)
+                else:
+                    print("Method not implemented in current BAT version.")
             else:
-                print("Method not implemented in current BAT version.")
-        else:
-            print("Input does not match opened input file - save input file first.")
-            self.messageBox(QMessageBox.Warning, "GUI Input vs. Input-File Missmatch",\
-                "Input does not match opened input file - save input file first.",\
-                "Deviating Items:\n{0:^}".format(str(compare)))
+                print("Input does not match opened input file - save input file first.")
+                self.messageBox(QMessageBox.Warning, "GUI Input vs. Input-File Missmatch",\
+                    "Input does not match opened input file - save input file first.",\
+                    "Deviating Items:\n{0:^}".format(str(compare)))
+        except ValueError as e:
+            print("No analysis performed --> input not correct (ValueError: " + str(e) + ")")
 
     # MENU - new
     def menuNew(self):
@@ -852,19 +858,22 @@ class Ui(QtWidgets.QMainWindow):
     # Button: copy loads-table to clipboard
     def copyLoadsTableToClipboard(self):
         # read values of loads-table
-        loadsTableStr = ""
-        rows = self.loadsTable.rowCount()
-        for row in range(0,rows): # get all load rows
-            loadsTableStr += "{0:^}\t{1:^}\t{2:^}\t{3:^}\n".format(\
-                self.loadsTable.item(row,0).text(), \
-                self.loadsTable.item(row,1).text(), \
-                self.loadsTable.item(row,2).text(), \
-                self.loadsTable.item(row,3).text())
-        # get global clipboard, clear it and set text
-        cb = QApplication.clipboard()
-        cb.clear(mode=cb.Clipboard)
-        cb.setText(loadsTableStr, mode=cb.Clipboard)
-        print("Loads-Table copied to Clipboard")
+        try:
+            loadsTableStr = ""
+            rows = self.loadsTable.rowCount()
+            for row in range(0,rows): # get all load rows
+                loadsTableStr += "{0:^}\t{1:^}\t{2:^}\t{3:^}\n".format(\
+                    self.loadsTable.item(row,0).text(), \
+                    self.loadsTable.item(row,1).text(), \
+                    self.loadsTable.item(row,2).text(), \
+                    self.loadsTable.item(row,3).text())
+            # get global clipboard, clear it and set text
+            cb = QApplication.clipboard()
+            cb.clear(mode=cb.Clipboard)
+            cb.setText(loadsTableStr, mode=cb.Clipboard)
+            print("Loads-Table copied to Clipboard")
+        except AttributeError as e:
+            print("Nothing copied to Clipboard --> Load-Table has no or empty entries (" + str(e) + ")")
 
     # tool-Button: Bolt-Info
     def boltInfoPressed(self):

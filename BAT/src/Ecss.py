@@ -151,7 +151,6 @@ class Ecss(BoltAnalysisBase):
         TAmax = TA + Tscatter
         # min / max init. preload after tightening (*1000 to get N)
         # includes prevailing-torque
-        print(self.M_p)
         # F_M: preload after tightening [min, max]; equ.6.3.14 / 6.3.15
         self.F_M = [(TAmin-self.M_p[1])/Kmax*1000, (TAmax-self.M_p[0])/Kmin*1000]
         # calculate tightening factor (preload scatter incl. friction and tight. dev. tolerance)
@@ -227,7 +226,10 @@ class Ecss(BoltAnalysisBase):
                     logging.error(err_str)
                     raise JointMosTypeError(err_str)
             # local gapping margin (always with minimal service preload)
-            MOS_gap = self.F_V[0]/(self.inp_file.fos_gap*FPA)-1
+            if FA <= 0.0:
+                MOS_gap = math.inf # set to "inf" if no or negative axial force
+            else:
+                MOS_gap = self.F_V[0]/(self.inp_file.fos_gap*FPA)-1
             # bolt margin
             # if VDI thermal method used, use temp. dependent sig_y and sig_u for MOS evaluation
             if self.inp_file.temp_use_vdi_method.casefold() == "yes":
