@@ -218,7 +218,11 @@ class EsaPss(BoltAnalysisBase):
                     logging.error(err_str)
                     raise JointMosTypeError(err_str)
             # local gapping margin (always with minimal service preload)
-            MOS_gap = self.F_V[0]/(self.inp_file.fos_gap*FPA)-1
+            if FA <= 0.0:
+                MOS_gap = math.inf # set to "inf" if no or negative axial force
+            else:
+                MOS_gap = self.F_V[0]/(self.inp_file.fos_gap*FPA)-1
+
             # if VDI thermal method used, use temp. dependent sig_y and sig_u for MOS evaluation
             if self.inp_file.temp_use_vdi_method.casefold() == "yes":
                 bolt_sig_y = self.materials.materials[self.inp_file.temp_bolt_material].sig_y
