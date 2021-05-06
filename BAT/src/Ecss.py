@@ -193,6 +193,12 @@ class Ecss(BoltAnalysisBase):
         # calculate yield MOS under bolt head / first clamped part after tightening
         self.MOS_pres = self._mos_pres(self.F_M[1])
         #
+        # analyze gapping limit
+        FA_gap_limit = [self.F_V[0]/(1-self.Phi_n), self.F_V[1]/(1-self.Phi_n)] # [min, max]
+        FSA_gap_limit = [FA_gap_limit[0]*self.Phi_n, FA_gap_limit[1]*self.Phi_n] # additional bolt force at gapping limit
+        print("FA_gap_limit [N]: "+str(FA_gap_limit))
+        print("FSA_gap_limit [N]: "+str(FSA_gap_limit))
+        #
         # perform calculation for all bolts / loadcases
         #
         sum_FPA = 0.0
@@ -204,6 +210,7 @@ class Ecss(BoltAnalysisBase):
             FQ = math.sqrt((bi[2]*ffit)**2+(bi[3]*ffit)**2) # shear bolt force
             FPA = FA*(1-self.Phi_n) # reduction in clamping force
             FSA = FA*self.Phi_n # additional bolt force
+            #
             # required clamping force for friction grip per bolt
             # VDI2230: nmbr_shear_planes == q_F; cof_clamp == mu_T
             FKreq = FQ/(self.inp_file.nmbr_shear_planes*self.inp_file.cof_clamp)
@@ -245,6 +252,23 @@ class Ecss(BoltAnalysisBase):
             MOS_y = bolt_sig_y/math.sqrt( ((self.F_V[1]+\
                 FSA*self.inp_file.fos_y)/self.used_bolt.As)**2 +\
                     3*(0.5*self.tau[1])**2 )-1
+            #
+            # TODO: check which MOS_y is worst case (gapCor with FVmin or MOS_y with FVmax)??
+            # MOS_y_gapCorr_max is always the limiting factor! Minor divergence explained by shear-stress.
+            # stiffness ratio Phi is always the same --> MOS_y_gapCorr_min always covered!
+            if FA > FA_gap_limit[0]:
+                MOS_y_gapCorr_min = bolt_sig_y/math.sqrt( ((self.F_V[0]+\
+                    (FSA_gap_limit[0]+(FA-FA_gap_limit[0]))*self.inp_file.fos_y)/self.used_bolt.As)**2 +\
+                        3*(0.5*self.tau[0])**2 )-1
+                print("MOS_y_gapCorr_min: {0:.2%} ({1:.1f}N)".format(MOS_y_gapCorr_min, \
+                    self.F_V[0]+FSA_gap_limit[0]+(FA-FA_gap_limit[0])))
+            if FA > FA_gap_limit[1]:
+                MOS_y_gapCorr_max = bolt_sig_y/math.sqrt( ((self.F_V[1]+\
+                    (FSA_gap_limit[1]+(FA-FA_gap_limit[1]))*self.inp_file.fos_y)/self.used_bolt.As)**2 +\
+                        3*(0.5*self.tau[1])**2 )-1
+                print("MOS_y_gapCorr_max: {0:.2%} ({1:.1f}N)".format(MOS_y_gapCorr_max, \
+                    self.F_V[1]+FSA_gap_limit[1]+(FA-FA_gap_limit[1])))
+            #
             # ultimate bolt margin (with 50% tau relaxation; see VDI2230 ch. 5.5.2.1)
             MOS_u = bolt_sig_u/math.sqrt( ((self.F_V[1]+\
                 FSA*self.inp_file.fos_u)/self.used_bolt.As)**2 +\
