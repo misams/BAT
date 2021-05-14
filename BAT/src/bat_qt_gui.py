@@ -163,9 +163,8 @@ class Ui(QtWidgets.QMainWindow):
             self.comboBoltMaterial.addItem(key)
             self.comboBoltMaterialT.addItem(key)
         self.tightTorqueTol.setEnabled(False)
-        for key in ["0%", "1%", "2%", "3%", "4%", "5%"]: # fill torque device tolerance
+        for key in ["0%", "1%", "2%", "3%", "4%", "5%", "User Input"]: # fill torque device tolerance
             self.tightTorqueTolCombo.addItem(key)
-        self.tightTorqueTolCombo.addItem("User Input")
         # set number of shear planes and loading plane factor
         self.numberOfShearPlanes.setValue(1)
         self.loadingPlaneFactor.setText("0.5")
@@ -246,6 +245,7 @@ class Ui(QtWidgets.QMainWindow):
         # fill torques etc
         self.tightTorque.setText('')
         self.tightTorqueTol.setText('')
+        self.tightTorqueTolCombo.setCurrentIndex(0)
         self.radioLockYes.setChecked(True)
         self.Mp_min.setText('')
         self.Mp_max.setText('')
@@ -524,7 +524,16 @@ class Ui(QtWidgets.QMainWindow):
         self.cofThreadMin.setText(str(self.openedInputFile.cof_bolt[3]))
         # fill torques etc
         self.tightTorque.setText(str(self.openedInputFile.tight_torque))
-        self.tightTorqueTol.setText(str(self.openedInputFile.torque_tol_tight_device))
+        if self.openedInputFile.torque_tol_tight_device.find('%')!=-1:
+            index = self.tightTorqueTolCombo.findText(\
+                self.openedInputFile.torque_tol_tight_device, QtCore.Qt.MatchFixedString)
+            if index >= 0:
+                self.tightTorqueTolCombo.setCurrentIndex(index)
+            self.torqueTolClicked() # refresh self.tightTorqueTol
+        else:
+            self.tightTorqueTolCombo.setCurrentIndex(6) # set to "User Input"
+            self.tightTorqueTol.setText(self.openedInputFile.torque_tol_tight_device)
+        #
         if self.openedInputFile.locking_mechanism == "yes":
             self.radioLockYes.setChecked(True)
             self.Mp_min.setText(str(self.openedInputFile.prevailing_torque[0]))
@@ -721,12 +730,14 @@ class Ui(QtWidgets.QMainWindow):
         self.gih.bolt_material = self.comboBoltMaterial.currentText()
         self.gih.temp_bolt_material = self.comboBoltMaterialT.currentText()
         #[mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
-        # TODO: error handling if input wrong
         self.gih.cof_bolt = (\
             float(self.cofBoltHeadMax.text()), float(self.cofThreadMax.text()),\
             float(self.cofBoltHeadMin.text()), float(self.cofThreadMin.text()) )
         self.gih.tight_torque = float(self.tightTorque.text())
-        self.gih.torque_tol_tight_device = float(self.tightTorqueTol.text())
+        if self.tightTorqueTolCombo.currentText()=="User Input":
+            self.gih.torque_tol_tight_device = self.tightTorqueTol.text()
+        else:
+            self.gih.torque_tol_tight_device = self.tightTorqueTolCombo.currentText()
         if self.radioLockNo.isChecked():
             self.gih.locking_mechanism = "no"
         else:

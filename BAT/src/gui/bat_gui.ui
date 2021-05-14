@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>830</width>
-    <height>636</height>
+    <width>1000</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1211,7 +1211,7 @@ Excel</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>830</width>
+     <width>1000</width>
      <height>22</height>
     </rect>
    </property>
@@ -1286,12 +1286,67 @@ Excel</string>
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>radioEsaPss</tabstop>
+  <tabstop>radioEcss</tabstop>
+  <tabstop>radioVdi</tabstop>
+  <tabstop>projectName</tabstop>
+  <tabstop>radioTBJ</tabstop>
+  <tabstop>radioTTJ</tabstop>
+  <tabstop>comboBolt</tabstop>
+  <tabstop>comboBoltMaterial</tabstop>
+  <tabstop>comboBoltMaterialT</tabstop>
+  <tabstop>cofBoltHeadMin</tabstop>
+  <tabstop>cofBoltHeadMax</tabstop>
+  <tabstop>cofThreadMin</tabstop>
+  <tabstop>cofThreadMax</tabstop>
+  <tabstop>tightTorque</tabstop>
+  <tabstop>tightTorqueTolCombo</tabstop>
+  <tabstop>tightTorqueTol</tabstop>
+  <tabstop>radioLockYes</tabstop>
+  <tabstop>radioLockNo</tabstop>
+  <tabstop>Mp_min</tabstop>
+  <tabstop>Mp_max</tabstop>
+  <tabstop>loadingPlaneFactor</tabstop>
+  <tabstop>toolButton_bolt_info</tabstop>
+  <tabstop>toolButton_mat_info</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>useShimCheck</tabstop>
+  <tabstop>clampedPartsTable</tabstop>
+  <tabstop>deleteCpButton</tabstop>
+  <tabstop>cofClampedParts</tabstop>
+  <tabstop>numberOfShearPlanes</tabstop>
+  <tabstop>throughHoleDiameter</tabstop>
+  <tabstop>substDA</tabstop>
+  <tabstop>comboRz</tabstop>
+  <tabstop>addCpButton</tabstop>
+  <tabstop>loadsTable</tabstop>
+  <tabstop>addRowButton</tabstop>
+  <tabstop>fosY</tabstop>
+  <tabstop>fosU</tabstop>
+  <tabstop>fosSlip</tabstop>
+  <tabstop>fosGap</tabstop>
+  <tabstop>fosFit</tabstop>
+  <tabstop>deleteRowButton</tabstop>
+  <tabstop>copyLoadsTable</tabstop>
+  <tabstop>pasteLoadsExcel</tabstop>
+  <tabstop>deltaT</tabstop>
+  <tabstop>checkBoxVdiThermal</tabstop>
+  <tabstop>textEditOutput</tabstop>
+  <tabstop>inputFile</tabstop>
+  <tabstop>saveInputFileButton</tabstop>
+  <tabstop>outputFile</tabstop>
+  <tabstop>saveOutputFileButton</tabstop>
+  <tabstop>radioJointMin</tabstop>
+  <tabstop>radioJointMean</tabstop>
+  <tabstop>calculateButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupMethods"/>
-  <buttongroup name="buttonGroupJointType"/>
   <buttongroup name="buttonGroupLocking"/>
+  <buttongroup name="buttonGroupJointType"/>
+  <buttongroup name="buttonGroupMethods"/>
   <buttongroup name="buttonGroupMosType"/>
  </buttongroups>
 </ui>

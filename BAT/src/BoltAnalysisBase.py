@@ -23,11 +23,13 @@ class BoltAnalysisBase(ABC):
         self.materials = materials
         self.bolts = bolts
         self.bat_version = bat_version
+        self.ana_method = "" # analysis method for printed output
         # used bolt and bolt-material for analysis (set by input-file)
         self.used_bolt = bolts.bolts[self.inp_file.bolt]
         self.used_bolt_mat = self.materials.materials[self.inp_file.bolt_material]
         # calculated variables
-        self.M_p = None # prevailing torque (VDI2230:M_ue)
+        self.M_p = self.inp_file.prevailing_torque # prevailing torque (VDI2230:M_ue)
+        self.T_scatter = 0.0 # scatter of tightening device (e.g. torque-wench)
         self.l_K = 0.0 # joint / clamped length (ECSS:L_j)
         self.A_sub = 0.0 # substitution area of clamped parts compliance
         self.delta_b = 0.0 # bolt compliance (VDI2230:delta_S)
@@ -52,6 +54,8 @@ class BoltAnalysisBase(ABC):
         self.bolt_results = {} # results per bolt / loadcase
         self.MOS_glob_slip = 0.0 # global slippage margin
         self.MOS_pres = 0.0 # yield check under bolt head 
+        # set T_scatter
+        self._set_T_scatter()
 
     # joint stiffness for bolt and clamped parts
     @abstractmethod
@@ -68,10 +72,253 @@ class BoltAnalysisBase(ABC):
     def _calc_joint_results(self):
         pass
 
+    # get analysis input (file) string for printout
+    def _get_input_str(self):
+        output_str = "" # use output_str for print() or print-to-file
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        output_str += "| {0:^91} |\n".format("BAT Bolt Analysis Input (v"+self.bat_version+")")
+        output_str += "| {0:^91} |\n".format(" ")
+        output_str += "| {0:^91} |\n".format(self.inp_file.project_name)
+        output_str += "{0:=^95}\n".format('=')
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "BAT method:", self.inp_file.method, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Joint type:", self.inp_file.joint_type, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Joint MoS type:", self.inp_file.joint_mos_type, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Bolt:", self.inp_file.bolt, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Bolt material:", self.inp_file.bolt_material, "")
+        if self.inp_file.torque_tol_tight_device.find('%')!=-1:
+            scatter_str = "\u00B1{1:.2f} ({0:^})".format(self.inp_file.torque_tol_tight_device, self.T_scatter)
+        else:
+            scatter_str = "\u00B1{0:.2f}".format(self.T_scatter)
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Torque tolerance of tight. device [Nm]:", scatter_str, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Locking mechanism used:", self.inp_file.locking_mechanism, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Loading plane factor - n:", self.inp_file.loading_plane_factor, "")
+        output_str += "| {0:<50} {1:^20d} {2:^20}|\n".format(\
+            "Number of shear planes:", self.inp_file.nmbr_shear_planes, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Through hole diameter [mm]:", self.inp_file.through_hole_diameter, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Shim used:", "yes" if self.inp_file.use_shim!="no" else "no", "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Subst. outs. dia. of basic solid DA [mm]:", self.inp_file.subst_da, "")
+        output_str += "| {0:<50} {1:^20} {2:^20}|\n".format(\
+            "Embedding surf. rough. Rz [micron]:", self.inp_file.emb_rz, "")
+        output_str += "|{0:-^93}|\n".format('-') # empty line within section
+        # factors of safety
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Factor of safety yield", "FOS_y:", self.inp_file.fos_y)
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Factor of safety ultimate", "FOS_u:", self.inp_file.fos_u)
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Factor of safety slippage", "FOS_slip:", self.inp_file.fos_slip)
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Factor of safety gapping", "FOS_gap:", self.inp_file.fos_gap)
+        output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+            "Fitting-Factor", "FOS_fit:", self.inp_file.fos_fit)
+        output_str += "|{0:-^93}|\n".format('-') # empty line within section
+        # list clamped parts with properties
+        cp = self.inp_file.clamped_parts
+        tmp_shim_str = "" # add "Shim" to CP(0)
+        for i in range(len(cp)):
+            # shim handling for output string
+            if self.inp_file.use_shim != "no" and i==0:
+                tmp_shim_str = " - Shim / Washer" 
+            elif self.inp_file.use_shim != "no" and i>0:
+                tmp_shim_str = ""
+            else:
+                i += 1 # add 1 if no shim is used; shim is always [0]
+            output_str += "| {0:<40} {1:<30} {2:^20}|\n".format(\
+                "Clamped-Part ("+str(i)+")"+tmp_shim_str, "Material:", cp[i][0])
+            output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
+                " ", "Thickness [mm]:", cp[i][1])
+            output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
+                " ", "Young's modulus @RT [MPa]:", self.materials.materials[cp[i][0]].E)
+            output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
+                " ", "Yield strength @RT [MPa]:", self.materials.materials[cp[i][0]].sig_y)
+            output_str += "| {0:<40} {1:<30} {2:^20.1f}|\n".format(\
+                " ", "Ultimate strength @RT [MPa]:", self.materials.materials[cp[i][0]].sig_u)
+            output_str += "| {0:<40} {1:<30} {2:^20.3e}|\n".format(\
+                " ", "CTE [1/K]:", self.materials.materials[cp[i][0]].alpha)
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        return output_str
+
+    # get global analysis results string
+    def _get_global_result_str(self):
+        output_str = "" # use output_str for print() or print-to-file
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        output_str += "| {0:^91} |\n".format(self.ana_method)
+        output_str += "{0:=^95}\n".format('=')
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Clamped length l_K [mm]:", self.l_K, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Subst. area of CP compliance Asub [mm^2]:", self.A_sub, "")
+        output_str += "| {0:<50} {1:^20.4g} {2:^20}|\n".format(\
+            "Bolt stiffness c_B [N/mm]:", 1/self.delta_b, "")
+        output_str += "| {0:<50} {1:^20.4g} {2:^20}|\n".format(\
+            "Clamped part stiffness c_c [N/mm]:", 1/self.delta_c, "")
+        output_str += "| {0:<50} {1:^20.4f} {2:^20}|\n".format(\
+            "Load factor Phi [-]:", self.Phi, "")
+        output_str += "| {0:<50} {1:^20.4f} {2:^20}|\n".format(\
+            "Load factor Phi_n [-]:", self.Phi_n, "")
+        output_str += "| {0:<50} {1:^20.2f} {2:^20}|\n".format(\
+            "Embedding f_Z [micron]:", self.f_Z, "")
+        output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
+            "Preload loss due embedding F_Z [N]:", self.F_Z, "")
+        # if VDI method used
+        if self.inp_file.temp_use_vdi_method.casefold() == "yes":
+            output_str += "| Preload loss due to thermal effects {0:^56}|\n".format(" ")
+            output_str += "| {0:<50} {1:>14.1f} / {2:<24.1f}|\n".format(\
+                "  based on FVmin / FVmax [N] (VDI method):",\
+                    self.dF_V_th[0], self.dF_V_th[1])
+        else:
+            output_str += "| {0:<50} {1:^20.1f} {2:^20}|\n".format(\
+                "Preload loss due thermal effects dF_V_th [N]:", self.dF_V_th[0], "")
+        # min / max table
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("", "MIN (mu_max)", "MAX (mu_min)")
+        output_str += "{0:=^95}\n".format('=')
+        output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
+            "Tightening torque with prevailing torque [Nm]:", self.inp_file.tight_torque)
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Tightening torque with tight. device scatter [Nm]:", \
+                self.inp_file.tight_torque-self.T_scatter, self.inp_file.tight_torque+self.T_scatter)
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Prevailing torque (max | min) [Nm]:", self.M_p[1], self.M_p[0])
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Tightening torque w/o prevailing torque [Nm]:", self.inp_file.tight_torque-self.M_p[1]-self.T_scatter,\
+                self.inp_file.tight_torque-self.M_p[0]+self.T_scatter)
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-") # empty line in table
+        output_str += "| {0:<50}|{1:^20.3f}|{2:^20.3f}|\n".format(\
+            "Coefficient of friction under bolt head:", self.inp_file.cof_bolt[0],\
+                self.inp_file.cof_bolt[2])
+        output_str += "| {0:<50}|{1:^20.3f}|{2:^20.3f}|\n".format(\
+            "Coefficient of friction in thread:", self.inp_file.cof_bolt[1],\
+                self.inp_file.cof_bolt[3])
+        output_str += "| {0:<50}|{1:^41.2f}|\n".format(\
+            "Coefficient of friction between clamped parts:", self.inp_file.cof_clamp)
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-") # empty line in table
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Bolt preload after tightening [N]:", self.F_M[0], self.F_M[1])
+        output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
+            "MEAN Bolt preload after tightening [N]:", 0.5*(self.F_M[0]+self.F_M[1]))
+        output_str += "| {0:<50}|{1:>19.2f} / \u00B1{2:<18.1%}|\n".format(\
+            "Preload Scatter / Tightening Factor Alpha_A [-]:",\
+                self.alpha_A, (self.alpha_A-1)/(self.alpha_A+1))
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+                "Total preload loss incl. emb. & temp. [N]:", \
+                    self.dF_V_th[0]+self.F_Z, self.dF_V_th[1])
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Bolt preload at service incl. emb. & temp. [N]:", self.F_V[0], self.F_V[1])
+        output_str += "| {0:<50}|{1:^41.1f}|\n".format(\
+            "MEAN Bolt preload at serv. incl. emb. & temp. [N]:", 0.5*(self.F_V[0]+self.F_V[1]))
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-")
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Torsional stress after tightening [MPa]:", self.tau[0], self.tau[1])
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Normal stress after tightening [MPa]:", self.sig_n[0], self.sig_n[1])
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Von-Mises equiv. stress aft. tightening [MPa]:", self.sig_v[0], self.sig_v[1])
+        output_str += "| {0:<50}|{1:^20.1%}|{2:^20.1%}|\n".format(\
+            "Bolt utilization [%]:", self.nue[0], self.nue[1])
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-")
+        output_str += "| {0:<50}|{1:^20}|{2:^20.0%}|\n".format(\
+            "Min. MoS (yield) under bolt head / washer [%]:", "-", self.MOS_pres)
+        output_str += "{0:=^95}\n".format('=')
+        # return output_str
+        return output_str
+
+    # get results per bolt/loadcase string
+    def _get_bolt_result_str(self):
+        output_str = "" # use output_str for print() or print-to-file
+        # define header
+        output_str += "{0:=^127}\n".format('=')
+        # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
+            .format("Number", "Bolt /", "Axial Bolt", "Shear Bolt", "Add. Bolt", "Red. Clmp.", \
+            "Slippage", "Gapping", "Yield", "Ultimate")
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
+            .format("#", "Loadcase", "Force", "Force", "Force", "Force", "MoS", "MoS", "MoS", "MoS")
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
+            .format("", "", "FA [N]", "FQ [N]", "FSA [N]", "FPA [N]", "FoS="+str(self.inp_file.fos_slip),\
+            "FoS="+str(self.inp_file.fos_gap), "FoS="+str(self.inp_file.fos_y), "FoS="+str(self.inp_file.fos_u))
+        output_str += "{0:=^127}\n".format('=')
+        # loop through bolts / loadcases
+        bolt_nmbr = 0 # to fill Number-# column
+        min_mos = [math.inf, math.inf, math.inf, math.inf, math.inf]
+        for lc_name, lc in self.bolt_results.items():
+            bolt_nmbr += 1 # count bolts / loadcases
+            #         lc[0   1   2     3   4             5        6       7     8           ]
+            # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
+            output_str += "|{0:^8d}|{1:^12}|{2:^12.1f}|{3:^12.1f}|{4:^12.1f}|{5:^12.1f}|{6:^12.0%}|{7:^12.0%}|{8:^12.0%}|{9:^12.0%}|\n"\
+                .format(bolt_nmbr, lc_name, lc[0], lc[1], lc[2], lc[3], lc[4], lc[5], lc[6], lc[7])
+            # get mininum margins of safety
+            min_mos = [min(min_mos[0], lc[4]), min(min_mos[1], lc[5]), \
+                min(min_mos[2], lc[6]), min(min_mos[3], lc[7]), min(min_mos[4], lc[8])]
+        output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
+        output_str += "|{0:>73}|{1:^12.0%}|{2:^12.0%}|{3:^12.0%}|{4:^12.0%}|\n".format(\
+                "Minimum Margins of Safety: ", min_mos[0], min_mos[1], min_mos[2], min_mos[3])
+        output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
+        output_str += "|{0:>73}|{1:^12.0%}|{2:^12}|{3:^12}|{4:^12}|\n".format(\
+                "Global Slippage Margin: ", self.MOS_glob_slip, "-", "-", "-")
+        output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
+        output_str += "|{0:>73}|{1:^12}|{2:^12}|{3:^12.0%}|{4:^12}|\n".format(\
+                "Minimum MoS against Yield under bolt head / first clamp part: ", "-", "-", min_mos[4], "-")
+        output_str += "{0:=^127}\n".format('=')
+        # return output_str
+        return output_str
+
+    # get thermal analysis string
+    def _get_thermal_result_str(self):
+        output_str = "" # use output_str for print() or print-to-file
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        if self.inp_file.temp_use_vdi_method.casefold() == "yes":
+            output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("VDI 2230 Thermal Preload Method",\
+                "Room-Temp (ref)", "defined Temp.")
+        else:
+            output_str += "| {0:^50}|{1:^20}|{2:^20}|\n".format("Thermal Preload Analysis",\
+                "Room-Temp (ref)", "defined Temp.")
+        output_str += "{0:=^95}\n".format('=')
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Young's Modulus of bolt [MPa]:", self.E_b_th[0], self.E_b_th[1])
+        output_str += "| {0:<50}|{1:^20.1f}|{2:^20.1f}|\n".format(\
+            "Young's Modulus of clamped parts [MPa]:", self.E_c_th[0], self.E_c_th[1])
+        output_str += "| {0:<50}|{1:^20.3e}|{2:^20.3e}|\n".format(\
+            "CTE of bolt [1/K]:", self.alpha_b_th[0], self.alpha_b_th[1])
+        output_str += "| {0:<50}|{1:^20.3e}|{2:^20.3e}|\n".format(\
+            "CTE of clamped parts [1/K]:", self.alpha_c_th[0], self.alpha_c_th[1])
+        output_str += "|-{0:-^50}+{1:-^20}+{2:-^20}|\n".format("-", "-", "-")
+        output_str += "| {0:<64} {1:^27.1f}|\n".format(\
+            "Temperature difference delta_T [K]:", self.inp_file.delta_t)
+        output_str += "|-{0:-^50}-{1:-^20}-{2:-^20}|\n".format("-", "-", "-")
+        #output_str += "| {0:<64} {1:>12.1f} / {2:<12.1f}|\n".format(\
+        #    "Term-1 preload loss based on FVmin / FVmax [N]:",\
+        #    F_VRT_min*(1-(dS+dP)/denom)*(-1), F_VRT_max*(1-(dS+dP)/denom)*(-1) )
+        #output_str += "| {0:<64} {1:^27.1f}|\n".format(\
+        #    "Term-2 Preload loss based on CTE [N]:",\
+        #        self.lk*(alpha_ST-alpha_PT)*self.inp_file.delta_t/denom*(-1) )
+        output_str += "| {0:<64} {1:>12.1f} / {2:<12.1f}|\n".format(\
+            "Preload loss due to thermal effects based on FVmin / FVmax [N]:",\
+                self.dF_V_th[0], self.dF_V_th[1])
+        output_str += "{0:=^95}\n".format('=') # global splitter
+        return output_str
+
     # get output string
-    @abstractmethod
     def _get_output_str(self):
-        pass
+        outp_str = ""
+        if self.inp_file.delta_t != 0: # add thermal output str if delta_T is not 0
+            outp_str = self._get_input_str() + self._get_global_result_str() +\
+                self._get_thermal_result_str() + self._get_bolt_result_str()
+        else:
+            outp_str = self._get_input_str() + self._get_global_result_str() +\
+                self._get_bolt_result_str()
+        return outp_str
 
     # calculate thermal effects on preload (preload loss / increase)
     # preload change in bolt: clamped parts - bolts (convention)
@@ -184,6 +431,15 @@ class BoltAnalysisBase(ABC):
                 (self.inp_file.through_hole_diameter**2)*math.pi/4
             MOS_pres = sig_y_pres / (F_axial/A_pres) - 1
         return MOS_pres
+
+    # set T_scatter
+    def _set_T_scatter(self):
+        # use %-value or direct input of tightening-device-torque-tolerance
+        if self.inp_file.torque_tol_tight_device.find('%')!=-1:
+            self.T_scatter = self.inp_file.tight_torque * \
+                float(self.inp_file.torque_tol_tight_device.split('%')[0])/100.0
+        else:
+            self.T_scatter = float(self.inp_file.torque_tol_tight_device)
 
     # print results to terminal and/or file
     def print_results(self, output_file=None, print_to_cmd=True):

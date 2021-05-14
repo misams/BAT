@@ -20,7 +20,7 @@ class InputFileParser:
         self.bolt_material = ""
         self.cof_bolt = None # optional [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
         self.tight_torque = 0.0 # also use "STD"
-        self.torque_tol_tight_device = 0.0 # optional
+        self.torque_tol_tight_device = "" # optional
         self.locking_mechanism = "" # e.g. Helicoil
         self.prevailing_torque = None # only used if *LOCKING_MECHANISM = yes
         self.loading_plane_factor = 0.0
@@ -90,7 +90,7 @@ class InputFileParser:
                             elif tmp_line[0]=="*TIGHT_TORQUE":
                                 self.tight_torque = float(tmp_line[1])
                             elif tmp_line[0]=="*TORQUE_TOL_TIGHT_DEVICE":
-                                self.torque_tol_tight_device = float(tmp_line[1])
+                                self.torque_tol_tight_device = tmp_line[1]
                             elif tmp_line[0]=="*LOCKING_MECHANISM":
                                 self.locking_mechanism = tmp_line[1]
                             elif tmp_line[0]=="*PREVAILING_TORQUE":
@@ -221,7 +221,7 @@ class InputFileParser:
         print("*COF_CLAMP:                  {0:^}".format(str(self.cof_clamp)))
         print("*COF_BOLT:                   {0:^}".format(str(self.cof_bolt)))
         print("*TIGHT_TORQUE:               {0:^}".format(str(self.tight_torque)))
-        print("*TORQUE_TOL_TIGHT_DEVICE:    {0:^}".format(str(self.torque_tol_tight_device)))
+        print("*TORQUE_TOL_TIGHT_DEVICE:    {0:^}".format(self.torque_tol_tight_device))
         print("*LOCKING_MECHANISM:          {0:^}".format(self.locking_mechanism))
         print("*PREVAILING_TORQUE:          {0:^}".format(str(self.prevailing_torque)))
         print("*LOADING_PLANE_FACTOR:       {0:^}".format(str(self.loading_plane_factor)))

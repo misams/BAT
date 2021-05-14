@@ -13,7 +13,7 @@ class GuiInputHandler:
         self.bolt_material = ""
         self.cof_bolt = None # optional [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
         self.tight_torque = 0.0 # also use "STD"
-        self.torque_tol_tight_device = 0.0 # optional
+        self.torque_tol_tight_device = ""
         self.locking_mechanism = "" # e.g. Helicoil
         self.prevailing_torque = None # [min, max] only used if *LOCKING_MECHANISM = yes
         self.loading_plane_factor = 0.0
@@ -63,6 +63,8 @@ class GuiInputHandler:
             compare_items.append("*TIGHT_TORQUE")
         if self.torque_tol_tight_device != inp_file.torque_tol_tight_device:
             compare_items.append("*TORQUE_TOL_TIGHT_DEVICE")
+            print(repr(self.torque_tol_tight_device))
+            print(repr(inp_file.torque_tol_tight_device))
         if self.locking_mechanism != inp_file.locking_mechanism:
             compare_items.append("*LOCKING_MECHANISM")
         if self.prevailing_torque != inp_file.prevailing_torque and self.locking_mechanism=="yes":
@@ -140,7 +142,7 @@ class GuiInputHandler:
                 comment="[mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]")
             output_str += "    *TIGHT_TORQUE = {0:.2f} # {comment:^}\n".format(self.tight_torque,\
                 comment="tightening torque WITH prevailing torque")
-            output_str += "    *TORQUE_TOL_TIGHT_DEVICE = {0:.2f} # {comment:^}\n".format(self.torque_tol_tight_device, \
+            output_str += "    *TORQUE_TOL_TIGHT_DEVICE = {0:^} # {comment:^}\n".format(self.torque_tol_tight_device, \
                 comment="torque wrench tolerance")
             output_str += "    *LOCKING_MECHANISM = {0:^} # {comment:^}\n".format(self.locking_mechanism, \
                 comment="\"yes\" or \"no\", e.g. yes for Helicoil")
@@ -235,7 +237,7 @@ class GuiInputHandler:
         print("*COF_CLAMP:                  {0:^}".format(str(self.cof_clamp)))
         print("*COF_BOLT:                   {0:^}".format(str(self.cof_bolt)))
         print("*TIGHT_TORQUE:               {0:^}".format(str(self.tight_torque)))
-        print("*TORQUE_TOL_TIGHT_DEVICE:    {0:^}".format(str(self.torque_tol_tight_device)))
+        print("*TORQUE_TOL_TIGHT_DEVICE:    {0:^}".format(self.torque_tol_tight_device))
         print("*LOCKING_MECHANISM:          {0:^}".format(self.locking_mechanism))
         print("*PREVAILING_TORQUE:          {0:^}".format(str(self.prevailing_torque)))
         print("*LOADING_PLANE_FACTOR:       {0:^}".format(str(self.loading_plane_factor)))

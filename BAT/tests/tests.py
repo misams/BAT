@@ -30,7 +30,7 @@ def tests():
     print("clamped parts compliance: {0:.3e} mm/N".format(ana_ecss.delta_c))
     print("force ratio PHI:          {0:.3f}".format(ana_ecss.Phi))
     print("Torque incl. Mp:          {0:.2f} Nm".format(ana_ecss.inp_file.tight_torque))
-    print("Torque wrench scatter: +/-{0:.2f} Nm".format(ana_ecss.inp_file.torque_tol_tight_device))
+    print("Torque wrench scatter: +/-{0:^} Nm".format(ana_ecss.inp_file.torque_tol_tight_device))
     print("Prevailing torque Mp:     {0:.2f} / {1:.2f} Nm".format(\
         ana_ecss.inp_file.prevailing_torque[0], ana_ecss.inp_file.prevailing_torque[1]))
     print("F_M_min:                  {0:.1f} N".format(ana_ecss.F_M[0])) # 5717.85N FM_min p.106
