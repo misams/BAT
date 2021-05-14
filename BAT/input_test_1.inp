@@ -40,11 +40,11 @@
 
 # Definition of factors of safety
 *FOS_DEFINITION
-    *FOS_Y = 2.00 # yield
-    *FOS_U = 3.00 # ultimate
-    *FOS_SLIP = 2.00 # slippage
-    *FOS_GAP = 2.00 # gapping
-    *FOS_FIT = 1.50 # fitting-factor
+    *FOS_Y = 1.00 # yield
+    *FOS_U = 1.00 # ultimate
+    *FOS_SLIP = 1.00 # slippage
+    *FOS_GAP = 1.00 # gapping
+    *FOS_FIT = 1.00 # fitting-factor
 *FOS_DEFINITION_END
 
 # Definition of bolt loads
@@ -86,6 +86,7 @@ Bolt:33 3135.19 93.38 0.00
 Bolt:34 3526.25 173.37 0.00
 Bolt:35 3814.39 261.87 0.00
 Bolt:36 3990.86 356.19 0.00
+Bolt:gap 8460 1.0 0.0
 *BOLT_LOAD_DEFINITION_END
 
 # Definition of temperature environment
