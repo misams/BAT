@@ -2,7 +2,7 @@
 #                                      #
 # BAT Input File                       #
 #                                      #
-# Created: 14-05-2021 21:03:12         #
+# Created: 16-05-2021 18:35:42         #
 # Unit System: mm, N, Nm               #
 #                                      #
 ########################################
@@ -86,7 +86,7 @@ Bolt:33 3135.19 93.38 0.00
 Bolt:34 3526.25 173.37 0.00
 Bolt:35 3814.39 261.87 0.00
 Bolt:36 3990.86 356.19 0.00
-Bolt:gap 8460.00 1.00 0.00
+Bolt:gap 18460.00 1.00 0.00
 *BOLT_LOAD_DEFINITION_END
 
 # Definition of temperature environment

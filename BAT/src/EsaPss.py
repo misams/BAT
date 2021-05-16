@@ -183,6 +183,13 @@ class EsaPss(BoltAnalysisBase):
         # calculate yield MOS under bolt head / first clamped part after tightening
         self.MOS_pres = self._mos_pres(self.F_M[1])
         #
+        # analyze gapping limit (force where gapping occurs)
+        FA_gap_limit = [self.F_V[0]/(1-self.Phi_n), self.F_V[1]/(1-self.Phi_n)] # [min, max]
+        FSA_at_gap_limit = [FA_gap_limit[0]*self.Phi_n, FA_gap_limit[1]*self.Phi_n] # additional bolt force at gapping limit
+        print("*** Gapping Summary ***")
+        print("FA_gap_limit  [N]: {0:.1f} / {1:.1f}".format(FA_gap_limit[0], FA_gap_limit[1]))
+        print("FSA_at_gap_limit [N]: {0:.1f} / {1:.1f}".format(FSA_at_gap_limit[0], FSA_at_gap_limit[1]))
+        #
         # perform calculation for all bolts / loadcases
         sum_FPA = 0.0
         sum_FQ = 0.0
@@ -229,21 +236,34 @@ class EsaPss(BoltAnalysisBase):
             else:
                 bolt_sig_y = self.materials.materials[self.inp_file.bolt_material].sig_y
                 bolt_sig_u = self.materials.materials[self.inp_file.bolt_material].sig_u
+            #
+            # check if gapping is present (only check max-gap-limit --> always limiting factor)
+            if FA > FA_gap_limit[1]:
+                FSA_gap_corr = FSA_at_gap_limit[1]+(FA-FA_gap_limit[1]) # gapping
+                print("{0:^} -> MOS_y_gapCorr_max used at {1:.1f}N".format(bi[0], \
+                    self.F_V[1]+FSA_at_gap_limit[1]+(FA-FA_gap_limit[1])))
+                gap_check = True
+            else:
+                FSA_gap_corr = FSA # NOT gapping
+                gap_check = False
+            #
             # yield bolt margin (with 50% tau relaxation; see VDI2230 ch. 5.5.2.1)
             MOS_y = bolt_sig_y/math.sqrt( ((self.F_V[1]+\
-                FSA*self.inp_file.fos_y)/self.used_bolt.As)**2 +\
+                FSA_gap_corr*self.inp_file.fos_y)/self.used_bolt.As)**2 +\
                     3*(0.5*self.tau[1])**2 )-1
+            #
             # ultimate bolt margin (with 50% tau relaxation; see VDI2230 ch. 5.5.2.1)
             MOS_u = bolt_sig_u/math.sqrt( ((self.F_V[1]+\
-                FSA*self.inp_file.fos_u)/self.used_bolt.As)**2 +\
+                FSA_gap_corr*self.inp_file.fos_u)/self.used_bolt.As)**2 +\
                     3*(0.5*self.tau[1])**2 )-1
+            #
             # yield margin for pressure under bolt head
-            MOS_loc_pres = self._mos_pres(self.F_V[1]+FSA*self.inp_file.fos_y,\
+            MOS_loc_pres = self._mos_pres(self.F_V[1]+FSA_gap_corr*self.inp_file.fos_y,\
                 self.inp_file.temp_use_vdi_method)
             # save data for each bolt/loadcase to result dict
             # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
             self.bolt_results.update({bi[0] : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap,\
-                MOS_y, MOS_u, MOS_loc_pres]})
+                MOS_y, MOS_u, MOS_loc_pres, gap_check]})
         # calculate global slippage margin
         # total lateral joint force which can be transmitted via friction
         F_tot_lat = (sum_F_V_mean-sum_FPA)*self.inp_file.cof_clamp*self.inp_file.nmbr_shear_planes
@@ -252,3 +272,6 @@ class EsaPss(BoltAnalysisBase):
             self.MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
         else:
             self.MOS_glob_slip = math.inf
+        #
+        # finally clean margins in self.bolt_results --> set >1000% to inf & <1000% to -inf
+        self._clean_margins()

@@ -254,10 +254,14 @@ class BoltAnalysisBase(ABC):
         min_mos = [math.inf, math.inf, math.inf, math.inf, math.inf]
         for lc_name, lc in self.bolt_results.items():
             bolt_nmbr += 1 # count bolts / loadcases
-            #         lc[0   1   2     3   4             5        6       7     8           ]
-            # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
-            output_str += "|{0:^8d}|{1:^12}|{2:^12.1f}|{3:^12.1f}|{4:^12.1f}|{5:^12.1f}|{6:^12.0%}|{7:^12.0%}|{8:^12.0%}|{9:^12.0%}|\n"\
+            #         lc[0   1   2     3   4             5        6       7     8             9        ]
+            # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres, gap_check]
+            output_str += "|{0:^8d}|{1:^12}|{2:^12.1f}|{3:^12.1f}|{4:^12.1f}|{5:^12.1f}|{6:^12.0%}|{7:^12.0%}|{8:^12.0%}|{9:^12.0%}|"\
                 .format(bolt_nmbr, lc_name, lc[0], lc[1], lc[2], lc[3], lc[4], lc[5], lc[6], lc[7])
+            if lc[9] is True:
+                output_str += "GC\n"
+            else:
+                output_str += '\n'
             # get mininum margins of safety
             min_mos = [min(min_mos[0], lc[4]), min(min_mos[1], lc[5]), \
                 min(min_mos[2], lc[6]), min(min_mos[3], lc[7]), min(min_mos[4], lc[8])]
@@ -462,3 +466,20 @@ class BoltAnalysisBase(ABC):
                     str(datetime.now().strftime("%d-%m-%Y %H:%M:%S"))))
         # return string
         return self._get_output_str()
+
+    # clean margins in self.bolt_results --> set >1000% to inf & <1000% to -inf
+    def _clean_margins(self):
+        #        [0   1   2     3   4             5        6       7     8             9        ]
+        # value: [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres, gap_check]
+        for key, value in self.bolt_results.items():
+            # MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres
+            for i in [4, 5, 6, 7, 8]:
+                if value[i]*100 > 1000:
+                    value[i] = math.inf
+                elif value[i]*100 < -1000:
+                    value[i] = -math.inf
+            # global slippage margin
+            if self.MOS_glob_slip*100 > 1000:
+                self.MOS_glob_slip = math.inf
+            elif self.MOS_glob_slip*100 < -1000:
+                self.MOS_glob_slip = -math.inf
