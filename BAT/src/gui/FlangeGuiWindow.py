@@ -12,7 +12,7 @@ from PyQt5.Qt import Qt
 Bolted-Flange-Window
 """
 class FlangeWindow(QtWidgets.QMainWindow):
-    def __init__(self, ui_dir, loadsTable=None, tabWidget=None):
+    def __init__(self, init_dict, ui_dir, loadsTable=None, tabWidget=None):
         super(FlangeWindow, self).__init__()
         # item to be modified in main-window
         self.loadsTabletoBeModified = loadsTable
@@ -27,6 +27,7 @@ class FlangeWindow(QtWidgets.QMainWindow):
         #
         # set widgets pointers and connections
         #
+        self.tabWidget = self.findChild(QtWidgets.QTabWidget, "tabWidget")
         self.nmbrBolts = self.findChild(QtWidgets.QSpinBox, "nmbrBolts")
         self.lineEditPcd = self.findChild(QtWidgets.QLineEdit, "lineEditPcd")
         self.lineEditHNeutral = self.findChild(QtWidgets.QLineEdit, "lineEditHNeutral")
@@ -52,44 +53,42 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.Fbs_tors_array = None
         #
         # INIT GUI
-        self.init_gui()
+        self.init_gui(init_dict)
 
     # init gui - default settings
-    def init_gui(self):
+    def init_gui(self, init_dict):
+        # disable arbitrary flange tab (under development)
+        self.tabWidget.setTabEnabled(1, False)
         # set default neutral line location and shear load distribution
-        self.lineEditHNeutral.setText("0.5")
-        self.radioEqual.setChecked(True)
+        self.nmbrBolts.setValue(init_dict["nmbr_bolts"])
+        self.lineEditPcd.setText(str(init_dict["pcd"]))
+        self.lineEditHNeutral.setText(str(init_dict["nl_loc"]))
+        if init_dict["fq_dist"] == "EQUAL":
+            self.radioEqual.setChecked(True)
+        else:
+            self.radioSine.setChecked(True)
         # force components table init
         self.forceCompTable.setColumnCount(4)
         self.forceCompTable.insertRow(0)
         self.forceCompTable.setHorizontalHeaderLabels(\
             ["FX\n[N]", "FY\n[N]", "FZ\n[N]", "Remark"])
         self.forceCompTable.horizontalHeader().setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-        self.forceCompTable.setItem(0,0,QtWidgets.QTableWidgetItem("0.0"))
-        self.forceCompTable.setItem(0,1,QtWidgets.QTableWidgetItem("0.0"))
-        self.forceCompTable.setItem(0,2,QtWidgets.QTableWidgetItem("0.0"))
-        self.forceCompTable.setItem(0,3,QtWidgets.QTableWidgetItem("e.g. 1000kg + 1.2g down"))
+        self.forceCompTable.setItem(0,0,QtWidgets.QTableWidgetItem(str(init_dict["force_comp"][0])))
+        self.forceCompTable.setItem(0,1,QtWidgets.QTableWidgetItem(str(init_dict["force_comp"][1])))
+        self.forceCompTable.setItem(0,2,QtWidgets.QTableWidgetItem(str(init_dict["force_comp"][2])))
+        self.forceCompTable.setItem(0,3,QtWidgets.QTableWidgetItem(init_dict["force_remark"]))
         # force location table init
         self.forceLocTable.setColumnCount(3)
         self.forceLocTable.insertRow(0)
         self.forceLocTable.setHorizontalHeaderLabels(\
-            ["X\n[mm]", "Y\n[mm]", "Z\n[mm]"])
+            ["X (long.)\n[mm]", "Y (lat.)\n[mm]", "Z (vert.)\n[mm]"])
         self.forceLocTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.forceLocTable.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         self.forceLocTable.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        self.forceLocTable.setItem(0,0,QtWidgets.QTableWidgetItem("0.0"))
-        self.forceLocTable.setItem(0,1,QtWidgets.QTableWidgetItem("0.0"))
-        self.forceLocTable.setItem(0,2,QtWidgets.QTableWidgetItem("0.0"))
-        ## FOR TEST PURPOSE ONLY ##
-        self.nmbrBolts.setValue(36)
-        self.lineEditPcd.setText("800")
-        self.forceCompTable.setItem(0,0,QtWidgets.QTableWidgetItem("5000.0"))
-        self.forceCompTable.setItem(0,1,QtWidgets.QTableWidgetItem("8000.0"))
-        self.forceCompTable.setItem(0,2,QtWidgets.QTableWidgetItem("10000.0"))
-        self.forceLocTable.setItem(0,0,QtWidgets.QTableWidgetItem("2000.0"))
-        self.forceLocTable.setItem(0,1,QtWidgets.QTableWidgetItem("500.0"))
-        self.forceLocTable.setItem(0,2,QtWidgets.QTableWidgetItem("100.0"))
-
+        self.forceLocTable.setItem(0,0,QtWidgets.QTableWidgetItem(str(init_dict["force_loc"][0])))
+        self.forceLocTable.setItem(0,1,QtWidgets.QTableWidgetItem(str(init_dict["force_loc"][1])))
+        self.forceLocTable.setItem(0,2,QtWidgets.QTableWidgetItem(str(init_dict["force_loc"][2])))
+        
     # BUTTON - click "Calculate Bolt Forces"
     def click_calculate(self):
         # calculate bolt loads for circular-flange
@@ -97,64 +96,91 @@ class FlangeWindow(QtWidgets.QMainWindow):
 
     # BUTTON - click "Write Bolt Forces to Load-Table"
     def click_writeToTable(self):
-        # switch to "Loads-Tab"
-        self.tabWidgetToBeModified.setCurrentIndex(3)
-        # clear loadsTable and delete all rows - empty table
-        self.loadsTabletoBeModified.clearContents()
-        self.loadsTabletoBeModified.setRowCount(0)
-        # write loads to table
-        for i, row in enumerate(self.phi_array):
-            self.loadsTabletoBeModified.insertRow(i) # insert row
-            #bolt_id_string = "Bolt:{0:d}-{1:.1f}°".format(i+1,row) # long id-string
-            bolt_id_string = "Bolt:{0:d}".format(i+1)
-            self.loadsTabletoBeModified.setItem(i,0,QtWidgets.QTableWidgetItem(bolt_id_string))
-            self.loadsTabletoBeModified.setItem(i,1,QtWidgets.QTableWidgetItem("{0:.2f}".format(self.Fbn_array[i])))
-            self.loadsTabletoBeModified.setItem(i,2,QtWidgets.QTableWidgetItem("{0:.2f}".format(self.Fbs_array[i])))
-            self.loadsTabletoBeModified.setItem(i,3,QtWidgets.QTableWidgetItem("{0:.2f}".format(0)))
+        try:
+            # switch to "Loads-Tab"
+            self.tabWidgetToBeModified.setCurrentIndex(3)
+            # clear loadsTable and delete all rows - empty table
+            self.loadsTabletoBeModified.clearContents()
+            self.loadsTabletoBeModified.setRowCount(0)
+            # write loads to table
+            for i, row in enumerate(self.phi_array):
+                self.loadsTabletoBeModified.insertRow(i) # insert row
+                #bolt_id_string = "Bolt:{0:d}-{1:.1f}°".format(i+1,row) # long id-string
+                bolt_id_string = "Bolt:{0:d}".format(i+1)
+                self.loadsTabletoBeModified.setItem(i,0,QtWidgets.QTableWidgetItem(bolt_id_string))
+                self.loadsTabletoBeModified.setItem(i,1,QtWidgets.QTableWidgetItem("{0:.2f}".format(self.Fbn_array[i])))
+                self.loadsTabletoBeModified.setItem(i,2,QtWidgets.QTableWidgetItem("{0:.2f}".format(self.Fbs_array[i])))
+                self.loadsTabletoBeModified.setItem(i,3,QtWidgets.QTableWidgetItem("{0:.2f}".format(0)))
+        except Exception as e:
+            print("Circular-Flange Exception B: " + str(e))
 
     # circular flange analysis
     def circ_flange(self):
-        # inputs
-        n_bolts = int(self.nmbrBolts.value())
-        pcd = float(self.lineEditPcd.text()) # [mm]
-        h_neutral = float(self.lineEditHNeutral.text())
-        xF = float(self.forceLocTable.item(0,0).text())# [mm] normal distance from I/F flange
-        yF = float(self.forceLocTable.item(0,1).text()) # [mm] lateral distance from circular center
-        zF = float(self.forceLocTable.item(0,2).text()) # [mm] vertical distance from circular center
-        Fx = float(self.forceCompTable.item(0,0).text()) # [N] axial force
-        Fy = float(self.forceCompTable.item(0,1).text()) # [N] lateral force 1
-        Fz = float(self.forceCompTable.item(0,2).text()) # [N] lateral force 2
-        #
-        # analysis
-        Fax = Fx # [N] axial force acting on bolt flange
-        Flat = np.sqrt(Fy**2+Fz**2) # [N] lateral force acting on bolt flange
-        lat_arm = np.sqrt(yF**2+zF**2) # [mm] lateral force arm for torque
-        Mblat = Flat*xF/1000 # [Nm] bending moment on bolt flange caused by lateral force
-        Mbax = Fax*lat_arm/1000 # [Nm] bending moment on bolt flange caused by axial force
-        Mt = Flat*lat_arm/1000 # [Nm] torsion moment by lateral offset
-        #
-        self.phi_array = np.arange(0,360,360/n_bolts) # vector of bolt angles (start at top)
-        z_arm_array = pcd/2*np.cos(np.deg2rad(self.phi_array)) # bolt central distance in z-dir
-        z_neutral_array = z_arm_array+pcd/2-pcd*h_neutral # distance from neutral line
-        # axial bolt force Fbn (Mblat+Mbax --> conservative)
-        self.Fbn_array = (Mblat+Mbax)*1000*z_neutral_array/np.sum(z_neutral_array**2) + Fax/n_bolts
-        # shear load caused by lateral force
-        if self.radioEqual.isChecked(): # homogenous shear force distribution
-            print("Bolt Shear Load Distribution: EQUAL")
-            self.Fbs_lat_array = np.ones(n_bolts)*Flat/n_bolts
-        else: # sine shear force distribution
-            print("Bolt Shear Load Distribution: SINE")
-            sin_norm = np.abs(np.sin(np.deg2rad(self.phi_array)))
-            self.Fbs_lat_array = Flat/np.sum(sin_norm)*sin_norm
-        # overall bolt shear force: add shear force out of moment Mt
-        self.Fbs_tors_array = 2*Mt*1000/(n_bolts*pcd)*np.sign(np.sin(np.deg2rad(self.phi_array+0.01*360/n_bolts)))
-        self.Fbs_array = np.abs(self.Fbs_lat_array + self.Fbs_tors_array) # linear addition (correct for worst case bolt locations)
+        try:
+            # inputs
+            n_bolts = int(self.nmbrBolts.value())
+            pcd = float(self.lineEditPcd.text()) # [mm]
+            h_neutral = float(self.lineEditHNeutral.text())
+            xF = float(self.forceLocTable.item(0,0).text())# [mm] normal distance from I/F flange
+            yF = float(self.forceLocTable.item(0,1).text()) # [mm] lateral distance from circular center
+            zF = float(self.forceLocTable.item(0,2).text()) # [mm] vertical distance from circular center
+            Fx = float(self.forceCompTable.item(0,0).text()) # [N] axial force
+            Fy = float(self.forceCompTable.item(0,1).text()) # [N] lateral force 1
+            Fz = float(self.forceCompTable.item(0,2).text()) # [N] lateral force 2
+            #
+            # analysis
+            Fax = Fx # [N] axial force acting on bolt flange
+            Flat = np.sqrt(Fy**2+Fz**2) # [N] lateral force acting on bolt flange
+            lat_arm = np.sqrt(yF**2+zF**2) # [mm] lateral force arm for torque
+            Mblat = Flat*xF/1000 # [Nm] bending moment on bolt flange caused by lateral force
+            Mbax = Fax*lat_arm/1000 # [Nm] bending moment on bolt flange caused by axial force
+            Mt = Flat*lat_arm/1000 # [Nm] torsion moment by lateral offset
+            #
+            self.phi_array = np.arange(0,360,360/n_bolts) # vector of bolt angles (start at top)
+            z_arm_array = pcd/2*np.cos(np.deg2rad(self.phi_array)) # bolt central distance in z-dir
+            z_neutral_array = z_arm_array+pcd/2-pcd*h_neutral # distance from neutral line
+            # axial bolt force Fbn (Mblat+Mbax --> conservative)
+            self.Fbn_array = (Mblat+Mbax)*1000*z_neutral_array/np.sum(z_neutral_array**2) + Fax/n_bolts
+            # shear load caused by lateral force
+            if self.radioEqual.isChecked(): # homogenous shear force distribution
+                print("Bolt Shear Load Distribution: EQUAL")
+                self.Fbs_lat_array = np.ones(n_bolts)*Flat/n_bolts
+            else: # sine shear force distribution
+                print("Bolt Shear Load Distribution: SINE")
+                sin_norm = np.abs(np.sin(np.deg2rad(self.phi_array)))
+                self.Fbs_lat_array = Flat/np.sum(sin_norm)*sin_norm
+            # overall bolt shear force: add shear force out of moment Mt
+            self.Fbs_tors_array = 2*Mt*1000/(n_bolts*pcd)*np.sign(np.sin(np.deg2rad(self.phi_array+0.01*360/n_bolts)))
+            self.Fbs_array = np.abs(self.Fbs_lat_array + self.Fbs_tors_array) # linear addition (correct for worst case bolt locations)
 
-        # Plot bolt forces in window
-        w_plot = PlotWindowCircFlange(self.phi_array, self.Fbn_array, self.Fbs_array, \
-            self.Fbs_lat_array, self.Fbs_tors_array)
-        w_plot.setWindowModality(Qt.ApplicationModal) # lock main window
-        w_plot.show()
+            # Plot bolt forces in window
+            w_plot = PlotWindowCircFlange(self.phi_array, self.Fbn_array, self.Fbs_array, \
+                self.Fbs_lat_array, self.Fbs_tors_array)
+            w_plot.setWindowModality(Qt.ApplicationModal) # lock main window
+            w_plot.show()
+        except Exception as e:
+            print("Circular-Flange Exception A: " + str(e))
+
+    # get circular-flange dict with all values
+    def get_circular_flange_dict(self):
+        if self.radioEqual.isChecked():
+            fq_dist = "EQUAL"
+        else:
+            fq_dist = "SINE"
+        circular_flange_dict = {
+            "nmbr_bolts" : int(self.nmbrBolts.value()),
+            "pcd" : float(self.lineEditPcd.text()),
+            "nl_loc" : float(self.lineEditHNeutral.text()),
+            "fq_dist" : fq_dist,
+            "force_loc" : [float(self.forceLocTable.item(0,0).text()), \
+                           float(self.forceLocTable.item(0,1).text()), \
+                           float(self.forceLocTable.item(0,2).text())],
+            "force_comp" : [float(self.forceCompTable.item(0,0).text()), \
+                            float(self.forceCompTable.item(0,1).text()), \
+                            float(self.forceCompTable.item(0,2).text())],
+            "force_remark" : self.forceCompTable.item(0,3).text()
+        }
+        return circular_flange_dict
 
     # arbitrary flange analysis
     def arb_flange(self):

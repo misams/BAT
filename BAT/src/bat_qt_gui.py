@@ -1,6 +1,7 @@
 import sys
 import os
 import logging
+import webbrowser
 from pathlib import Path
 from collections import Counter, OrderedDict
 from src.functions.InputFileParser import InputFileParser
@@ -47,6 +48,7 @@ class Ui(QtWidgets.QMainWindow):
         self.actionQuit.triggered.connect(self.close)
         self.actionBolted_Flange.triggered.connect(self.menuBoltedFlange)
         self.w_bolted_flange = None # bolted flange window
+        self.actionBAT_Help.triggered.connect(self.menuBatHelp)
         self.actionAbout_BAT.triggered.connect(self.menuAboutBat)
         # base options
         self.radioEsaPss = self.findChild(QtWidgets.QRadioButton, "radioEsaPss")
@@ -133,6 +135,9 @@ class Ui(QtWidgets.QMainWindow):
         self.radioJointMean = self.findChild(QtWidgets.QRadioButton, "radioJointMean")
         # Output tab
         self.textEditOutput = self.findChild(QtWidgets.QTextEdit, "textEditOutput")
+        # initial dict for circular flange clean initialization
+        self.zero_init_dict = {"nmbr_bolts" : 0, "pcd" : 0.0, "nl_loc" : 0.5, "fq_dist" : "EQUAL",
+            "force_loc" : [0.0, 0.0, 0.0], "force_comp" : [0.0, 0.0, 0.0], "force_remark" : "-"}
         #
         # INIT GUI
         self.init_gui()
@@ -227,6 +232,10 @@ class Ui(QtWidgets.QMainWindow):
         font.setStyleHint(QtGui.QFont.TypeWriter)
         self.textEditOutput.setCurrentFont(font)
         self.textEditOutput.setLineWrapMode(QtWidgets.QTextEdit.NoWrap) # do not wrap text
+        # Circular-Flange window
+        # initialize bolted flange window
+        self.w_bolted_flange = FlangeWindow(self.zero_init_dict,\
+            self.ui_dir, self.loadsTable, self.tabWidget)
 
     # erase gui - reset / new
     def erase_gui(self):
@@ -282,6 +291,9 @@ class Ui(QtWidgets.QMainWindow):
         self.textEditOutput.clear()
         self.tabWidget.setTabEnabled(5, False)
         self.tabWidget.setCurrentIndex(0)
+        # erase bolted flange window
+        self.w_bolted_flange = FlangeWindow(self.zero_init_dict,\
+            self.ui_dir, self.loadsTable, self.tabWidget)
         # finally set statusbar
         self.statusbar.showMessage("New BAT project created")
 
@@ -630,6 +642,14 @@ class Ui(QtWidgets.QMainWindow):
         self.inputFile.setText(openedFileName)
         outp_file = openedFileName.split('.')[0]+".out"
         self.outputFile.setText(outp_file)
+        # Cicular Flange window
+        # initialize bolted flange window
+        if self.openedInputFile.is_circularflange():
+            self.w_bolted_flange = FlangeWindow(self.openedInputFile.circular_flange,\
+                self.ui_dir, self.loadsTable, self.tabWidget)
+        else:
+            self.w_bolted_flange = FlangeWindow(self.zero_init_dict,\
+                self.ui_dir, self.loadsTable, self.tabWidget)
         # finally set statusbar
         self.statusbar.showMessage("Input File Opened: "+openedFileName)
 
@@ -797,6 +817,8 @@ class Ui(QtWidgets.QMainWindow):
             self.gih.joint_mos_type = "min"
         else:
             self.gih.joint_mos_type = "mean"
+        # Circular flange window
+        self.gih.circular_flange = self.w_bolted_flange.get_circular_flange_dict()
         
     # MENU - About BAT
     def menuAboutBat(self):
@@ -810,11 +832,15 @@ class Ui(QtWidgets.QMainWindow):
         msg.setStandardButtons(QMessageBox.Ok)
         retval = msg.exec_()
 
+    # MENU - BAT Help
+    def menuBatHelp(self):
+        # path of help-PDF file
+        pdf_file_path = os.path.join(Path(self.ui_dir).parents[1],"doc/BAT_doc/LaTex/BAT_UserManual.pdf")
+        # open PDF in webbrowser
+        webbrowser.open_new(pdf_file_path)
+
     # MENU - Bolted-flange
     def menuBoltedFlange(self, checked):
-        if self.w_bolted_flange is None:
-            print("Bolted-Flange window created")
-            self.w_bolted_flange = FlangeWindow(self.ui_dir, self.loadsTable, self.tabWidget)
         self.w_bolted_flange.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_bolted_flange.show()
 

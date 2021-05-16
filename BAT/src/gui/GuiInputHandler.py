@@ -39,6 +39,16 @@ class GuiInputHandler:
         self.temp_bolt_material = "" # for VDI method
         self.temp_use_shim = None # for VDI method
         self.temp_clamped_parts = {} # for VDI method
+        # circular-flange (OPTIONAL)
+        self.circular_flange = {
+            "nmbr_bolts" : 0,
+            "pcd" : 0.0,
+            "nl_loc" : 0.0,
+            "fq_dist" : "",
+            "force_loc" : [],
+            "force_comp" : [],
+            "force_remark" : ""
+        }
 
     # compare GuiInputHandler and InputFileParser (without VDI thermal method)
     def compareInput(self, inp_file : InputFileParser):
@@ -63,8 +73,6 @@ class GuiInputHandler:
             compare_items.append("*TIGHT_TORQUE")
         if self.torque_tol_tight_device != inp_file.torque_tol_tight_device:
             compare_items.append("*TORQUE_TOL_TIGHT_DEVICE")
-            print(repr(self.torque_tol_tight_device))
-            print(repr(inp_file.torque_tol_tight_device))
         if self.locking_mechanism != inp_file.locking_mechanism:
             compare_items.append("*LOCKING_MECHANISM")
         if self.prevailing_torque != inp_file.prevailing_torque and self.locking_mechanism=="yes":
@@ -105,6 +113,10 @@ class GuiInputHandler:
             compare_items.append("*TEMP_USE_SHIM")
         if self.temp_clamped_parts != inp_file.temp_clamped_parts:
             compare_items.append("*TEMP_CLAMPED_PARTS")
+        if self.circular_flange != inp_file.circular_flange:
+            compare_items.append("*CIRCULAR_FLANGE")
+            print(repr(self.circular_flange))
+            print(repr(inp_file.circular_flange))
         # return compare_items
         return compare_items
 
@@ -221,7 +233,28 @@ class GuiInputHandler:
                 if key != 0: # ignore shim
                     output_str += "    *TEMP_CLAMPED_PART({0:d}) = [{1:^}, {2:.2f}]\n".format(\
                         key, value[0], value[1])
-            output_str += "*TEMP_DEFINITION_END\n"
+            output_str += "*TEMP_DEFINITION_END\n\n"
+            # OPTIONAL circular-flange
+            output_str += "# OPTIONAL\n"
+            output_str += "# Circular-Flange environment\n"
+            output_str += "*CIRCULAR_FLANGE\n"
+            output_str += "    *NMBR_BOLTS = {0:d} # {comment:^}\n".format(self.circular_flange["nmbr_bolts"], \
+                comment="number of circular bolts")
+            output_str += "    *PCD = {0:.2f} # {comment:^}\n".format(self.circular_flange["pcd"], \
+                comment="[mm] pitch circle diamter of bolts")
+            output_str += "    *NL_LOC = {0:.2f} # {comment:^}\n".format(self.circular_flange["nl_loc"], \
+                comment="[0 to 1] neutral line location in Z-direction")
+            output_str += "    *FQ_DISTRIBUTION = {0:^} # {comment:^}\n".format(self.circular_flange["fq_dist"], \
+                comment="[EQUAL: stiff flange, SINE: soft flange]")
+            output_str += "    *FORCE_LOCATION = [{0:.2f}, {1:.2f}, {2:.2f}] # {comment:^}\n".format(\
+                self.circular_flange["force_loc"][0], self.circular_flange["force_loc"][1],\
+                self.circular_flange["force_loc"][2], comment="[X-long, Y-lat, Z-vert] in [mm], external force location")
+            output_str += "    *FORCE_COMPS= [{0:.2f}, {1:.2f}, {2:.2f}] # {comment:^}\n".format(\
+                self.circular_flange["force_comp"][0], self.circular_flange["force_comp"][1],\
+                self.circular_flange["force_comp"][2], comment="[FX-long, FY-lat, FZ-vert] in [N], external force components")
+            output_str += "    *FORCE_REMARK = {0:^} # {comment:^}\n".format(self.circular_flange["force_remark"], \
+                comment="force component remark")
+            output_str += "*CIRCULAR_FLANGE_END\n"
             # write GUI input to BAT input file
             fid.write(output_str)
 
@@ -259,4 +292,5 @@ class GuiInputHandler:
         print("*TEMP_BOLT_MATERIAL:         {0:^}".format(str(self.temp_bolt_material)))
         print("*TEMP_USE_SHIM:              {0:^}".format(str(self.temp_use_shim)))
         print("*TEMP_CLAMPED_PARTS(i):      {0:^}".format(str(self.temp_clamped_parts)))
+        print("*CIRCULAR_FLANGE:            " + str(self.circular_flange))
         print()

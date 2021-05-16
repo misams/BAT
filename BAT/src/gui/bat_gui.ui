@@ -1232,6 +1232,7 @@ Excel</string>
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionBAT_Help"/>
     <addaction name="actionAbout_BAT"/>
    </widget>
    <widget class="QMenu" name="menuTools">
@@ -1283,6 +1284,11 @@ Excel</string>
   <action name="actionBolted_Flange">
    <property name="text">
     <string>Bolted Flange</string>
+   </property>
+  </action>
+  <action name="actionBAT_Help">
+   <property name="text">
+    <string>BAT Help</string>
    </property>
   </action>
  </widget>
@@ -1344,9 +1350,9 @@ Excel</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupLocking"/>
-  <buttongroup name="buttonGroupJointType"/>
-  <buttongroup name="buttonGroupMethods"/>
   <buttongroup name="buttonGroupMosType"/>
+  <buttongroup name="buttonGroupMethods"/>
+  <buttongroup name="buttonGroupJointType"/>
+  <buttongroup name="buttonGroupLocking"/>
  </buttongroups>
 </ui>

@@ -2,7 +2,7 @@
 #                                      #
 # BAT Input File                       #
 #                                      #
-# Created: 16-05-2021 18:35:42         #
+# Created: 16-05-2021 22:11:52         #
 # Unit System: mm, N, Nm               #
 #                                      #
 ########################################
@@ -106,3 +106,15 @@ Bolt:gap 18460.00 1.00 0.00
     *TEMP_CLAMPED_PART(2) = [S355, 5.00]
     *TEMP_CLAMPED_PART(3) = [S355, 5.00]
 *TEMP_DEFINITION_END
+
+# OPTIONAL
+# Circular-Flange environment
+*CIRCULAR_FLANGE
+    *NMBR_BOLTS = 10 # number of circular bolts
+    *PCD = 400.00 # [mm] pitch circle diamter of bolts
+    *NL_LOC = 0.50 # [0 to 1] neutral line location in Z-direction
+    *FQ_DISTRIBUTION = EQUAL # [EQUAL: stiff flange, SINE: soft flange]
+    *FORCE_LOCATION = [2000.00, 500.00, 100.00] # [X-long, Y-lat, Z-vert] in [mm], external force location
+    *FORCE_COMPS= [4000.00, 5000.00, 2000.00] # [FX-long, FY-lat, FZ-vert] in [N], external force components
+    *FORCE_REMARK = first try # force component remark
+*CIRCULAR_FLANGE_END

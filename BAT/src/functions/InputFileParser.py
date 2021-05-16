@@ -46,6 +46,16 @@ class InputFileParser:
         self.temp_bolt_material = "" # for VDI method
         self.temp_use_shim = None # for VDI method
         self.temp_clamped_parts = {} # for VDI method
+        # circular-flange (OPTIONAL)
+        self.circular_flange = {
+            "nmbr_bolts" : 0,
+            "pcd" : 0.0,
+            "nl_loc" : 0.0,
+            "fq_dist" : "",
+            "force_loc" : [],
+            "force_comp" : [],
+            "force_remark" : ""
+        }
         # read input file and process
         self._read_input_file()
 
@@ -194,6 +204,33 @@ class InputFileParser:
                                 tmp_cp_str = tmp_line[1].replace('[','').replace(']','').split(',')
                                 self.temp_clamped_parts.update({cp_nmbr : (tmp_cp_str[0].strip(), float(tmp_cp_str[1]))})
                             line = fid.readline()
+                    # OPTIONAL: circular-flange
+                    elif line.lstrip()[0:16]=="*CIRCULAR_FLANGE":
+                        line = fid.readline()
+                        # loop through circular-flange block
+                        while line.lstrip()[0:20]!="*CIRCULAR_FLANGE_END":
+                            tmp_line = self._proc_line(line) # process inp-file line
+                            if tmp_line[0]=="*NMBR_BOLTS":
+                                self.circular_flange["nmbr_bolts"] = int(tmp_line[1])
+                            elif tmp_line[0]=="*PCD":
+                                self.circular_flange["pcd"] = float(tmp_line[1])
+                            elif tmp_line[0]=="*NL_LOC":
+                                self.circular_flange["nl_loc"] = float(tmp_line[1])
+                            elif tmp_line[0]=="*FQ_DISTRIBUTION":
+                                self.circular_flange["fq_dist"] = tmp_line[1]
+                            elif tmp_line[0]=="*FORCE_LOCATION":
+                                # get force locations
+                                tmp_str = tmp_line[1].replace('[','').replace(']','').split(',')
+                                self.circular_flange["force_loc"] = \
+                                    [float(tmp_str[0]), float(tmp_str[1]), float(tmp_str[2])]
+                            elif tmp_line[0]=="*FORCE_COMPS":
+                                # get force components
+                                tmp_str = tmp_line[1].replace('[','').replace(']','').split(',')
+                                self.circular_flange["force_comp"] = \
+                                    [float(tmp_str[0]), float(tmp_str[1]), float(tmp_str[2])]
+                            elif tmp_line[0]=="*FORCE_REMARK":
+                                self.circular_flange["force_remark"] = tmp_line[1]
+                            line = fid.readline()
                     line = fid.readline()
         # catch exceptions and re-throw
         except FileNotFoundError as fnf_error:
@@ -208,6 +245,22 @@ class InputFileParser:
         # delete preceding whitespaces; replace comment chr and split string
         tmp = line.lstrip().replace('#', '=').split('=')
         return [tmp[0].strip(), tmp[1].strip()]
+
+    # check if Circular-Flange environment is in input file
+    def is_circularflange(self):
+        empty_circular_flange = {
+            "nmbr_bolts" : 0,
+            "pcd" : 0.0,
+            "nl_loc" : 0.0,
+            "fq_dist" : "",
+            "force_loc" : [],
+            "force_comp" : [],
+            "force_remark" : ""
+        }
+        if self.circular_flange == empty_circular_flange:
+            return False
+        else:
+            return True
 
     # print function of input file
     # DEBUGGING function
@@ -243,4 +296,5 @@ class InputFileParser:
         print("*TEMP_BOLT_MATERIAL:         {0:^}".format(str(self.temp_bolt_material)))
         print("*TEMP_USE_SHIM:              {0:^}".format(str(self.temp_use_shim)))
         print("*TEMP_CLAMPED_PARTS(i):      {0:^}".format(str(self.temp_clamped_parts)))
+        print("*CIRCULAR_FLANGE:            " + str(self.circular_flange))
         print()
