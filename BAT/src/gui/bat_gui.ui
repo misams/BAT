@@ -654,6 +654,33 @@
              </property>
             </widget>
            </item>
+           <item row="12" column="3">
+            <widget class="QToolButton" name="toolButton_torque_info">
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="3">
+            <widget class="QCheckBox" name="checkBox_same_mu">
+             <property name="text">
+              <string>equal µ</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="3">
+            <widget class="QToolButton" name="toolButton_mu_info">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>?</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
@@ -1350,9 +1377,9 @@ Excel</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupMosType"/>
-  <buttongroup name="buttonGroupMethods"/>
   <buttongroup name="buttonGroupJointType"/>
+  <buttongroup name="buttonGroupMethods"/>
   <buttongroup name="buttonGroupLocking"/>
+  <buttongroup name="buttonGroupMosType"/>
  </buttongroups>
 </ui>

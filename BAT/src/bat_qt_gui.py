@@ -73,8 +73,14 @@ class Ui(QtWidgets.QMainWindow):
         self.cofBoltHeadMax = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMax")
         self.cofThreadMin = self.findChild(QtWidgets.QLineEdit, "cofThreadMin")
         self.cofThreadMax = self.findChild(QtWidgets.QLineEdit, "cofThreadMax")
+        self.toolButton_mu_info = self.findChild(QtWidgets.QToolButton, "toolButton_mu_info")
+        #self.toolButton_mu_info.clicked.connect(???)
+        self.checkBox_same_mu = self.findChild(QtWidgets.QCheckBox, "checkBox_same_mu")
+        #self.checkBox_same_mu.stateChanged.connect(???)
         self.tightTorque = self.findChild(QtWidgets.QLineEdit, "tightTorque")
         self.tightTorque.textChanged.connect(self.torqueTolClicked)
+        self.toolButton_torque_info = self.findChild(QtWidgets.QToolButton, "toolButton_torque_info")
+        #self.toolButton_torque_info.clicked.connect(???)
         self.tightTorqueTolCombo = self.findChild(QtWidgets.QComboBox, "tightTorqueTolCombo")
         self.tightTorqueTol = self.findChild(QtWidgets.QLineEdit, "tightTorqueTol")
         self.tightTorqueTolCombo.activated.connect(self.torqueTolClicked)
@@ -544,6 +550,7 @@ class Ui(QtWidgets.QMainWindow):
             self.torqueTolClicked() # refresh self.tightTorqueTol
         else:
             self.tightTorqueTolCombo.setCurrentIndex(6) # set to "User Input"
+            self.tightTorqueTol.setEnabled(True)
             self.tightTorqueTol.setText(self.openedInputFile.torque_tol_tight_device)
         #
         if self.openedInputFile.locking_mechanism == "yes":

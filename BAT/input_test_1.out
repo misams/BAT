@@ -1,5 +1,5 @@
 ===============================================================================================
-|                              BAT Bolt Analysis Input (v0.7.5)                               |
+|                           BAT Bolt Analysis Input (v0.7.6-ALPHA)                            |
 |                                                                                             |
 |                                    bolt analysis test 1                                     |
 ===============================================================================================
@@ -21,7 +21,7 @@
 | Factor of safety ultimate                FOS_u:                                 1.00        |
 | Factor of safety slippage                FOS_slip:                              1.00        |
 | Factor of safety gapping                 FOS_gap:                               1.00        |
-| Fitting-Factor                           FOS_fit:                               1.00        |
+| Fitting-Factor                           FITF:                                  1.00        |
 |---------------------------------------------------------------------------------------------|
 | Clamped-Part (0) - Shim / Washer         Material:                              8.8         |
 |                                          Thickness [mm]:                        1.50        |
@@ -87,9 +87,10 @@
 | Min. MoS (yield) under bolt head / washer [%]:    |         -          |        151%        |
 ===============================================================================================
 ===============================================================================================================================
-| Number |   Bolt /   | Axial Bolt | Shear Bolt | Add. Bolt  | Red. Clmp. |  Slippage  |  Gapping   |   Yield    |  Ultimate  |
-|   #    |  Loadcase  |   Force    |   Force    |   Force    |   Force    |    MoS     |    MoS     |    MoS     |    MoS     |
-|        |            |   FA [N]   |   FQ [N]   |  FSA [N]   |  FPA [N]   |  FoS=1.0   |  FoS=1.0   |  FoS=1.0   |  FoS=1.0   |
+| Number |  Bolt-ID   | Axial Bolt | Shear Bolt | Add. Bolt  | Red. Clmp. |  Slippage  |  Gapping   |   Yield    |  Ultimate  |
+|   #    |     or     |   Force    |   Force    |   Force    |   Force    |    MOS     |    MOS     |    MOS     |    MOS     |
+|        |  Loadcase  |   FA [N]   |   FQ [N]   |  FSA [N]   |  FPA [N]   |            |            |            |            |
+|        |            |  FITF=1.0  |  FITF=1.0  |            |            |  FOS=1.0   |  FOS=1.0   |  FOS=1.0   |  FOS=1.0   |
 ===============================================================================================================================
 |   1    |   Bolt:1   |   4050.3   |   453.5    |   366.5    |   3683.8   |    158%    |    93%     |    48%     |    97%     |
 |   2    |   Bolt:2   |   3990.9   |   550.8    |   361.1    |   3629.7   |    116%    |    96%     |    48%     |    97%     |
@@ -135,4 +136,4 @@
 |-------------------------------------------------------------------------+------------+------------+------------+------------|
 |           Minimum MoS against Yield under bolt head / first clamp part: |     -      |     -      |    83%     |     -      |
 ===============================================================================================================================
-BAT Analysis Timestamp: 16-05-2021 22:20:05
+BAT Analysis Timestamp: 20-05-2021 21:17:05

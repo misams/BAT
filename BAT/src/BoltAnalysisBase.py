@@ -121,7 +121,7 @@ class BoltAnalysisBase(ABC):
         output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
             "Factor of safety gapping", "FOS_gap:", self.inp_file.fos_gap)
         output_str += "| {0:<40} {1:<30} {2:^20.2f}|\n".format(\
-            "Fitting-Factor", "FOS_fit:", self.inp_file.fos_fit)
+            "Fitting-Factor", "FITF:", self.inp_file.fos_fit)
         output_str += "|{0:-^93}|\n".format('-') # empty line within section
         # list clamped parts with properties
         cp = self.inp_file.clamped_parts
@@ -241,13 +241,16 @@ class BoltAnalysisBase(ABC):
         output_str += "{0:=^127}\n".format('=')
         # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
         output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
-            .format("Number", "Bolt /", "Axial Bolt", "Shear Bolt", "Add. Bolt", "Red. Clmp.", \
+            .format("Number", "Bolt-ID", "Axial Bolt", "Shear Bolt", "Add. Bolt", "Red. Clmp.", \
             "Slippage", "Gapping", "Yield", "Ultimate")
         output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
-            .format("#", "Loadcase", "Force", "Force", "Force", "Force", "MoS", "MoS", "MoS", "MoS")
+            .format("#", "or", "Force", "Force", "Force", "Force", "MOS", "MOS", "MOS", "MOS")
         output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
-            .format("", "", "FA [N]", "FQ [N]", "FSA [N]", "FPA [N]", "FoS="+str(self.inp_file.fos_slip),\
-            "FoS="+str(self.inp_file.fos_gap), "FoS="+str(self.inp_file.fos_y), "FoS="+str(self.inp_file.fos_u))
+            .format("", "Loadcase", "FA [N]", "FQ [N]", "FSA [N]", "FPA [N]", "", "", "", "")
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
+            .format("", "", "FITF="+str(self.inp_file.fos_fit), "FITF="+str(self.inp_file.fos_fit), "", "", \
+                "FOS="+str(self.inp_file.fos_slip), "FOS="+str(self.inp_file.fos_gap),\
+                "FOS="+str(self.inp_file.fos_y), "FOS="+str(self.inp_file.fos_u))
         output_str += "{0:=^127}\n".format('=')
         # loop through bolts / loadcases
         bolt_nmbr = 0 # to fill Number-# column
