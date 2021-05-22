@@ -11,13 +11,15 @@ from src.gui.GuiInputHandler import GuiInputHandler
 from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMenu
 from PyQt5.Qt import Qt, QApplication, QClipboard
-from src.gui.FlangeGuiWindow import FlangeWindow # currently dummy-only
+from src.gui.FlangeGuiWindow import FlangeWindow
 from src.gui.BoltInfoWindow import BoltInfoWindow
 from src.gui.MatInfoWindow import MatInfoWindow
+from src.gui.TorqueInfoWindow import TorqueInfoWindow
+from src.gui.FrictionInfoWindow import FrictionInfoWindow
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
-    def __init__(self, ui_dir, materials=None, bolts=None, inp_dir=None, bat_version="-"):
+    def __init__(self, ui_dir, materials=None, bolts=None, inp_dir=None, bat_version="-", fric_info_table_path=None):
         super(Ui, self).__init__()
         # load *.ui file
         self.ui_dir = ui_dir
@@ -30,6 +32,7 @@ class Ui(QtWidgets.QMainWindow):
         self.gih = None # GUI input handler
         self.inp_dir = inp_dir # default directory of input-files
         self.bat_version = bat_version # BAT software version
+        self.fric_info_table_path = fric_info_table_path # path to friction_info_table.png
         #
         # set window title
         #
@@ -70,17 +73,19 @@ class Ui(QtWidgets.QMainWindow):
         self.toolButton_mat_info = self.findChild(QtWidgets.QToolButton, "toolButton_mat_info")
         self.toolButton_mat_info.clicked.connect(self.matInfoPressed)
         self.cofBoltHeadMin = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMin")
+        self.cofBoltHeadMin.textChanged.connect(self.useEqualMuChecked)
         self.cofBoltHeadMax = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMax")
+        self.cofBoltHeadMax.textChanged.connect(self.useEqualMuChecked)
         self.cofThreadMin = self.findChild(QtWidgets.QLineEdit, "cofThreadMin")
         self.cofThreadMax = self.findChild(QtWidgets.QLineEdit, "cofThreadMax")
         self.toolButton_mu_info = self.findChild(QtWidgets.QToolButton, "toolButton_mu_info")
-        #self.toolButton_mu_info.clicked.connect(???)
+        self.toolButton_mu_info.clicked.connect(self.muInfoPressed)
         self.checkBox_same_mu = self.findChild(QtWidgets.QCheckBox, "checkBox_same_mu")
-        #self.checkBox_same_mu.stateChanged.connect(???)
+        self.checkBox_same_mu.stateChanged.connect(self.useEqualMuChecked)
         self.tightTorque = self.findChild(QtWidgets.QLineEdit, "tightTorque")
         self.tightTorque.textChanged.connect(self.torqueTolClicked)
         self.toolButton_torque_info = self.findChild(QtWidgets.QToolButton, "toolButton_torque_info")
-        #self.toolButton_torque_info.clicked.connect(???)
+        self.toolButton_torque_info.clicked.connect(self.torqueInfoPressed)
         self.tightTorqueTolCombo = self.findChild(QtWidgets.QComboBox, "tightTorqueTolCombo")
         self.tightTorqueTol = self.findChild(QtWidgets.QLineEdit, "tightTorqueTol")
         self.tightTorqueTolCombo.activated.connect(self.torqueTolClicked)
@@ -93,6 +98,8 @@ class Ui(QtWidgets.QMainWindow):
         self.loadingPlaneFactor = self.findChild(QtWidgets.QLineEdit, "loadingPlaneFactor")
         self.w_bolt_info = None # bolt info window
         self.w_mat_info = None # material info window
+        self.w_mu_info = None # mu (CoF) info window
+        self.w_torque_info = None # torque info window
         # Clamped Parts tab
         self.cofClampedParts = self.findChild(QtWidgets.QLineEdit, "cofClampedParts")
         self.numberOfShearPlanes = self.findChild(QtWidgets.QSpinBox, "numberOfShearPlanes")
@@ -167,6 +174,7 @@ class Ui(QtWidgets.QMainWindow):
         self.radioJointMean.setEnabled(True)
         self.radioLockYes.setChecked(True)
         self.comboBoltMaterialT.setEnabled(False) # disable VDI bolt material
+        self.checkBox_same_mu.setChecked(True) # set "equal mu" as default
         # fill bolt combo-boxes
         for key in self.bolts.bolts:
             self.comboBolt.addItem(key)
@@ -257,6 +265,7 @@ class Ui(QtWidgets.QMainWindow):
         self.cofThreadMax.setText('')
         self.cofBoltHeadMin.setText('')
         self.cofThreadMin.setText('')
+        self.checkBox_same_mu.setChecked(True)
         # fill torques etc
         self.tightTorque.setText('')
         self.tightTorqueTol.setText('')
@@ -340,6 +349,17 @@ class Ui(QtWidgets.QMainWindow):
             self.combo_shim.setEnabled(False)
         # check VDI checkbox
         self.useVdiChecked()
+
+    # use equal-mu checkbox
+    def useEqualMuChecked(self):
+        if self.checkBox_same_mu.isChecked():
+            self.cofThreadMin.setEnabled(False)
+            self.cofThreadMin.setText(self.cofBoltHeadMin.text())
+            self.cofThreadMax.setEnabled(False)
+            self.cofThreadMax.setText(self.cofBoltHeadMax.text())
+        else:
+            self.cofThreadMin.setEnabled(True)
+            self.cofThreadMax.setEnabled(True)
 
     # use VDI-thermal method checkbox
     def useVdiChecked(self):
@@ -486,10 +506,20 @@ class Ui(QtWidgets.QMainWindow):
                 else:
                     print("Method not implemented in current BAT version.")
             else:
-                print("Input does not match opened input file - save input file first.")
-                self.messageBox(QMessageBox.Warning, "GUI Input vs. Input-File Missmatch",\
-                    "Input does not match opened input file - save input file first.",\
-                    "Deviating Items:\n{0:^}".format(str(compare)))
+                msg_ret = self.messageBox(QMessageBox.Warning, "GUI Input vs. Input-File Missmatch",\
+                    "Input does not match opened input file - do you want to overwrite " +\
+                    "values and run BAT-analysis?\n\nDeviating Items:\n{0:^}".format(str(compare)),\
+                        None, "YesCancel")
+                # quick save and run
+                if msg_ret == QMessageBox.Yes:
+                    # save input file
+                    self.gih.saveInputFile(self.openedInputFile.input_file)
+                    print("Input-file saved: " + str(self.openedInputFile.input_file))
+                    # reopen new input file
+                    self.openInput(str(self.openedInputFile.input_file))
+                    # directly run BAT analysis
+                    self.calculatePressed() 
+                    print("Input file saved and BAT analysis executed (Save and Run - Yes)")
         except ValueError as e:
             print("No analysis performed --> input not correct (ValueError: " + str(e) + ")")
 
@@ -535,11 +565,15 @@ class Ui(QtWidgets.QMainWindow):
         if index >= 0: # set VDI temp_bolt_material
             self.comboBoltMaterialT.setCurrentIndex(index)
         # fill CoFs
+        self.checkBox_same_mu.setChecked(False)
         # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
         self.cofBoltHeadMax.setText(str(self.openedInputFile.cof_bolt[0]))
         self.cofThreadMax.setText(str(self.openedInputFile.cof_bolt[1]))
         self.cofBoltHeadMin.setText(str(self.openedInputFile.cof_bolt[2]))
         self.cofThreadMin.setText(str(self.openedInputFile.cof_bolt[3]))
+        if self.openedInputFile.cof_bolt[0] == self.openedInputFile.cof_bolt[1] \
+            and self.openedInputFile.cof_bolt[2] == self.openedInputFile.cof_bolt[3]:
+            self.checkBox_same_mu.setChecked(True)
         # fill torques etc
         self.tightTorque.setText(str(self.openedInputFile.tight_torque))
         if self.openedInputFile.torque_tol_tight_device.find('%')!=-1:
@@ -864,6 +898,8 @@ class Ui(QtWidgets.QMainWindow):
             msg.setStandardButtons(QMessageBox.Ok)
         elif button_opt == "OkCancel":
             msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        elif button_opt == "YesCancel":
+            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
         return msg.exec_()
 
     # use data in clipboard and paste loads from excel
@@ -922,7 +958,6 @@ class Ui(QtWidgets.QMainWindow):
     # tool-Button: Bolt-Info
     def boltInfoPressed(self):
         if self.w_bolt_info is None:
-            print("Bolt-Info window created")
             self.w_bolt_info = BoltInfoWindow(self.bolts.db_path)
         self.w_bolt_info.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_bolt_info.show()
@@ -930,7 +965,6 @@ class Ui(QtWidgets.QMainWindow):
     # tool-Button: Mat-Info
     def matInfoPressed(self, checked):
         if self.w_mat_info is None:
-            print("Material-Info window created")
             self.w_mat_info = MatInfoWindow(self.materials)
         self.w_mat_info.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_mat_info.show()
@@ -948,3 +982,20 @@ class Ui(QtWidgets.QMainWindow):
                     self.tightTorqueTol.setText("{0:.2f}".format(tightTol))
                 else:
                     pass # empty self.tightTorque
+
+    # tool-Button: Torque-Info
+    def torqueInfoPressed(self):
+        # read values 
+        bolt = self.bolts.bolts[self.comboBolt.currentText()]
+        bolt_mat = self.materials.materials[self.comboBoltMaterial.currentText()]
+        mu_th_min = self.cofThreadMin.text()
+        mu_uh_min = self.cofBoltHeadMin.text()
+        # create window
+        self.w_torque_info = TorqueInfoWindow(bolt, bolt_mat, mu_th_min, mu_uh_min)
+        self.w_torque_info.show()
+
+    # tool-Button: mu-Info
+    def muInfoPressed(self):
+        # create window
+        self.w_mu_info = FrictionInfoWindow(self.fric_info_table_path)
+        self.w_mu_info.show()

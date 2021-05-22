@@ -937,7 +937,7 @@
            <item row="4" column="2">
             <widget class="QLabel" name="label_43">
              <property name="text">
-              <string>FOS&lt;sub&gt;fit&lt;/sub&gt;:</string>
+              <string>FITF:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

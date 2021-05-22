@@ -144,6 +144,15 @@ def main():
             inp_dir = work_dir
         print("BAT input-file directory  : " + inp_dir)
         logging.info("BAT input-file directory  : " + inp_dir)
+        # path to friction_info_table.png
+        fric_info_table_path = config["PATHS"]["fric_info_table_path"]
+        if fric_info_table_path != "DEFAULT":
+            fric_info_table_path = os.path.abspath(fric_info_table_path)
+        else:
+            fric_info_table_path = work_dir+"/doc/BAT_doc/friction_info_table.png"
+        print("BAT friction_info_table.png location  : " + fric_info_table_path)
+        logging.info("BAT friction_info_table.png location  : " + fric_info_table_path)
+
         #
         # run BAT analysis
         #
@@ -160,7 +169,7 @@ def main():
         if args.gui is True:
             print("BAT GUI initialized...rock it!")
             app = QtWidgets.QApplication(sys.argv)
-            window = bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__)
+            window = bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__, fric_info_table_path)
             window.show()
             sys.exit(app.exec_())
         elif args.torque_table is True:

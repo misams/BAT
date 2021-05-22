@@ -51,6 +51,7 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.Fbs_array = None
         self.Fbs_lat_array = None
         self.Fbs_tors_array = None
+        self.circ_analysis_summary = None
         #
         # INIT GUI
         self.init_gui(init_dict)
@@ -135,6 +136,7 @@ class FlangeWindow(QtWidgets.QMainWindow):
             Mblat = Flat*xF/1000 # [Nm] bending moment on bolt flange caused by lateral force
             Mbax = Fax*lat_arm/1000 # [Nm] bending moment on bolt flange caused by axial force
             Mt = Flat*lat_arm/1000 # [Nm] torsion moment by lateral offset
+            self.circ_analysis_summary = [Fax, Flat, Mblat, Mbax, Mt]
             #
             self.phi_array = np.arange(0,360,360/n_bolts) # vector of bolt angles (start at top)
             z_arm_array = pcd/2*np.cos(np.deg2rad(self.phi_array)) # bolt central distance in z-dir
@@ -155,7 +157,7 @@ class FlangeWindow(QtWidgets.QMainWindow):
 
             # Plot bolt forces in window
             w_plot = PlotWindowCircFlange(self.phi_array, self.Fbn_array, self.Fbs_array, \
-                self.Fbs_lat_array, self.Fbs_tors_array)
+                self.Fbs_lat_array, self.Fbs_tors_array, self.circ_analysis_summary)
             w_plot.setWindowModality(Qt.ApplicationModal) # lock main window
             w_plot.show()
         except Exception as e:
@@ -279,7 +281,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
 # plot window for circular-flange
 class PlotWindowCircFlange(QtWidgets.QMainWindow):
-    def __init__(self, phi_array, Fbn_array, Fbs_array, Fbs_lat_array, Fbs_tors_array):
+    def __init__(self, phi_array, Fbn_array, Fbs_array, Fbs_lat_array, Fbs_tors_array, circ_analysis_summary):
         super(PlotWindowCircFlange, self).__init__()
 
         sc = MplCanvas(self, width=7, height=6, dpi=100)
@@ -300,8 +302,23 @@ class PlotWindowCircFlange(QtWidgets.QMainWindow):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(toolbar)
         layout.addWidget(sc)
+        # add label with summary text
+        # self.circ_analysis_summary = [Fax, Flat, Mblat, Mbax, Mt]
+        label_summary_str = "\nCircular-Flange Analysis Summary:\n\n"
+        label_summary_str += "Axial Force:            Fax   = {0:.1f} N\n".format(circ_analysis_summary[0])
+        label_summary_str += "Lateral Force :         Flat  = {0:.1f} N\n".format(circ_analysis_summary[1])
+        label_summary_str += "Lateral Bending Moment: Mblat = {0:.1f} Nm\n".format(circ_analysis_summary[2])
+        label_summary_str += "Axial Bending Moment:   Mbax  = {0:.1f} Nm\n".format(circ_analysis_summary[3])
+        label_summary_str += "Torsional Moment:       Mt    = {0:.1f} Nm\n".format(circ_analysis_summary[4])
+        label = QtWidgets.QLabel()
+        font = QtGui.QFont("Monospace", 9) # set monospace font (platform independent)
+        font.setStyleHint(QtGui.QFont.TypeWriter)
+        label.setFont(font)
+        label.setText(label_summary_str)
+        layout.addWidget(label)
 
         # Create a placeholder widget to hold our toolbar and canvas.
         widget = QtWidgets.QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+        self.resize(800,600)
