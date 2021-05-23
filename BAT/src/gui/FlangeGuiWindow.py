@@ -1,12 +1,14 @@
-import sys
+import sys, os
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.Qt import Qt
+from src.gui.ImageInfoWindow import ImageInfoWindow
 
 """
 Bolted-Flange-Window
@@ -44,6 +46,9 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.buttonCalc.clicked.connect(self.click_calculate)
         self.buttonWriteResults = self.findChild(QtWidgets.QPushButton, "buttonWriteResults")
         self.buttonWriteResults.clicked.connect(self.click_writeToTable)
+        self.toolButton_help = self.findChild(QtWidgets.QToolButton, "toolButton_help")
+        self.toolButton_help.clicked.connect(self.helpButtonPressed)
+        self.w_help_window = None # help window
         #
         # analysis results
         self.phi_array = None
@@ -271,6 +276,15 @@ class FlangeWindow(QtWidgets.QMainWindow):
         ax.set_ylim([-300, 300])
         plt.draw()
         plt.show()
+
+    # tool-button: help
+    def helpButtonPressed(self):
+        # create image help window
+        help_image = os.path.join(Path(self.ui_dir).parents[1],"doc/BAT_doc/flange_1_help.png")
+        self.w_help_window = ImageInfoWindow(\
+            help_image, 770, 600, "Circular Flange Help Window")
+        self.w_help_window.setWindowModality(Qt.WindowModal) # do not lock main window
+        self.w_help_window.show()
 
 # plot-window with matplotlib am pyQt5
 class MplCanvas(FigureCanvasQTAgg):

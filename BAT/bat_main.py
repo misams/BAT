@@ -14,11 +14,13 @@ import src.ThreadPullOut as thread_pull_out
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.7.6-ALPHA"
+__version__ = "0.7.6"
 """
 Change Log:
-v0.7.6 - xx.xx.2021
--?
+v0.7.6 - 23.05.2021
+- help windows added (CoF, torque, cicular flange)
+- equal mu function added
+- quick save before analysis (save and run)
 v0.7.5 - 16.05.2021
 - circular Flange-GUI
 - tightening torque tolerance drop-down included

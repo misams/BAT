@@ -2,7 +2,7 @@
 #                                      #
 # BAT Input File                       #
 #                                      #
-# Created: 22-05-2021 18:55:08         #
+# Created: 23-05-2021 13:15:38         #
 # Unit System: mm, N, Nm               #
 #                                      #
 ########################################
@@ -17,7 +17,7 @@
     *BOLT = H_M8 # or e.g. S_M8x1 for fine thread
     *BOLT_MATERIAL = A4-80
     *COF_BOLT = [0.12, 0.14, 0.07, 0.04] # [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
-    *TIGHT_TORQUE = 13.50 # tightening torque WITH prevailing torque
+    *TIGHT_TORQUE = 13.20 # tightening torque WITH prevailing torque
     *TORQUE_TOL_TIGHT_DEVICE = 3% # torque wrench tolerance
     *LOCKING_MECHANISM = yes # "yes" or "no", e.g. yes for Helicoil
     *PREVAILING_TORQUE = [0.30, 1.00] # [min, max] only used if *LOCKING_MECHANISM = yes

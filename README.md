@@ -39,12 +39,13 @@ $ python bat_main.py --help
 ```shell
 $ python bat_main.py --gui
 ```
-![Example Screenshot BAT v0.7.5](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
+![Example Screenshot BAT v0.7.6](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
 
 ## Changelog
 
 Release | Date | Info
 --- | --- | ---
+v0.7.6 | 23.05.2021 |- help windows added (CoF, torque, cicular flange)<br>- equal mu function added<br>- quick save before analysis (save and run)
 v0.7.5 | 16.05.2021 | - circular Flange-GUI<br>- tightening torque tolerance drop-down included<br>- MOS correction if gapping occurs
 v0.7.4 | 04.04.2021 | - bolt and material info button and windows added to GUI<br>- Tools/Bolted Flange disabled (under development)
 v0.7.3 | 30.01.2021 | - MIN / MAX prevailing torque M_p added

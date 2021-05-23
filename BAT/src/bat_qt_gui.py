@@ -15,7 +15,7 @@ from src.gui.FlangeGuiWindow import FlangeWindow
 from src.gui.BoltInfoWindow import BoltInfoWindow
 from src.gui.MatInfoWindow import MatInfoWindow
 from src.gui.TorqueInfoWindow import TorqueInfoWindow
-from src.gui.FrictionInfoWindow import FrictionInfoWindow
+from src.gui.ImageInfoWindow import ImageInfoWindow
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
@@ -959,14 +959,16 @@ class Ui(QtWidgets.QMainWindow):
     def boltInfoPressed(self):
         if self.w_bolt_info is None:
             self.w_bolt_info = BoltInfoWindow(self.bolts.db_path)
-        self.w_bolt_info.setWindowModality(Qt.ApplicationModal) # lock main window
+        self.w_bolt_info.setWindowModality(Qt.WindowModal) # do not lock main window
+        #self.w_bolt_info.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_bolt_info.show()
 
     # tool-Button: Mat-Info
     def matInfoPressed(self, checked):
         if self.w_mat_info is None:
             self.w_mat_info = MatInfoWindow(self.materials)
-        self.w_mat_info.setWindowModality(Qt.ApplicationModal) # lock main window
+        self.w_mat_info.setWindowModality(Qt.WindowModal) # do not lock main window
+        #self.w_mat_info.setWindowModality(Qt.ApplicationModal) # lock main window
         self.w_mat_info.show()
 
     # if tightTorqueTolCombo clicked
@@ -992,10 +994,13 @@ class Ui(QtWidgets.QMainWindow):
         mu_uh_min = self.cofBoltHeadMin.text()
         # create window
         self.w_torque_info = TorqueInfoWindow(bolt, bolt_mat, mu_th_min, mu_uh_min)
+        self.w_torque_info.setWindowModality(Qt.WindowModal) # do not lock main window
         self.w_torque_info.show()
 
     # tool-Button: mu-Info
     def muInfoPressed(self):
-        # create window
-        self.w_mu_info = FrictionInfoWindow(self.fric_info_table_path)
+        # create image help window
+        self.w_mu_info = ImageInfoWindow(\
+            self.fric_info_table_path, 770, 600, "Friction Info Window")
+        self.w_mu_info.setWindowModality(Qt.WindowModal) # do not lock main window
         self.w_mu_info.show()
