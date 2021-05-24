@@ -1,5 +1,12 @@
 \chapter{Introduction}
-This document will include the \textbf{BAT} (Bolt Analysis Tool) User Manual.
+This document includes the Bolt Analysis Tool \textbf{BAT} user manual and a description of the 
+used analyis methodologies and algorithms. 
+
+The \emph{Bolt Analyis Tool} \textbf{BAT} is an input file based \href{https://www.python.org}{Python3}
+command line tool for multi-bolt analyses. A graphical user interface \emph{GUI} designed in 
+\href{https://pypi.org/project/PyQt5/}{pyQt5} is available for easy useability. 
+\textbf{BAT} is an open source project and is released 
+under \href{https://www.gnu.org/licenses/gpl-3.0.txt}{GNU General Public License v3.0}. 
 \begin{colbox}{BAT Info:}
   The current design status of the \emph{Bolt Analysis Tool} \textbf{BAT} only includes 
   \emph{Concentric Axially Loaded Bolted Joints}. 
@@ -49,12 +56,28 @@ The \emph{additional axial bolt load} $F_{SA}$ and the \emph{additional axial pl
   F_{SA} = n \Phi F_A, \qquad F_{PA} = (1-n \Phi) F_A
   \label{equ:FSA_FPA}
 \end{equation}
-where $\Phi$ is the load factor, which is defined as the quotient of the additional bolt load $F_{SA}$ 
-and the axial working load component $F_A$. $n$ is the \emph{loading plane factor} and is crucial
-for determining the size of the additional bolt loads. As seen in \fig{fig:joint_diagram} $F_{KR}$ is the residual
+where $\Phi$ is the load factor. $n$ is the \emph{loading plane factor} and is crucial
+for determining the size of the additional bolt loads (for detailed information see §\ref{sec:n}). 
+As seen in \fig{fig:joint_diagram} $F_{KR}$ is the residual
 clamping load at the interface during relief or loading by $F_{PA}$ and after embedding in service and 
 $F_S$ is the maximum bolt load. 
+
+The load factor $\Phi$ is the quotient of the addition bolt load $F_{SA}$ and the axial working load
+component $F_A$.
+\begin{equation}
+  \Phi = \frac{F_{SA}}{F_A}
+\end{equation}
+The elastic compliance of the bolt $\delta_b$ (see §\ref{ssec:compl_bolts}), the elastic
+compliance of the clamped parts $\delta_c$ (see §\ref{ssec:compl_cp}) and an estimation
+of the load introduction factor $n$ (see §\ref{sec:n}) are required in order to deter-
+mine the load factor $\Phi$ \cite{VDI2230_1}. For a \emph{concentric loading and clamping} the
+load factor $\Phi_n$ with included loading plane factor $n$ is calculed as follows. 
+\begin{equation}
+  \Phi_n = n \cdot \frac{\delta_c}{\delta_b+\delta_c}
+\end{equation}
+
 \section{Loading Plane Factor}
+\label{sec:n}
 A simple explanation of the \emph{loading plane effect} is given in \cite{ESAPSS} and this text is 
 used directly for the description in this document. 
 
@@ -315,6 +338,7 @@ joints (TTJ) $L_{eng,sub}^{TTJ}=0.33d$.
 \end{colbox}
 
 \subsection{Compliance of Clamped Parts}
+\label{ssec:compl_cp}
 The calculation of the compliance of the clamped parts $\delta_c$ is more complicated than that of the 
 bolts presented in §\ref{ssec:compl_bolts} because of the 3-dimensional stress state in the joint that 
 is induced by the preload. The presented method \cite{ECSS_HB_32_23A} neglects the compliance of the 
@@ -405,9 +429,9 @@ $y=\nicefrac{D_{avail}}{d_h}$. The existence of a compression sleeve is determin
   \end{equation}
 \end{colbox}
 
-\section{Stesses in Bolt and Clamped-Parts}
-\subsection{Stress in bolt after tightening}
-\label{ssec:stresses}
+\chapter{Stesses in Bolt and Margins}
+\section{Stress in bolt after tightening}
+\label{sec:stresses}
 Based on §\ref{sec:preload} the stresses in the bolt after tightening can be derived. 
 The minimum and maximum shear stress in the bolt $\tau_M^{min/max}$ after tightening can be calculated
 as follows
@@ -436,7 +460,7 @@ Based on the von-Mises equivalent stress in the bolt the minimum and maximum
 \end{equation}
 where $\sigma_y$ is the bolt material yield strength and this defines the tightening status of the joint. 
 
-\subsection{Stress and margins of safety in bolt at service}
+\section{Margins of safety in bolt at service}
 The bolted joint can be loaded with an axial force $F_A$ and a shear force $F_Q$. For
 the axial loading the additional bolt load is defined in \equ{equ:FSA_FPA} and for the shar loading
 the required clamping force for friction grip per bolt is defined 
