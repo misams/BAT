@@ -6,13 +6,14 @@ import math
 Torque-Info-Window
 """
 class TorqueInfoWindow(QWidget):
-    def __init__(self, bolt, bolt_mat, mu_th_min, mu_uh_min):
+    def __init__(self, bolt, bolt_mat, mu_th_min, mu_uh_min, D_hole):
         super(TorqueInfoWindow, self).__init__()
         # set analysis variables
         self.bolt = bolt
         self.bolt_mat = bolt_mat
         self.mu_th_min = mu_th_min
         self.mu_uh_min = mu_uh_min
+        self.D_hole = D_hole
         # set window title
         self.setWindowTitle("Tightening Torque Info")
         # set layout and add widgets
@@ -20,7 +21,7 @@ class TorqueInfoWindow(QWidget):
         label = QLabel("Tightening Torque Info Text:")
         layout.addWidget(label)
         self.setLayout(layout)
-        self.resize(800, 400) # resize window
+        self.resize(800, 460) # resize window
         # add QTextEdit for file display
         textEdit = QTextEdit()
         # write text to textEdit
@@ -70,7 +71,10 @@ class TorqueInfoWindow(QWidget):
             F_M_zul.append(sig_m_zul*self.bolt.As*nue/1000)
             # tightening torque for metric threads in [Nm]
             # with 1/sin(2*lambda) for countersunk bolts
-            Dkm = (self.bolt.dh+self.bolt.d)/2 # approximate value; through hole dia. not used
+            if self.D_hole == "":
+                Dkm = (self.bolt.dh+self.bolt.d)/2 # approximate value; through hole dia. not used
+            else:
+                Dkm = (self.bolt.dh+float(self.D_hole))/2
             T_A.append(F_M_zul[-1]*(0.16*self.bolt.p+0.58*self.bolt.d2*self.mu_th_min+\
                 Dkm/(2*math.sin(self.bolt.lbd*math.pi/180/2))*self.mu_uh_min))
         # create output string
@@ -101,9 +105,16 @@ class TorqueInfoWindow(QWidget):
             output_str += "|{0:^20}|{1:^12.1f}|{2:^12.1f}|{3:^12.1f}|{4:^12.1f}|{5:^12.1f}|{6:^12.1f}|\n"\
                 .format("T_A [Nm]:", T_A[0], T_A[1], T_A[2], T_A[3], T_A[4], T_A[5])
         output_str += "{0:=^100}\n".format('=')
-        output_str += "\n# Used data for F_M and T_A calculation (apprx. value for D_km used)\n"
+        output_str += "\n--> Torque tolerance of tightening device and prevailing torque are not considered in the table.\n"
+        output_str += "\n# Used data for F_M and T_A calculation\n"
+        output_str += "Fully elastic shear stress used: Wp=d^3*pi/16 (ECSS)\n"
         output_str += "Bolt:          {0:^}\n".format(self.bolt.name)
         output_str += "Bolt Material: {0:^} (Sig_y = {1:.1f} MPa)\n".format(self.bolt_mat.name, self.bolt_mat.sig_y)
         output_str += "mu_th_min:     {0:.2f}\n".format(self.mu_th_min)
         output_str += "mu_uh_min:     {0:.2f}\n".format(self.mu_uh_min)
+        output_str += "D_km:          {0:.2f} mm ".format(Dkm)
+        if self.D_hole == "":
+            output_str += "(no D_hole specified --> apprx. D_km used)\n"
+        else:
+            output_str += "(D_hole = {0:^} mm used for D_km evaluation)\n".format(self.D_hole)
         return output_str

@@ -198,7 +198,7 @@ class Ui(QtWidgets.QMainWindow):
         self.deltaT.setText("0")
         # loads-table init
         self.loadsTable.setColumnCount(4) # init load-table
-        self.loadsTable.insertRow(0)
+        #self.loadsTable.insertRow(0)
         self.loadsTable.setHorizontalHeaderLabels(\
             ["Bolt-ID\n\nLoad-Case", "FN\n\n[N]", "FQ1\n\n[N]", "FQ2\n(optional)\n[N]"])
         self.loadsTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
@@ -295,8 +295,8 @@ class Ui(QtWidgets.QMainWindow):
         self.deltaT.setText("0")
         self.loadsTable.clearContents()
         self.loadsTable.setRowCount(0)
-        self.loadsTable.insertRow(0)
-        self.loadsTable.setItem(0,0,QtWidgets.QTableWidgetItem("test bolt"))
+        #self.loadsTable.insertRow(0)
+        #self.loadsTable.setItem(0,0,QtWidgets.QTableWidgetItem("test bolt"))
         self.checkBoxVdiThermal.setChecked(False)
         self.useShimChecked()
         # calculate tab
@@ -992,8 +992,10 @@ class Ui(QtWidgets.QMainWindow):
         bolt_mat = self.materials.materials[self.comboBoltMaterial.currentText()]
         mu_th_min = self.cofThreadMin.text()
         mu_uh_min = self.cofBoltHeadMin.text()
+        D_hole = self.throughHoleDiameter.text()
         # create window
-        self.w_torque_info = TorqueInfoWindow(bolt, bolt_mat, mu_th_min, mu_uh_min)
+        self.w_torque_info = TorqueInfoWindow(\
+            bolt, bolt_mat, mu_th_min, mu_uh_min, D_hole)
         self.w_torque_info.setWindowModality(Qt.WindowModal) # do not lock main window
         self.w_torque_info.show()
 

@@ -14,9 +14,11 @@ import src.ThreadPullOut as thread_pull_out
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.7.6"
+__version__ = "0.7.7"
 """
 Change Log:
+v0.7.7 - 27.05.2021
+- bolt-load input-file format changed (separator ',')
 v0.7.6 - 23.05.2021
 - help windows added (CoF, torque, cicular flange)
 - equal mu function added

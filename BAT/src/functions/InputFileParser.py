@@ -165,7 +165,7 @@ class InputFileParser:
                         # loop through bolt-load-definition block
                         while line.lstrip()[0:25]!="*BOLT_LOAD_DEFINITION_END":
                             # load-ID, axial-force, lateral-force-1, lateral-force-2 (optional)
-                            tmp_line = line.split()
+                            tmp_line = line.split(',')
                             if len(tmp_line)==4: # optional lat-force-2 used
                                 self.bolt_loads.append(\
                                     [tmp_line[0], float(tmp_line[1]), float(tmp_line[2]), float(tmp_line[3])])

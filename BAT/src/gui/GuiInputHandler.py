@@ -115,8 +115,6 @@ class GuiInputHandler:
             compare_items.append("*TEMP_CLAMPED_PARTS")
         if self.circular_flange != inp_file.circular_flange:
             compare_items.append("*CIRCULAR_FLANGE")
-            print(repr(self.circular_flange))
-            print(repr(inp_file.circular_flange))
         # return compare_items
         return compare_items
 
@@ -208,7 +206,7 @@ class GuiInputHandler:
             output_str += "# load/bolt-ID (max. 12 char.), axial-force, lateral-force-1, lateral-force-2 (optional)\n"
             output_str += "*BOLT_LOAD_DEFINITION\n"
             for bl in self.bolt_loads:
-                output_str += "{0:^} {1:.2f} {2:.2f} {3:.2f}\n".format(bl[0], bl[1], bl[2], bl[3])
+                output_str += "{0:^}, {1:.2f}, {2:.2f}, {3:.2f}\n".format(bl[0], bl[1], bl[2], bl[3])
             output_str += "*BOLT_LOAD_DEFINITION_END\n\n"
             # definition of temperature environment
             output_str += "# Definition of temperature environment\n"
