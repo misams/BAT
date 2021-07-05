@@ -198,8 +198,9 @@ class Ecss(BoltAnalysisBase):
         #
         # perform calculation for all bolts / loadcases
         #
-        sum_FPA = 0.0
-        sum_FQ = 0.0
+        sum_FPA = 0.0 # for global slippage margin
+        sum_FQ1 = 0.0 # sum up each FQ component for
+        sum_FQ2 = 0.0 # global slippage margin evaluation
         for bi in self.inp_file.bolt_loads:
             ffit = self.inp_file.fos_fit # fitting-factor
             # bi : ['Bolt-ID', FN, FQ1, FQ2] --> bolt forces for each bolt 'bi'
@@ -213,7 +214,8 @@ class Ecss(BoltAnalysisBase):
             FKreq = FQ/(self.inp_file.nmbr_shear_planes*self.inp_file.cof_clamp)
             # calc sums for global slippage margin
             sum_FPA += FPA
-            sum_FQ += FQ
+            sum_FQ1 += bi[2]*ffit
+            sum_FQ2 += bi[3]*ffit
             #
             # calculate local slippage margin
             if FKreq==0:
@@ -278,6 +280,7 @@ class Ecss(BoltAnalysisBase):
         # total lateral joint force which can be transmitted via friction
         F_tot_lat = (sum_F_V_mean-sum_FPA)*self.inp_file.cof_clamp*self.inp_file.nmbr_shear_planes
         # global slippage margin
+        sum_FQ = math.sqrt(sum_FQ1**2 + sum_FQ2**2)
         if sum_FQ != 0.0:
             self.MOS_glob_slip = F_tot_lat/(sum_FQ*self.inp_file.fos_slip)-1
         else:

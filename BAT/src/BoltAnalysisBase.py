@@ -419,9 +419,9 @@ class BoltAnalysisBase(ABC):
             sig_y_pres = self.materials.materials[self.inp_file.clamped_parts[1][0]].sig_y
             sig_y_pres_shim = self.materials.materials[self.inp_file.use_shim[0]].sig_y \
                 if self.inp_file.use_shim!="no" else 0.0
-        print("*** Pressure below bolt head / shim ***")
-        print("sig_y_pres:      {0:.2f} MPa".format(sig_y_pres))
-        print("sig_y_pres_shim: {0:.2f} MPa".format(sig_y_pres_shim))
+        #print("*** Pressure below bolt head / shim ***")
+        #print("sig_y_pres:      {0:.2f} MPa".format(sig_y_pres))
+        #print("sig_y_pres_shim: {0:.2f} MPa".format(sig_y_pres_shim))
         # MOS with or without washer
         if self.inp_file.use_shim != "no": # with washer
             # minimal area under bolt head
@@ -433,8 +433,8 @@ class BoltAnalysisBase(ABC):
             A_pres_2 = (self.bolts.washers[self.inp_file.use_shim[1]].dmaj**2)*math.pi/4 - \
                 (self.inp_file.through_hole_diameter**2)*math.pi/4
             MOS_pres_2 = sig_y_pres / (F_axial/A_pres_2) - 1
-            print("MOS_pres_1:      {0:.1%} MPa".format(MOS_pres_1))
-            print("MOS_pres_2:      {0:.1%} MPa".format(MOS_pres_2))
+            #print("MOS_pres_1:      {0:.1%} MPa".format(MOS_pres_1))
+            #print("MOS_pres_2:      {0:.1%} MPa".format(MOS_pres_2))
             # minimum MOS_pres
             MOS_pres = min(MOS_pres_1, MOS_pres_2)
         else: # without washer
@@ -442,7 +442,7 @@ class BoltAnalysisBase(ABC):
             A_pres = (self.used_bolt.dh**2)*math.pi/4 - \
                 (self.inp_file.through_hole_diameter**2)*math.pi/4
             MOS_pres = sig_y_pres / (F_axial/A_pres) - 1
-            print("MOS_pres:        {0:.1%} MPa".format(MOS_pres))
+            #print("MOS_pres:        {0:.1%} MPa".format(MOS_pres))
         return MOS_pres
 
     # set T_scatter
