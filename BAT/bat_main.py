@@ -19,6 +19,7 @@ __version__ = "0.7.8-ALPHA"
 Change Log:
 v0.7.8 - xx.07.2021
 - BUG in global slippage margin corrected (fixes #8)
+- shim-filter included (fixes #7)
 v0.7.7 - 27.05.2021
 - bolt-load input-file format changed (separator ',')
 v0.7.6 - 23.05.2021

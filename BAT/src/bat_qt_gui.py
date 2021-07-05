@@ -66,6 +66,7 @@ class Ui(QtWidgets.QMainWindow):
         self.radioTBJ = self.findChild(QtWidgets.QRadioButton, "radioTBJ")
         self.radioTTJ = self.findChild(QtWidgets.QRadioButton, "radioTTJ")
         self.comboBolt = self.findChild(QtWidgets.QComboBox, "comboBolt")
+        self.comboBolt.currentTextChanged.connect(self.boltComboChanged)
         self.comboBoltMaterial = self.findChild(QtWidgets.QComboBox, "comboBoltMaterial")
         self.comboBoltMaterialT = self.findChild(QtWidgets.QComboBox, "comboBoltMaterialT")
         self.toolButton_bolt_info = self.findChild(QtWidgets.QToolButton, "toolButton_bolt_info")
@@ -240,6 +241,7 @@ class Ui(QtWidgets.QMainWindow):
         self.clampedPartsTable.setCellWidget(1,1,combo_cp_mat)
         self.clampedPartsTable.setCellWidget(1,2,combo_cp_matT)
         self.useShimChecked()
+        self.boltComboChanged() # apply shim filter
         # output tab setup
         self.tabWidget.setTabEnabled(5, False) # disable output tab
         font = QtGui.QFont("Monospace", 9) # set monospace font (platform independent)
@@ -1006,3 +1008,22 @@ class Ui(QtWidgets.QMainWindow):
             self.fric_info_table_path, 770, 600, "Friction Info Window")
         self.w_mu_info.setWindowModality(Qt.WindowModal) # do not lock main window
         self.w_mu_info.show()
+
+    # if bolt-combo text changes --> apply shim filter
+    def boltComboChanged(self):
+        # get 'Mi' of selected bolt
+        filter_str = self.comboBolt.currentText().split('_')[1].split('x')[0]
+        self.combo_shim.clear() # clear shim-combo
+        shim_detected = 0
+        # apply filter to shim-combo
+        for i in self.bolts.washers:
+            cmpr_str = i.split('_')[1] # get 'Mi' of available shims
+            if filter_str == cmpr_str:
+                self.combo_shim.addItem(i)
+                shim_detected += 1
+        # info-message if NO shim available for selected 'Mi'
+        if shim_detected == 0:
+            log_str = "WARNING: no fitting shim available for selected bolt-size!"
+            print(log_str)
+            logging.warning(log_str)
+            self.messageBox(QMessageBox.Warning, "NO Shim Available", log_str)
