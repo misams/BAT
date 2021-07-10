@@ -1013,6 +1013,8 @@ class Ui(QtWidgets.QMainWindow):
     def boltComboChanged(self):
         # get 'Mi' of selected bolt
         filter_str = self.comboBolt.currentText().split('_')[1].split('x')[0]
+        if "UN" in filter_str: # modificatio for UNC and UNF bolts
+            filter_str = filter_str.split('-')[0]
         self.combo_shim.clear() # clear shim-combo
         shim_detected = 0
         # apply filter to shim-combo

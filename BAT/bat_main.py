@@ -14,12 +14,13 @@ import src.ThreadPullOut as thread_pull_out
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.7.8-ALPHA"
+__version__ = "0.7.8"
 """
 Change Log:
-v0.7.8 - xx.07.2021
+v0.7.8 - 10.07.2021
 - BUG in global slippage margin corrected (fixes #8)
 - shim-filter included (fixes #7)
+- UNC/UNF hex socket bolts and washer added to database
 v0.7.7 - 27.05.2021
 - bolt-load input-file format changed (separator ',')
 v0.7.6 - 23.05.2021

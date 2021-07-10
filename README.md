@@ -45,6 +45,7 @@ $ python bat_main.py --gui
 
 Release | Date | Info
 --- | --- | ---
+v0.7.8 | 10.07.2021 |- BUG in global slippage margin corrected (fixes #8)<br>- shim-filter included (fixes #7)<br>- UNC/UNF hex socket bolts and washer added to database
 v0.7.7 | 27.05.2021 |- bolt-load input-file format changed (separator ',')
 v0.7.6 | 23.05.2021 |- help windows added (CoF, torque, cicular flange)<br>- equal mu function added<br>- quick save before analysis (save and run)
 v0.7.5 | 16.05.2021 | - circular Flange-GUI<br>- tightening torque tolerance drop-down included<br>- MOS correction if gapping occurs
