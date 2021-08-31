@@ -14,9 +14,16 @@ import src.ThreadPullOut as thread_pull_out
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.7.8"
+__version__ = "0.8-ALPHA"
 """
 Change Log:
+v0.8 - xx.xx.2021
+- slippage and gapping columns can be excluded in output (GUI only)
+- GUI does not crash anymore if saved empty (error info in command-line)
+- info message if mu_min > mu_max in GUI (fixes #9)
+- prevailing torque Helicoil max-torque table as info added (fixes #9)
+- double entries check for "Paste from Excel" in bolt loads (fixes #9)
+- checkbox added: "overwrite" for "Paste from Excel" --> without overwrite: add to table (fixes #9)
 v0.7.8 - 10.07.2021
 - BUG in global slippage margin corrected (fixes #8)
 - shim-filter included (fixes #7)
@@ -150,17 +157,22 @@ def main():
             inp_dir = os.path.abspath(inp_dir)
         else:
             inp_dir = work_dir
-        print("BAT input-file directory  : " + inp_dir)
-        logging.info("BAT input-file directory  : " + inp_dir)
-        # path to friction_info_table.png
-        fric_info_table_path = config["PATHS"]["fric_info_table_path"]
+        print("BAT input-file"WARNING: Double Bolt-ID / Load-Case entries present! Analysis NOT complete!")
+= config["PATHS"]["fric_info_table_path"]
         if fric_info_table_path != "DEFAULT":
             fric_info_table_path = os.path.abspath(fric_info_table_path)
         else:
             fric_info_table_path = work_dir+"/doc/BAT_doc/friction_info_table.png"
         print("BAT friction_info_table.png location  : " + fric_info_table_path)
         logging.info("BAT friction_info_table.png location  : " + fric_info_table_path)
-
+        # path to prevailing_torque_info_table.png
+        mp_info_table_path = config["PATHS"]["mp_info_table_path"]
+        if mp_info_table_path != "DEFAULT":
+            mp_info_table_path = os.path.abspath(mp_info_table_path)
+        else:
+            mp_info_table_path = work_dir+"/doc/BAT_doc/prev_torque_info_table.png"
+        print("BAT prev_torque_info_table.png location  : " + mp_info_table_path)
+        logging.info("BAT prev_torque_info_table.png location  : " + mp_info_table_path)
         #
         # run BAT analysis
         #
@@ -174,10 +186,12 @@ def main():
         bolts = bm.BoltManager(db_dir)
 
         # use GUI or command-line
-        if args.gui is True:
+        if args.gui is True"WARNING: Double Bolt-ID / Load-Case entries present! Analysis NOT complete!")
+:
             print("BAT GUI initialized...rock it!")
             app = QtWidgets.QApplication(sys.argv)
-            window = bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__, fric_info_table_path)
+            window = bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__,\
+                                    fric_info_table_path, mp_info_table_path)
             window.show()
             sys.exit(app.exec_())
         elif args.torque_table is True:
@@ -192,11 +206,11 @@ def main():
             if inp_file.method == "ESAPSS":
                 # calc ESA PSS-03-208
                 ana_esapss = esapss.EsaPss(inp_file, materials, bolts, __version__)
-                ana_esapss.print_results(output_file)
+                ana_esapss.print_results(output_file, True, 0)
             elif inp_file.method == "ECSS":
                 # calc ECSS-E-HB-32-23A
                 ana_ecss = ecss.Ecss(inp_file, materials, bolts, __version__)
-                ana_ecss.print_results(output_file)
+                ana_ecss.print_results(output_file, True, 0)
             else:
                 print("#\n# ERROR: analysis method not implemented.")
                 logging.error("ERROR: analysis method not implemented.")

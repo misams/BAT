@@ -118,6 +118,18 @@ class GuiInputHandler:
         # return compare_items
         return compare_items
 
+    # check CoF MIN/MAX values
+    #
+    # mu_head / mu_thread MAX values must be larger than MIN values
+    def checkCofMinMax(self):
+        # self.cof_bolt = [mu_head_max, mu_thread_max, mu_head_min, mu_thread_min]
+        mu_error = None
+        if self.cof_bolt[0] < self.cof_bolt[2]:
+            mu_error = "mu_head_max < mu_head_min"
+        elif self.cof_bolt[1] < self.cof_bolt[3]:
+            mu_error = "mu_thread_max < mu_thread_min"
+        return mu_error
+
     # save input file with GUI inputs
     def saveInputFile(self, inp_file_name):
         # write input file

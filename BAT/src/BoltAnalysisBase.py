@@ -54,6 +54,7 @@ class BoltAnalysisBase(ABC):
         self.bolt_results = {} # results per bolt / loadcase
         self.MOS_glob_slip = 0.0 # global slippage margin
         self.MOS_pres = 0.0 # yield check under bolt head 
+        self.mos_col_format = 0 # MOS column format (for bolt result string)
         # set T_scatter
         self._set_T_scatter()
 
@@ -238,48 +239,145 @@ class BoltAnalysisBase(ABC):
     def _get_bolt_result_str(self):
         output_str = "" # use output_str for print() or print-to-file
         # define header
-        output_str += "{0:=^127}\n".format('=')
+        output_str += "{0:=^75}{1:^}".format('=', self._get_MOS_end_string(0))
         # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres]
-        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^}"\
             .format("Number", "Bolt-ID", "Axial Bolt", "Shear Bolt", "Add. Bolt", "Red. Clmp.", \
-            "Slippage", "Gapping", "Yield", "Ultimate")
-        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
-            .format("#", "or", "Force", "Force", "Force", "Force", "MOS", "MOS", "MOS", "MOS")
-        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
-            .format("", "Loadcase", "FA [N]", "FQ [N]", "FSA [N]", "FPA [N]", "", "", "", "")
-        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^12}|{7:^12}|{8:^12}|{9:^12}|\n"\
+            self._get_MOS_end_string(1))
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^}"\
+            .format("#", "or", "Force", "Force", "Force", "Force", self._get_MOS_end_string(2))
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^}"\
+            .format("", "Loadcase", "FA [N]", "FQ [N]", "FSA [N]", "FPA [N]", self._get_MOS_end_string(3))
+        output_str += "|{0:^8}|{1:^12}|{2:^12}|{3:^12}|{4:^12}|{5:^12}|{6:^}"\
             .format("", "", "FITF="+str(self.inp_file.fos_fit), "FITF="+str(self.inp_file.fos_fit), "", "", \
-                "FOS="+str(self.inp_file.fos_slip), "FOS="+str(self.inp_file.fos_gap),\
-                "FOS="+str(self.inp_file.fos_y), "FOS="+str(self.inp_file.fos_u))
-        output_str += "{0:=^127}\n".format('=')
+                self._get_MOS_end_string(4))
+        output_str += "{0:=^75}{1:^}".format('=', self._get_MOS_end_string(5))
         # loop through bolts / loadcases
         bolt_nmbr = 0 # to fill Number-# column
-        min_mos = [math.inf, math.inf, math.inf, math.inf, math.inf]
         for lc_name, lc in self.bolt_results.items():
             bolt_nmbr += 1 # count bolts / loadcases
             #         lc[0   1   2     3   4             5        6       7     8             9        ]
             # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres, gap_check]
-            output_str += "|{0:^8d}|{1:^12}|{2:^12.1f}|{3:^12.1f}|{4:^12.1f}|{5:^12.1f}|{6:^12.0%}|{7:^12.0%}|{8:^12.0%}|{9:^12.0%}|"\
-                .format(bolt_nmbr, lc_name, lc[0], lc[1], lc[2], lc[3], lc[4], lc[5], lc[6], lc[7])
-            if lc[9] is True:
-                output_str += "GC\n"
-            else:
-                output_str += '\n'
+            output_str += "|{0:^8d}|{1:^12}|{2:^12.1f}|{3:^12.1f}|{4:^12.1f}|{5:^12.1f}|{6:^}"\
+                .format(bolt_nmbr, lc_name, lc[0], lc[1], lc[2], lc[3], self._get_MOS_end_string(5+bolt_nmbr))
+        # summary bolt results
+        output_str += "|-{0:-^72}+{1:^}".format("-", self._get_MOS_end_string(-7))
+        output_str += "|{0:>73}|{1:^}".format(\
+                "Minimum Margins of Safety: ", self._get_MOS_end_string(-6))
+        output_str += "|-{0:-^72}+{1:^}".format("-", self._get_MOS_end_string(-5))
+        output_str += "|{0:>73}|{1:^}".format(\
+                "Global Slippage Margin: ", self._get_MOS_end_string(-4))
+        output_str += "|-{0:-^72}+{1:^}".format("-", self._get_MOS_end_string(-3))
+        output_str += "|{0:>73}|{1:^}".format(\
+            "Minimum MoS against Yield under bolt head / first clamp part: ", self._get_MOS_end_string(-2))
+        output_str += "{0:=^75}{1:^}".format('=', self._get_MOS_end_string(-1))
+        # return output_str
+        return output_str
+
+    # handles MOS-column logic for output-printing
+    # TODO: find a more beautiful way for the code segment; works but ugly
+    def _get_MOS_end_string(self, lineID):
+        # setup column logic for MOS columns (last 4 columns)
+        min_mos = [math.inf, math.inf, math.inf, math.inf, math.inf]
+        # slippage-column
+        mos_slip_str = []
+        mos_slip_str.append("{0:=^13}".format('='))
+        mos_slip_str.append("{0:^12}|".format("Slippage"))
+        mos_slip_str.append("{0:^12}|".format("MOS"))
+        mos_slip_str.append("{0:^12}|".format(""))
+        mos_slip_str.append("{0:^12}|".format("FOS="+str(self.inp_file.fos_slip)))
+        mos_slip_str.append("{0:=^13}".format('='))
+        for lc_name, lc in self.bolt_results.items():
+            mos_slip_str.append("{0:^12.0%}|".format(lc[4]))
+        # gapping-column
+        mos_gap_str = []
+        mos_gap_str.append("{0:=^13}".format('='))
+        mos_gap_str.append("{0:^12}|".format("Gapping"))
+        mos_gap_str.append("{0:^12}|".format("MOS"))
+        mos_gap_str.append("{0:^12}|".format(""))
+        mos_gap_str.append("{0:^12}|".format("FOS="+str(self.inp_file.fos_gap)))
+        mos_gap_str.append("{0:=^13}".format('='))
+        for lc_name, lc in self.bolt_results.items():
+            mos_gap_str.append("{0:^12.0%}|".format(lc[5]))
+        # yield-column
+        mos_yield_str = []
+        mos_yield_str.append("{0:=^13}".format('='))
+        mos_yield_str.append("{0:^12}|".format("Yield"))
+        mos_yield_str.append("{0:^12}|".format("MOS"))
+        mos_yield_str.append("{0:^12}|".format(""))
+        mos_yield_str.append("{0:^12}|".format("FOS="+str(self.inp_file.fos_y)))
+        mos_yield_str.append("{0:=^13}".format('='))
+        for lc_name, lc in self.bolt_results.items():
+            mos_yield_str.append("{0:^12.0%}|".format(lc[6]))
+        # ultimate-column
+        mos_ult_str = []
+        mos_ult_str.append("{0:=^13}\n".format('='))
+        mos_ult_str.append("{0:^12}|\n".format("Ultimate"))
+        mos_ult_str.append("{0:^12}|\n".format("MOS"))
+        mos_ult_str.append("{0:^12}|\n".format(""))
+        mos_ult_str.append("{0:^12}|\n".format("FOS="+str(self.inp_file.fos_u)))
+        mos_ult_str.append("{0:=^13}\n".format('='))
+        for lc_name, lc in self.bolt_results.items():
+            mos_ult_str.append("{0:^12.0%}|".format(lc[7]))
             # get mininum margins of safety
             min_mos = [min(min_mos[0], lc[4]), min(min_mos[1], lc[5]), \
                 min(min_mos[2], lc[6]), min(min_mos[3], lc[7]), min(min_mos[4], lc[8])]
-        output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
-        output_str += "|{0:>73}|{1:^12.0%}|{2:^12.0%}|{3:^12.0%}|{4:^12.0%}|\n".format(\
-                "Minimum Margins of Safety: ", min_mos[0], min_mos[1], min_mos[2], min_mos[3])
-        output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
-        output_str += "|{0:>73}|{1:^12.0%}|{2:^12}|{3:^12}|{4:^12}|\n".format(\
-                "Global Slippage Margin: ", self.MOS_glob_slip, "-", "-", "-")
-        output_str += "|-{0:-^72}+{1:-^12}+{2:-^12}+{3:-^12}+{4:-^12}|\n".format("-", "-", "-", "-", "-")
-        output_str += "|{0:>73}|{1:^12}|{2:^12}|{3:^12.0%}|{4:^12}|\n".format(\
-                "Minimum MoS against Yield under bolt head / first clamp part: ", "-", "-", min_mos[4], "-")
-        output_str += "{0:=^127}\n".format('=')
-        # return output_str
-        return output_str
+            # add gapping-analysis note
+            if lc[9] is True:
+                mos_ult_str[-1] += "GC\n"
+            else:
+                mos_ult_str[-1] += '\n'
+        # add spacer
+        mos_slip_str.append("{0:-^12}+".format('-'))
+        mos_gap_str.append("{0:-^12}+".format('-'))
+        mos_yield_str.append("{0:-^12}+".format('-'))
+        mos_ult_str.append("{0:-^12}|\n".format('-'))
+        # add minimum margin of safety values
+        mos_slip_str.append("{0:^12.0%}|".format(min_mos[0]))
+        mos_gap_str.append("{0:^12.0%}|".format(min_mos[1]))
+        mos_yield_str.append("{0:^12.0%}|".format(min_mos[2]))
+        mos_ult_str.append("{0:^12.0%}|\n".format(min_mos[3]))
+        # add spacer
+        mos_slip_str.append("{0:-^12}+".format('-'))
+        mos_gap_str.append("{0:-^12}+".format('-'))
+        mos_yield_str.append("{0:-^12}+".format('-'))
+        mos_ult_str.append("{0:-^12}|\n".format('-'))
+        # add global slippage margin (in yield column)
+        mos_slip_str.append("{0:^12}|".format('-'))
+        mos_gap_str.append("{0:^12}|".format('-'))
+        mos_yield_str.append("{0:^12.0%}|".format(self.MOS_glob_slip))
+        mos_ult_str.append("{0:^12}|\n".format('-'))
+        # add spacer
+        mos_slip_str.append("{0:-^12}+".format('-'))
+        mos_gap_str.append("{0:-^12}+".format('-'))
+        mos_yield_str.append("{0:-^12}+".format('-'))
+        mos_ult_str.append("{0:-^12}|\n".format('-'))
+        # add minimum MOS under bolt head (in yield column)
+        mos_slip_str.append("{0:^12}|".format('-'))
+        mos_gap_str.append("{0:^12}|".format('-'))
+        mos_yield_str.append("{0:^12.0%}|".format(min_mos[4]))
+        mos_ult_str.append("{0:^12}|\n".format('-'))
+        # add end-spacer
+        mos_slip_str.append("{0:=^13}".format('='))
+        mos_gap_str.append("{0:=^13}".format('='))
+        mos_yield_str.append("{0:=^13}".format('='))
+        mos_ult_str.append("{0:=^13}\n".format('='))
+
+        # return MOS-end-string (MOS column visibility)
+        # 0 : all MOS columns visible (default)
+        # 1 : local slippage column hidden
+        # 2 : local gapping column hidden
+        # 3 : both - slippage and gapping columns hidden
+        return_str = ""
+        if self.mos_col_format == 1:
+            return_str = mos_gap_str[lineID]+mos_yield_str[lineID]+mos_ult_str[lineID]
+        elif self.mos_col_format == 2:
+            return_str = mos_slip_str[lineID]+mos_yield_str[lineID]+mos_ult_str[lineID]
+        elif self.mos_col_format == 3:
+            return_str = mos_yield_str[lineID]+mos_ult_str[lineID]
+        else:
+            return_str = mos_slip_str[lineID]+mos_gap_str[lineID]+mos_yield_str[lineID]+mos_ult_str[lineID]
+        return return_str
 
     # get thermal analysis string
     def _get_thermal_result_str(self):
@@ -419,9 +517,6 @@ class BoltAnalysisBase(ABC):
             sig_y_pres = self.materials.materials[self.inp_file.clamped_parts[1][0]].sig_y
             sig_y_pres_shim = self.materials.materials[self.inp_file.use_shim[0]].sig_y \
                 if self.inp_file.use_shim!="no" else 0.0
-        #print("*** Pressure below bolt head / shim ***")
-        #print("sig_y_pres:      {0:.2f} MPa".format(sig_y_pres))
-        #print("sig_y_pres_shim: {0:.2f} MPa".format(sig_y_pres_shim))
         # MOS with or without washer
         if self.inp_file.use_shim != "no": # with washer
             # minimal area under bolt head
@@ -433,8 +528,6 @@ class BoltAnalysisBase(ABC):
             A_pres_2 = (self.bolts.washers[self.inp_file.use_shim[1]].dmaj**2)*math.pi/4 - \
                 (self.inp_file.through_hole_diameter**2)*math.pi/4
             MOS_pres_2 = sig_y_pres / (F_axial/A_pres_2) - 1
-            #print("MOS_pres_1:      {0:.1%} MPa".format(MOS_pres_1))
-            #print("MOS_pres_2:      {0:.1%} MPa".format(MOS_pres_2))
             # minimum MOS_pres
             MOS_pres = min(MOS_pres_1, MOS_pres_2)
         else: # without washer
@@ -455,12 +548,22 @@ class BoltAnalysisBase(ABC):
             self.T_scatter = float(self.inp_file.torque_tol_tight_device)
 
     # print results to terminal and/or file
-    def print_results(self, output_file=None, print_to_cmd=True):
+    #
+    # "output_file"    : define output-file (*.out)
+    # "print_to_cmd"   : set if output is also printed to command window
+    # "mos_col_format" : sets visibility of MOS columns in bolt results (slippage + gapping)
+    #       0 : all MOS columns visible (default)
+    #       1 : local slippage column hidden
+    #       2 : local gapping column hidden
+    #       3 : both - slippage and gapping columns hidden
+    def print_results(self, output_file=None, print_to_cmd=True, mos_col_format=0):
+        self.mos_col_format = mos_col_format # set MOS column visibility
+        # print results to command-line
         if print_to_cmd is True:
             print() # print empty line
             # print BAT output
             print(self._get_output_str())
-         # print results to output_file
+        # print results to output_file
         if output_file != None:
             output_file = Path(output_file)
             log_str = "Output file written: {0:^}".format(str(output_file.absolute()))
@@ -476,7 +579,7 @@ class BoltAnalysisBase(ABC):
         # return string
         return self._get_output_str()
 
-    # clean margins in self.bolt_results --> set >1000% to inf & <1000% to -inf
+    # clean margins in self.bolt_results --> set >1000% to inf & <1000% to -1000%
     def _clean_margins(self):
         #        [0   1   2     3   4             5        6       7     8             9        ]
         # value: [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres, gap_check]
@@ -486,9 +589,9 @@ class BoltAnalysisBase(ABC):
                 if value[i]*100 > 1000:
                     value[i] = math.inf
                 elif value[i]*100 < -1000:
-                    value[i] = -math.inf
+                    value[i] = -10
             # global slippage margin
             if self.MOS_glob_slip*100 > 1000:
                 self.MOS_glob_slip = math.inf
             elif self.MOS_glob_slip*100 < -1000:
-                self.MOS_glob_slip = -math.inf
+                self.MOS_glob_slip = -10

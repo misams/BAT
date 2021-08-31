@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
+    <width>980</width>
     <height>700</height>
    </rect>
   </property>
@@ -555,6 +555,19 @@
                 </property>
                </widget>
               </item>
+              <item row="0" column="3">
+               <widget class="QToolButton" name="toolButton_Mp_info">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>?</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
@@ -1031,6 +1044,13 @@ Excel</string>
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QCheckBox" name="overwriteCheck">
+               <property name="text">
+                <string>Overwrite</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
           </layout>
@@ -1141,7 +1161,7 @@ Excel</string>
         <item>
          <widget class="QGroupBox" name="groupBox_8">
           <property name="title">
-           <string>BAT Options</string>
+           <string>BAT Analysis Options</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_9">
            <item row="0" column="1">
@@ -1169,6 +1189,42 @@ Excel</string>
              <attribute name="buttonGroup">
               <string notr="true">buttonGroupMosType</string>
              </attribute>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_9">
+          <property name="title">
+           <string>BAT Output Options</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_10">
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="checkBoxColLocSlip">
+             <property name="text">
+              <string>Slippage-MOS</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_44">
+             <property name="text">
+              <string>Print Bolt Result Columns:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QCheckBox" name="checkBoxColGap">
+             <property name="text">
+              <string>Gapping-MOS</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
           </layout>
@@ -1238,7 +1294,7 @@ Excel</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1000</width>
+     <width>980</width>
      <height>22</height>
     </rect>
    </property>
@@ -1378,8 +1434,8 @@ Excel</string>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroupMethods"/>
-  <buttongroup name="buttonGroupLocking"/>
   <buttongroup name="buttonGroupJointType"/>
   <buttongroup name="buttonGroupMosType"/>
+  <buttongroup name="buttonGroupLocking"/>
  </buttongroups>
 </ui>

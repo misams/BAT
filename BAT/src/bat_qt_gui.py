@@ -19,7 +19,8 @@ from src.gui.ImageInfoWindow import ImageInfoWindow
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
-    def __init__(self, ui_dir, materials=None, bolts=None, inp_dir=None, bat_version="-", fric_info_table_path=None):
+    def __init__(self, ui_dir, materials=None, bolts=None, inp_dir=None, bat_version="-",\
+                    fric_info_table_path=None, mp_info_table_path=None):
         super(Ui, self).__init__()
         # load *.ui file
         self.ui_dir = ui_dir
@@ -33,6 +34,7 @@ class Ui(QtWidgets.QMainWindow):
         self.inp_dir = inp_dir # default directory of input-files
         self.bat_version = bat_version # BAT software version
         self.fric_info_table_path = fric_info_table_path # path to friction_info_table.png
+        self.mp_info_table_path = mp_info_table_path # path to prev_torque_info_table.png
         #
         # set window title
         #
@@ -96,6 +98,8 @@ class Ui(QtWidgets.QMainWindow):
         self.radioLockNo.toggled.connect(self.lockRadioClicked)
         self.Mp_min = self.findChild(QtWidgets.QLineEdit, "Mp_min")
         self.Mp_max = self.findChild(QtWidgets.QLineEdit, "Mp_max")
+        self.toolButton_Mp_info = self.findChild(QtWidgets.QToolButton, "toolButton_Mp_info")
+        self.toolButton_Mp_info.clicked.connect(self.prevailingTorqueInfoPressed)
         self.loadingPlaneFactor = self.findChild(QtWidgets.QLineEdit, "loadingPlaneFactor")
         self.w_bolt_info = None # bolt info window
         self.w_mat_info = None # material info window
@@ -131,6 +135,7 @@ class Ui(QtWidgets.QMainWindow):
         self.deleteRowButton.clicked.connect(self.deleteRowPressed)
         self.pasteLoadsExcel = self.findChild(QtWidgets.QPushButton, "pasteLoadsExcel")
         self.pasteLoadsExcel.clicked.connect(self.pasteFromExcel)
+        self.overwriteCheck = self.findChild(QtWidgets.QCheckBox, "overwriteCheck")
         self.copyLoadsTable = self.findChild(QtWidgets.QPushButton, "copyLoadsTable")
         self.copyLoadsTable.clicked.connect(self.copyLoadsTableToClipboard)
         self.deltaT = self.findChild(QtWidgets.QLineEdit, "deltaT")
@@ -147,6 +152,8 @@ class Ui(QtWidgets.QMainWindow):
         self.calculateButton.clicked.connect(self.calculatePressed)
         self.radioJointMin = self.findChild(QtWidgets.QRadioButton, "radioJointMin")
         self.radioJointMean = self.findChild(QtWidgets.QRadioButton, "radioJointMean")
+        self.checkBoxColLocSlip = self.findChild(QtWidgets.QCheckBox, "checkBoxColLocSlip")
+        self.checkBoxColGap = self.findChild(QtWidgets.QCheckBox, "checkBoxColGap")
         # Output tab
         self.textEditOutput = self.findChild(QtWidgets.QTextEdit, "textEditOutput")
         # initial dict for circular flange clean initialization
@@ -165,17 +172,16 @@ class Ui(QtWidgets.QMainWindow):
 
     # init gui - default settings
     def init_gui(self):
-        # disable flange menu (under development)
-        #self.actionBolted_Flange.setEnabled(False)
-        # set radio-buttons
+        # set radio-buttons and check-boxes
         self.radioEcss.setChecked(True)
         self.radioVdi.setEnabled(False) # not implemented yet
-        #self.toolButton_mat_info.setEnabled(False) # not implemented yet
         self.radioJointMin.setChecked(True)
         self.radioJointMean.setEnabled(True)
         self.radioLockYes.setChecked(True)
         self.comboBoltMaterialT.setEnabled(False) # disable VDI bolt material
         self.checkBox_same_mu.setChecked(True) # set "equal mu" as default
+        self.checkBoxColLocSlip.setChecked(True)
+        self.checkBoxColGap.setChecked(True)
         # fill bolt combo-boxes
         for key in self.bolts.bolts:
             self.comboBolt.addItem(key)
@@ -208,6 +214,7 @@ class Ui(QtWidgets.QMainWindow):
         self.loadsTable.setItem(0,2,QtWidgets.QTableWidgetItem("10.0"))
         self.loadsTable.setItem(0,3,QtWidgets.QTableWidgetItem("0.0"))
         self.checkBoxVdiThermal.setChecked(False)
+        self.overwriteCheck.setChecked(True)
         #
         # clamped-parts-table
         self.useShimCheck.setChecked(True)
@@ -301,9 +308,12 @@ class Ui(QtWidgets.QMainWindow):
         #self.loadsTable.setItem(0,0,QtWidgets.QTableWidgetItem("test bolt"))
         self.checkBoxVdiThermal.setChecked(False)
         self.useShimChecked()
+        self.overwriteCheck.setChecked(True)
         # calculate tab
         self.inputFile.setText('')
         self.outputFile.setText('')
+        self.checkBoxColLocSlip.setChecked(True)
+        self.checkBoxColGap.setChecked(True)
         # output tab
         self.textEditOutput.clear()
         self.tabWidget.setTabEnabled(5, False)
@@ -481,18 +491,34 @@ class Ui(QtWidgets.QMainWindow):
             print("Output-file redefined: " + outputFileName)
             logging.info("Output-file redefined: " + outputFileName)
 
+    # get MOS columns format (checkboxes)
+    #       0 : all MOS columns visible (default)
+    #       1 : local slippage column hidden
+    #       2 : local gapping column hidden
+    #       3 : both - slippage and gapping columns hidden
+    def getMosColFormat(self):
+        return_val = 0 # default 
+        if self.checkBoxColLocSlip.isChecked() and not self.checkBoxColGap.isChecked():
+            return_val = 2
+        elif not self.checkBoxColLocSlip.isChecked() and self.checkBoxColGap.isChecked():
+            return_val = 1
+        elif not (self.checkBoxColLocSlip.isChecked() and self.checkBoxColGap.isChecked()):
+            return_val = 3
+        return return_val
+
     # calculate button pressed
     def calculatePressed(self):
         try:
             self.readGuiInputs() # read gui inputs
             compare = self.gih.compareInput(self.openedInputFile) # compare to opened input file
-            if self.openedInputFile and not compare:
+            checkCof = self.gih.checkCofMinMax() # check MIN/MAX bolt CoF input
+            if self.openedInputFile and not compare and not checkCof:
                 if self.openedInputFile.method == "ESAPSS":
                     # calc ESA-PSS
                     ana_esapss = EsaPss(\
                         self.openedInputFile, self.materials, self.bolts, self.bat_version)
                     output_results = ana_esapss.print_results(\
-                        self.outputFile.text(), print_to_cmd=False)
+                        self.outputFile.text(), False, self.getMosColFormat())
                     # enable output-tab and fill with results
                     self.tabWidget.setTabEnabled(5, True)
                     self.textEditOutput.setText(output_results)
@@ -501,13 +527,13 @@ class Ui(QtWidgets.QMainWindow):
                     ana_ecss = Ecss(\
                         self.openedInputFile, self.materials, self.bolts, self.bat_version)
                     output_results = ana_ecss.print_results(\
-                        self.outputFile.text(), print_to_cmd=False)
+                        self.outputFile.text(), False, self.getMosColFormat())
                     # enable output-tab and fill with results
                     self.tabWidget.setTabEnabled(5, True)
                     self.textEditOutput.setText(output_results)
                 else:
                     print("Method not implemented in current BAT version.")
-            else:
+            elif compare and not checkCof:
                 msg_ret = self.messageBox(QMessageBox.Warning, "GUI Input vs. Input-File Missmatch",\
                     "Input does not match opened input file - do you want to overwrite " +\
                     "values and run BAT-analysis?\n\nDeviating Items:\n{0:^}".format(str(compare)),\
@@ -522,6 +548,11 @@ class Ui(QtWidgets.QMainWindow):
                     # directly run BAT analysis
                     self.calculatePressed() 
                     print("Input file saved and BAT analysis executed (Save and Run - Yes)")
+            elif checkCof:
+                self.messageBox(QMessageBox.Warning, "GUI Input: Bolt CoF Min/Max Error",\
+                    "Bolt Coefficient-of-Fricton Error: input of minimum / maximum CoF-values " +\
+                    "NOT correct! Check GUI input in Tab <Bolt>.\n\nMU-Error: {0:^}".format(str(checkCof)),\
+                        None, "OK")
         except ValueError as e:
             print("No analysis performed --> input not correct (ValueError: " + str(e) + ")")
 
@@ -713,60 +744,68 @@ class Ui(QtWidgets.QMainWindow):
 
     # MENU - save
     def menuSave(self):
-        self.readGuiInputs() # read gui inputs
-        if self.openedInputFile: # check if input-file is already opened
-            compare = self.gih.compareInput(self.openedInputFile) # compare to opened input file
-            if compare:
-                mbox = self.messageBox(QMessageBox.Information, "Save Info",\
-                    "Input changed - saveing input file will overwrite following inputs:",\
-                    "Deviating Items:\n{0:^}".format(str(compare)), "OkCancel")
-                if mbox == QMessageBox.Ok:
+        try:
+            self.readGuiInputs() # read gui inputs
+        except Exception as e:
+            print("GUI input ERROR: invalid GUI input --> NO file saved! (Error: "+str(e)+")")
+        else:
+            if self.openedInputFile: # check if input-file is already opened
+                compare = self.gih.compareInput(self.openedInputFile) # compare to opened input file
+                if compare:
+                    mbox = self.messageBox(QMessageBox.Information, "Save Info",\
+                        "Input changed - saveing input file will overwrite following inputs:",\
+                        "Deviating Items:\n{0:^}".format(str(compare)), "OkCancel")
+                    if mbox == QMessageBox.Ok:
+                        self.gih.saveInputFile(self.openedInputFile.input_file)
+                        print("Input-file saved: " + str(self.openedInputFile.input_file))
+                else: 
                     self.gih.saveInputFile(self.openedInputFile.input_file)
                     print("Input-file saved: " + str(self.openedInputFile.input_file))
-            else: 
-                self.gih.saveInputFile(self.openedInputFile.input_file)
-                print("Input-file saved: " + str(self.openedInputFile.input_file))
-            # reopen new input file
-            self.openInput(str(self.openedInputFile.input_file))
-        else:
-            # if no input file loaded - save-as new input file
-            self.menuSaveAs()
+                # reopen new input file
+                self.openInput(str(self.openedInputFile.input_file))
+            else:
+                # if no input file loaded - save-as new input file
+                self.menuSaveAs()
 
     # MENU - save as
     def menuSaveAs(self):
         # read all GUI inputs 
         # TODO: check if inputs are correct / consistent
-        self.readGuiInputs()
-        # define and save new input-file
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        dialog = QFileDialog() # file-dialog
-        dialog.setOptions(options)
-        #bat_home_dir = Path(os.path.dirname(os.path.realpath(__file__))).parents[0]
-        dialog.setDirectory(str(self.inp_dir))
-        savedFileName, _ = dialog.getSaveFileName(self,\
-            "Save New BAT Input File",\
-            "",\
-            "BAT Input Files (*.inp)")
-        if savedFileName:
-            # check if "inp" is already added to file name
-            tmp = savedFileName.split('.')
-            if len(tmp) == 1 or (len(tmp) == 2 and tmp[1] == "inp"):
-                savedFileName = tmp[0]+".inp"
-                # save GUI inputs into file
-                self.gih.saveInputFile(savedFileName)
-                print("Input-file saved: " + savedFileName)
-                logging.info("Input-file saved: " + savedFileName)
-                # set fields in calculate tab
-                self.inputFile.setText(savedFileName)
-                outp_file = savedFileName.split('.')[0]+".out"
-                self.outputFile.setText(outp_file)
-                # reopen new input file
-                self.openInput(savedFileName)
-            else:
-                log_str = "ERROR: input file name not correct - do not use any special characters"
-                print(log_str)
-                logging.warning(log_str)
+        try:
+            self.readGuiInputs() # read gui inputs
+        except Exception as e:
+            print("GUI input ERROR: invalid GUI input --> NO file saved! (Error: "+str(e)+")")
+        else:
+            # define and save new input-file
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            dialog = QFileDialog() # file-dialog
+            dialog.setOptions(options)
+            #bat_home_dir = Path(os.path.dirname(os.path.realpath(__file__))).parents[0]
+            dialog.setDirectory(str(self.inp_dir))
+            savedFileName, _ = dialog.getSaveFileName(self,\
+                "Save New BAT Input File",\
+                "",\
+                "BAT Input Files (*.inp)")
+            if savedFileName:
+                # check if "inp" is already added to file name
+                tmp = savedFileName.split('.')
+                if len(tmp) == 1 or (len(tmp) == 2 and tmp[1] == "inp"):
+                    savedFileName = tmp[0]+".inp"
+                    # save GUI inputs into file
+                    self.gih.saveInputFile(savedFileName)
+                    print("Input-file saved: " + savedFileName)
+                    logging.info("Input-file saved: " + savedFileName)
+                    # set fields in calculate tab
+                    self.inputFile.setText(savedFileName)
+                    outp_file = savedFileName.split('.')[0]+".out"
+                    self.outputFile.setText(outp_file)
+                    # reopen new input file
+                    self.openInput(savedFileName)
+                else:
+                    log_str = "ERROR: input file name not correct - do not use any special characters"
+                    print(log_str)
+                    logging.warning(log_str)
 
     # read gui entries and store to GuiInputHandler
     def readGuiInputs(self):
@@ -911,31 +950,62 @@ class Ui(QtWidgets.QMainWindow):
         if text:
             #print(repr(text)) # print raw-string
             text_rows = text.rstrip('\n').split('\n') # split string at newline-chars (rows in Excel)
-            # clear loadsTable and delete all rows - empty table
-            self.loadsTable.clearContents()
-            self.loadsTable.setRowCount(0)
+            # create bolt-ID list to detect double entries
+            bolt_id_list = []
+            insert_row_offset = 0
+            if not self.overwriteCheck.isChecked() and self.loadsTable.rowCount()!=0:
+                print("Add loads to table - Loads-Table NOT overwritten!")
+                for row in range(0,self.loadsTable.rowCount()): # get all load rows
+                    bolt_id_list.append(self.loadsTable.item(row,0).text())
+                insert_row_offset = self.loadsTable.rowCount() # add table below old table
+            else:
+                # clear loadsTable and delete all rows - empty table
+                self.loadsTable.clearContents()
+                self.loadsTable.setRowCount(0)
             # add data out of Excel
             for i, row in enumerate(text_rows):
                 row_items = row.split('\t')
+                bolt_id_list.append(row_items[0]) # for double-check
+                j = i + insert_row_offset # offset if table is added
                 if len(row_items) == 3:
-                    self.loadsTable.insertRow(i) # insert row
+                    self.loadsTable.insertRow(j) # insert row
                     # set cell values
-                    self.loadsTable.setItem(i,0,QtWidgets.QTableWidgetItem(row_items[0]))
-                    self.loadsTable.setItem(i,1,QtWidgets.QTableWidgetItem(row_items[1]))
-                    self.loadsTable.setItem(i,2,QtWidgets.QTableWidgetItem(row_items[2]))
-                    self.loadsTable.setItem(i,3,QtWidgets.QTableWidgetItem('0'))
+                    self.loadsTable.setItem(j,0,QtWidgets.QTableWidgetItem(row_items[0]))
+                    self.loadsTable.setItem(j,1,QtWidgets.QTableWidgetItem(row_items[1]))
+                    self.loadsTable.setItem(j,2,QtWidgets.QTableWidgetItem(row_items[2]))
+                    self.loadsTable.setItem(j,3,QtWidgets.QTableWidgetItem('0'))
                 elif len(row_items) == 4:
-                    self.loadsTable.insertRow(i) # insert row
+                    self.loadsTable.insertRow(j) # insert row
                     # set cell values
-                    self.loadsTable.setItem(i,0,QtWidgets.QTableWidgetItem(row_items[0]))
-                    self.loadsTable.setItem(i,1,QtWidgets.QTableWidgetItem(row_items[1]))
-                    self.loadsTable.setItem(i,2,QtWidgets.QTableWidgetItem(row_items[2]))
-                    self.loadsTable.setItem(i,3,QtWidgets.QTableWidgetItem(row_items[3]))
+                    self.loadsTable.setItem(j,0,QtWidgets.QTableWidgetItem(row_items[0]))
+                    self.loadsTable.setItem(j,1,QtWidgets.QTableWidgetItem(row_items[1]))
+                    self.loadsTable.setItem(j,2,QtWidgets.QTableWidgetItem(row_items[2]))
+                    self.loadsTable.setItem(j,3,QtWidgets.QTableWidgetItem(row_items[3]))
                 else:
                     print("ERROR: Excel load format incorrect.")
                     self.messageBox(QMessageBox.Warning, "Excel Load Error",\
                         "ERROR: Excel load format incorrect.")
                     break
+            # double-entries check
+            dec = self.checkIfDuplicates(bolt_id_list)
+            if dec[0]:
+                print("WARNING: Double Bolt-ID / Load-Case entries present! Analysis will NOT be complete!")
+                self.messageBox(QMessageBox.Warning, "Double Entries Warning",\
+                    "Double Bolt-ID / Load-Case entries present!\n\nAnalysis will NOT be complete!")
+
+    # check if given list contains any duplicates and return location
+    def checkIfDuplicates(self, listOfElems):
+        setOfElems = set() # Python-set has to be unique
+        loc_of_double = 0 # location iterator
+        double_detected = False
+        for elem in listOfElems:
+            if elem in setOfElems:
+                double_detected = True
+                break
+            else:
+                setOfElems.add(elem)
+            loc_of_double += 1
+        return (double_detected, loc_of_double)
 
     # Button: copy loads-table to clipboard
     def copyLoadsTableToClipboard(self):
@@ -1008,6 +1078,14 @@ class Ui(QtWidgets.QMainWindow):
             self.fric_info_table_path, 770, 600, "Friction Info Window")
         self.w_mu_info.setWindowModality(Qt.WindowModal) # do not lock main window
         self.w_mu_info.show()
+
+    # tool-Button: prevailing-torque-Info
+    def prevailingTorqueInfoPressed(self):
+        # create image help window
+        self.w_mp_info = ImageInfoWindow(\
+            self.mp_info_table_path, 740, 170, "Prevailing-Torque Info Window")
+        self.w_mp_info.setWindowModality(Qt.WindowModal) # do not lock main window
+        self.w_mp_info.show()
 
     # if bolt-combo text changes --> apply shim filter
     def boltComboChanged(self):
