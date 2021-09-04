@@ -157,8 +157,10 @@ def main():
             inp_dir = os.path.abspath(inp_dir)
         else:
             inp_dir = work_dir
-        print("BAT input-file"WARNING: Double Bolt-ID / Load-Case entries present! Analysis NOT complete!")
-= config["PATHS"]["fric_info_table_path"]
+        print("BAT input-file : " + inp_dir)
+        logging.info("BAT input-file : " + inp_dir)
+        # path to fric_info_table.png
+        fric_info_table_path = config["PATHS"]["fric_info_table_path"]
         if fric_info_table_path != "DEFAULT":
             fric_info_table_path = os.path.abspath(fric_info_table_path)
         else:
@@ -186,8 +188,7 @@ def main():
         bolts = bm.BoltManager(db_dir)
 
         # use GUI or command-line
-        if args.gui is True"WARNING: Double Bolt-ID / Load-Case entries present! Analysis NOT complete!")
-:
+        if args.gui is True:
             print("BAT GUI initialized...rock it!")
             app = QtWidgets.QApplication(sys.argv)
             window = bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__,\
