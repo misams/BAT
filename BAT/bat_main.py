@@ -14,10 +14,10 @@ import src.ThreadPullOut as thread_pull_out
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.8-ALPHA"
+__version__ = "0.8"
 """
 Change Log:
-v0.8 - xx.xx.2021
+v0.8 - 04.09.2021
 - slippage and gapping columns can be excluded in output (GUI only)
 - GUI does not crash anymore if saved empty (error info in command-line)
 - info message if mu_min > mu_max in GUI (fixes #9)

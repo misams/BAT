@@ -39,12 +39,13 @@ $ python bat_main.py --help
 ```shell
 $ python bat_main.py --gui
 ```
-![Example Screenshot BAT v0.7.6](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
+![Example Screenshot BAT v0.8](https://github.com/misams/BAT/blob/master/BAT/doc/bat_example.png)
 
 ## Changelog
 
 Release | Date | Info
 --- | --- | ---
+v0.8 | 04.09.2021 |- slippage and gapping columns can be excluded in output (GUI only)<br>- GUI does not crash anymore if saved empty (error info in command-line)<br>- info message if mu_min > mu_max in GUI<br>- prevailing torque Helicoil max-torque table as info added<br>- double entries check for "Paste from Excel" in bolt loads<br>- checkbox added: "overwrite" for "Paste from Excel" --> without overwrite: add to table
 v0.7.8 | 10.07.2021 |- BUG in global slippage margin corrected (fixes #8)<br>- shim-filter included (fixes #7)<br>- UNC/UNF hex socket bolts and washer added to database
 v0.7.7 | 27.05.2021 |- bolt-load input-file format changed (separator ',')
 v0.7.6 | 23.05.2021 |- help windows added (CoF, torque, cicular flange)<br>- equal mu function added<br>- quick save before analysis (save and run)
