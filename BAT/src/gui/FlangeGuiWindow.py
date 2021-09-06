@@ -32,7 +32,9 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.tabWidget = self.findChild(QtWidgets.QTabWidget, "tabWidget")
         self.nmbrBolts = self.findChild(QtWidgets.QSpinBox, "nmbrBolts")
         self.lineEditPcd = self.findChild(QtWidgets.QLineEdit, "lineEditPcd")
+        self.lineEditPcd.setValidator(self.decimalValidator())
         self.lineEditHNeutral = self.findChild(QtWidgets.QLineEdit, "lineEditHNeutral")
+        self.lineEditHNeutral.setValidator(self.decimalValidator())
         self.radioEqual = self.findChild(QtWidgets.QRadioButton, "radioEqual")
         self.radioSine = self.findChild(QtWidgets.QRadioButton, "radioSine")
         self.forceCompTable = self.findChild(QtWidgets.QTableWidget, "forceCompTable")
@@ -60,6 +62,10 @@ class FlangeWindow(QtWidgets.QMainWindow):
         #
         # INIT GUI
         self.init_gui(init_dict)
+
+    # regular expression validator for QLineEdit Format mask (decimal number only)
+    def decimalValidator(self):
+        return QtGui.QRegExpValidator(QtCore.QRegExp("^\d*\.?\d*$"))
 
     # init gui - default settings
     def init_gui(self, init_dict):

@@ -76,40 +76,52 @@ class Ui(QtWidgets.QMainWindow):
         self.toolButton_mat_info = self.findChild(QtWidgets.QToolButton, "toolButton_mat_info")
         self.toolButton_mat_info.clicked.connect(self.matInfoPressed)
         self.cofBoltHeadMin = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMin")
+        self.cofBoltHeadMin.setValidator(self.decimalValidator())
         self.cofBoltHeadMin.textChanged.connect(self.useEqualMuChecked)
         self.cofBoltHeadMax = self.findChild(QtWidgets.QLineEdit, "cofBoltHeadMax")
+        self.cofBoltHeadMax.setValidator(self.decimalValidator())
         self.cofBoltHeadMax.textChanged.connect(self.useEqualMuChecked)
         self.cofThreadMin = self.findChild(QtWidgets.QLineEdit, "cofThreadMin")
+        self.cofThreadMin.setValidator(self.decimalValidator())
         self.cofThreadMax = self.findChild(QtWidgets.QLineEdit, "cofThreadMax")
+        self.cofThreadMax.setValidator(self.decimalValidator())
         self.toolButton_mu_info = self.findChild(QtWidgets.QToolButton, "toolButton_mu_info")
         self.toolButton_mu_info.clicked.connect(self.muInfoPressed)
         self.checkBox_same_mu = self.findChild(QtWidgets.QCheckBox, "checkBox_same_mu")
         self.checkBox_same_mu.stateChanged.connect(self.useEqualMuChecked)
         self.tightTorque = self.findChild(QtWidgets.QLineEdit, "tightTorque")
+        self.tightTorque.setValidator(self.decimalValidator())
         self.tightTorque.textChanged.connect(self.torqueTolClicked)
         self.toolButton_torque_info = self.findChild(QtWidgets.QToolButton, "toolButton_torque_info")
         self.toolButton_torque_info.clicked.connect(self.torqueInfoPressed)
         self.tightTorqueTolCombo = self.findChild(QtWidgets.QComboBox, "tightTorqueTolCombo")
         self.tightTorqueTol = self.findChild(QtWidgets.QLineEdit, "tightTorqueTol")
+        self.tightTorqueTol.setValidator(self.decimalValidator())
         self.tightTorqueTolCombo.activated.connect(self.torqueTolClicked)
         self.radioLockYes = self.findChild(QtWidgets.QRadioButton, "radioLockYes")
         self.radioLockYes.toggled.connect(self.lockRadioClicked)
         self.radioLockNo = self.findChild(QtWidgets.QRadioButton, "radioLockNo")
         self.radioLockNo.toggled.connect(self.lockRadioClicked)
         self.Mp_min = self.findChild(QtWidgets.QLineEdit, "Mp_min")
+        self.Mp_min.setValidator(self.decimalValidator())
         self.Mp_max = self.findChild(QtWidgets.QLineEdit, "Mp_max")
+        self.Mp_max.setValidator(self.decimalValidator())
         self.toolButton_Mp_info = self.findChild(QtWidgets.QToolButton, "toolButton_Mp_info")
         self.toolButton_Mp_info.clicked.connect(self.prevailingTorqueInfoPressed)
         self.loadingPlaneFactor = self.findChild(QtWidgets.QLineEdit, "loadingPlaneFactor")
+        self.loadingPlaneFactor.setValidator(self.decimalValidator())
         self.w_bolt_info = None # bolt info window
         self.w_mat_info = None # material info window
         self.w_mu_info = None # mu (CoF) info window
         self.w_torque_info = None # torque info window
         # Clamped Parts tab
         self.cofClampedParts = self.findChild(QtWidgets.QLineEdit, "cofClampedParts")
+        self.cofClampedParts.setValidator(self.decimalValidator())
         self.numberOfShearPlanes = self.findChild(QtWidgets.QSpinBox, "numberOfShearPlanes")
         self.throughHoleDiameter = self.findChild(QtWidgets.QLineEdit, "throughHoleDiameter")
+        self.throughHoleDiameter.setValidator(self.decimalValidator())
         self.substDA = self.findChild(QtWidgets.QLineEdit, "substDA")
+        self.substDA.setValidator(self.decimalValidator())
         self.comboRz = self.findChild(QtWidgets.QComboBox, "comboRz")
         self.clampedPartsTable = self.findChild(QtWidgets.QTableWidget, "clampedPartsTable")
         self.addCpButton = self.findChild(QtWidgets.QPushButton, "addCpButton")
@@ -123,10 +135,15 @@ class Ui(QtWidgets.QMainWindow):
         self.combo_shim_matT = QtWidgets.QComboBox()
         # FOS tab
         self.fosY= self.findChild(QtWidgets.QLineEdit, "fosY")
+        self.fosY.setValidator(self.decimalValidator())
         self.fosU= self.findChild(QtWidgets.QLineEdit, "fosU")
+        self.fosU.setValidator(self.decimalValidator())
         self.fosSlip= self.findChild(QtWidgets.QLineEdit, "fosSlip")
+        self.fosSlip.setValidator(self.decimalValidator())
         self.fosGap= self.findChild(QtWidgets.QLineEdit, "fosGap")
+        self.fosGap.setValidator(self.decimalValidator())
         self.fosFit= self.findChild(QtWidgets.QLineEdit, "fosFit")
+        self.fosFit.setValidator(self.decimalValidator())
         # Loads tab
         self.loadsTable = self.findChild(QtWidgets.QTableWidget, "loadsTable")
         self.addRowButton = self.findChild(QtWidgets.QPushButton, "addRowButton")
@@ -139,6 +156,7 @@ class Ui(QtWidgets.QMainWindow):
         self.copyLoadsTable = self.findChild(QtWidgets.QPushButton, "copyLoadsTable")
         self.copyLoadsTable.clicked.connect(self.copyLoadsTableToClipboard)
         self.deltaT = self.findChild(QtWidgets.QLineEdit, "deltaT")
+        self.deltaT.setValidator(self.decimalValidator())
         self.checkBoxVdiThermal = self.findChild(QtWidgets.QCheckBox, "checkBoxVdiThermal")
         self.checkBoxVdiThermal.stateChanged.connect(self.useVdiChecked)
         # Calculate tab
@@ -162,6 +180,10 @@ class Ui(QtWidgets.QMainWindow):
         #
         # INIT GUI
         self.init_gui()
+
+    # regular expression validator for QLineEdit Format mask (decimal number only)
+    def decimalValidator(self):
+        return QtGui.QRegExpValidator(QtCore.QRegExp("^\d*\.?\d*$"))
 
     # key press handler
     def keyPressEvent(self, event):
@@ -1045,17 +1067,17 @@ class Ui(QtWidgets.QMainWindow):
 
     # if tightTorqueTolCombo clicked
     def torqueTolClicked(self):
-            if self.tightTorqueTolCombo.currentText() == "User Input":
-                self.tightTorqueTol.setEnabled(True)
+        if self.tightTorqueTolCombo.currentText() == "User Input":
+            self.tightTorqueTol.setEnabled(True)
+        else:
+            self.tightTorqueTol.setEnabled(False)
+            if self.tightTorque.text() != "":
+                # calculate percentage of nominal tightening torque
+                tightTol = float(self.tightTorque.text())\
+                    *float(self.tightTorqueTolCombo.currentText()[0])/100
+                self.tightTorqueTol.setText("{0:.2f}".format(tightTol))
             else:
-                self.tightTorqueTol.setEnabled(False)
-                if self.tightTorque.text() != "":
-                    # calculate percentage of nominal tightening torque
-                    tightTol = float(self.tightTorque.text())\
-                        *float(self.tightTorqueTolCombo.currentText()[0])/100
-                    self.tightTorqueTol.setText("{0:.2f}".format(tightTol))
-                else:
-                    pass # empty self.tightTorque
+                pass # empty self.tightTorque
 
     # tool-Button: Torque-Info
     def torqueInfoPressed(self):
