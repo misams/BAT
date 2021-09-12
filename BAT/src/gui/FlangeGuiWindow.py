@@ -10,6 +10,16 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.Qt import Qt
 from src.gui.ImageInfoWindow import ImageInfoWindow
 
+# regular expression validator for QTableWidget Format mask (permit decimal number only)
+class NumericDelegate(QtWidgets.QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        editor = super(NumericDelegate, self).createEditor(parent, option, index)
+        if isinstance(editor, QtWidgets.QLineEdit):
+            reg_ex = QtCore.QRegExp("^\d*\.?\d*$")
+            validator = QtGui.QRegExpValidator(reg_ex, editor)
+            editor.setValidator(validator)
+        return editor
+
 """
 Bolted-Flange-Window
 """
@@ -89,6 +99,9 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.forceCompTable.setItem(0,1,QtWidgets.QTableWidgetItem(str(init_dict["force_comp"][1])))
         self.forceCompTable.setItem(0,2,QtWidgets.QTableWidgetItem(str(init_dict["force_comp"][2])))
         self.forceCompTable.setItem(0,3,QtWidgets.QTableWidgetItem(init_dict["force_remark"]))
+        self.forceCompTable.setItemDelegateForColumn(0,NumericDelegate(self.forceCompTable))
+        self.forceCompTable.setItemDelegateForColumn(1,NumericDelegate(self.forceCompTable))
+        self.forceCompTable.setItemDelegateForColumn(2,NumericDelegate(self.forceCompTable))
         # force location table init
         self.forceLocTable.setColumnCount(3)
         self.forceLocTable.insertRow(0)
@@ -100,6 +113,9 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.forceLocTable.setItem(0,0,QtWidgets.QTableWidgetItem(str(init_dict["force_loc"][0])))
         self.forceLocTable.setItem(0,1,QtWidgets.QTableWidgetItem(str(init_dict["force_loc"][1])))
         self.forceLocTable.setItem(0,2,QtWidgets.QTableWidgetItem(str(init_dict["force_loc"][2])))
+        self.forceLocTable.setItemDelegateForColumn(0,NumericDelegate(self.forceLocTable))
+        self.forceLocTable.setItemDelegateForColumn(1,NumericDelegate(self.forceLocTable))
+        self.forceLocTable.setItemDelegateForColumn(2,NumericDelegate(self.forceLocTable))
         
     # BUTTON - click "Calculate Bolt Forces"
     def click_calculate(self):

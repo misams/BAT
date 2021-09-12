@@ -16,6 +16,7 @@ from src.gui.BoltInfoWindow import BoltInfoWindow
 from src.gui.MatInfoWindow import MatInfoWindow
 from src.gui.TorqueInfoWindow import TorqueInfoWindow
 from src.gui.ImageInfoWindow import ImageInfoWindow
+from src.gui.FlangeGuiWindow import NumericDelegate
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
@@ -181,7 +182,7 @@ class Ui(QtWidgets.QMainWindow):
         # INIT GUI
         self.init_gui()
 
-    # regular expression validator for QLineEdit Format mask (decimal number only)
+    # regular expression validator for QLineEdit Format mask (permit decimal number only)
     def decimalValidator(self):
         return QtGui.QRegExpValidator(QtCore.QRegExp("^\d*\.?\d*$"))
 
@@ -235,6 +236,9 @@ class Ui(QtWidgets.QMainWindow):
         self.loadsTable.setItem(0,1,QtWidgets.QTableWidgetItem("100.0"))
         self.loadsTable.setItem(0,2,QtWidgets.QTableWidgetItem("10.0"))
         self.loadsTable.setItem(0,3,QtWidgets.QTableWidgetItem("0.0"))
+        self.loadsTable.setItemDelegateForColumn(1,NumericDelegate(self.loadsTable))
+        self.loadsTable.setItemDelegateForColumn(2,NumericDelegate(self.loadsTable))
+        self.loadsTable.setItemDelegateForColumn(3,NumericDelegate(self.loadsTable))
         self.checkBoxVdiThermal.setChecked(False)
         self.overwriteCheck.setChecked(True)
         #
@@ -271,6 +275,7 @@ class Ui(QtWidgets.QMainWindow):
         self.clampedPartsTable.setCellWidget(1,2,combo_cp_matT)
         self.useShimChecked()
         self.boltComboChanged() # apply shim filter
+        self.clampedPartsTable.setItemDelegateForColumn(0,NumericDelegate(self.clampedPartsTable))
         # output tab setup
         self.tabWidget.setTabEnabled(5, False) # disable output tab
         font = QtGui.QFont("Monospace", 9) # set monospace font (platform independent)

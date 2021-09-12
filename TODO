@@ -5,7 +5,6 @@
 
 - check clamped part stiffness for more (>2) clamped parts!
 - docu ;-)
-- check global slippage margin
 - check Asub with newer SHM-Excel!
 - check different cB values for result impact; cB SHM conservative??
 - visualization? (bolt diagram?)
@@ -13,7 +12,6 @@
 
 # GUI
 
-- Material-Info Button
 - check inputs are correct / consistent
 - logging for GUI
 - GUI for torque table
