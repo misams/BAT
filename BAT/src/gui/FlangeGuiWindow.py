@@ -24,7 +24,7 @@ class NumericDelegate(QtWidgets.QStyledItemDelegate):
 Bolted-Flange-Window
 """
 class FlangeWindow(QtWidgets.QMainWindow):
-    def __init__(self, init_dict, ui_dir, loadsTable=None, tabWidget=None):
+    def __init__(self, init_dict, ui_dir, info_pic_path, loadsTable=None, tabWidget=None):
         super(FlangeWindow, self).__init__()
         # item to be modified in main-window
         self.loadsTabletoBeModified = loadsTable
@@ -32,6 +32,8 @@ class FlangeWindow(QtWidgets.QMainWindow):
         # load *.ui file
         self.ui_dir = ui_dir
         uic.loadUi(self.ui_dir+"/bat_flange.ui", self)
+        # path of info PNGs
+        self.info_pic_path = info_pic_path
         #
         # set window title
         #
@@ -302,7 +304,7 @@ class FlangeWindow(QtWidgets.QMainWindow):
     # tool-button: help
     def helpButtonPressed(self):
         # create image help window
-        help_image = os.path.join(Path(self.ui_dir).parents[1],"doc/BAT_doc/flange_1_help.png")
+        help_image = self.info_pic_path + "/flange_1_help.png"
         self.w_help_window = ImageInfoWindow(\
             help_image, 770, 600, "Circular Flange Help Window")
         self.w_help_window.setWindowModality(Qt.WindowModal) # do not lock main window

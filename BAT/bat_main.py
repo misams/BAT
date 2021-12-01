@@ -18,7 +18,8 @@ __version__ = "0.8.2-ALPHA"
 """
 Change Log:
 v0.8.2 - xx.xx.2021
-- TBD
+- info buttons added (fixes #10)
+- execution bug corrected (fixes #13)
 v0.8.1 - 12.09.2021
 - corrected hashtag-bug in UNC/UNF bolt and washer files
 - all input fields (QLineEdit, QTableWidget) only permit decimal numbers as input
@@ -164,22 +165,14 @@ def main():
             inp_dir = work_dir
         print("BAT input-file : " + inp_dir)
         logging.info("BAT input-file : " + inp_dir)
-        # path to fric_info_table.png
-        fric_info_table_path = config["PATHS"]["fric_info_table_path"]
-        if fric_info_table_path != "DEFAULT":
-            fric_info_table_path = os.path.abspath(fric_info_table_path)
+        # path to info PNGs
+        info_pic_path = config["PATHS"]["info_pic_path"]
+        if info_pic_path != "DEFAULT":
+            info_pic_path = os.path.abspath(info_pic_path)
         else:
-            fric_info_table_path = work_dir+"/doc/BAT_doc/friction_info_table.png"
-        print("BAT friction_info_table.png location  : " + fric_info_table_path)
-        logging.info("BAT friction_info_table.png location  : " + fric_info_table_path)
-        # path to prevailing_torque_info_table.png
-        mp_info_table_path = config["PATHS"]["mp_info_table_path"]
-        if mp_info_table_path != "DEFAULT":
-            mp_info_table_path = os.path.abspath(mp_info_table_path)
-        else:
-            mp_info_table_path = work_dir+"/doc/BAT_doc/prev_torque_info_table.png"
-        print("BAT prev_torque_info_table.png location  : " + mp_info_table_path)
-        logging.info("BAT prev_torque_info_table.png location  : " + mp_info_table_path)
+            info_pic_path = work_dir+"/doc/BAT_info"
+        print("BAT info pic location  : " + info_pic_path)
+        logging.info("BAT info pic location  : " + info_pic_path)
         #
         # run BAT analysis
         #
@@ -197,7 +190,7 @@ def main():
             print("BAT GUI initialized...rock it!")
             app = QtWidgets.QApplication(sys.argv)
             window = bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__,\
-                                    fric_info_table_path, mp_info_table_path)
+                                    info_pic_path)
             window.show()
             sys.exit(app.exec_())
         elif args.torque_table is True:

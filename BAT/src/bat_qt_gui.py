@@ -21,7 +21,7 @@ from src.gui.FlangeGuiWindow import NumericDelegate
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
     def __init__(self, ui_dir, materials=None, bolts=None, inp_dir=None, bat_version="-",\
-                    fric_info_table_path=None, mp_info_table_path=None):
+                    info_pic_path=None):
         super(Ui, self).__init__()
         # load *.ui file
         self.ui_dir = ui_dir
@@ -34,8 +34,7 @@ class Ui(QtWidgets.QMainWindow):
         self.gih = None # GUI input handler
         self.inp_dir = inp_dir # default directory of input-files
         self.bat_version = bat_version # BAT software version
-        self.fric_info_table_path = fric_info_table_path # path to friction_info_table.png
-        self.mp_info_table_path = mp_info_table_path # path to prev_torque_info_table.png
+        self.info_pic_path = info_pic_path # path to info PNGs
         #
         # set window title
         #
@@ -134,6 +133,18 @@ class Ui(QtWidgets.QMainWindow):
         self.combo_shim = QtWidgets.QComboBox()
         self.combo_shim_mat = QtWidgets.QComboBox()
         self.combo_shim_matT = QtWidgets.QComboBox()
+        self.w_fric_info = None # CP friction info window
+        self.w_dhole_info = None # through hole dieamter info window
+        self.w_da_info = None # da / davail info window
+        self.w_emb_info = None # embedding info window
+        self.toolButton_fric_info = self.findChild(QtWidgets.QToolButton, "toolButton_fric_info")
+        self.toolButton_fric_info.clicked.connect(self.fricInfoPressed)
+        self.toolButton_dhole_info = self.findChild(QtWidgets.QToolButton, "toolButton_dhole_info")
+        self.toolButton_dhole_info.clicked.connect(self.dHoleInfoPressed)
+        self.toolButton_da_info = self.findChild(QtWidgets.QToolButton, "toolButton_da_info")
+        self.toolButton_da_info.clicked.connect(self.daInfoPressed)
+        self.toolButton_rz_info = self.findChild(QtWidgets.QToolButton, "toolButton_rz_info")
+        self.toolButton_rz_info.clicked.connect(self.embeddingInfoPressed)
         # FOS tab
         self.fosY= self.findChild(QtWidgets.QLineEdit, "fosY")
         self.fosY.setValidator(self.decimalValidator())
@@ -285,7 +296,7 @@ class Ui(QtWidgets.QMainWindow):
         # Circular-Flange window
         # initialize bolted flange window
         self.w_bolted_flange = FlangeWindow(self.zero_init_dict,\
-            self.ui_dir, self.loadsTable, self.tabWidget)
+            self.ui_dir, self.info_pic_path, self.loadsTable, self.tabWidget)
 
     # erase gui - reset / new
     def erase_gui(self):
@@ -347,7 +358,7 @@ class Ui(QtWidgets.QMainWindow):
         self.tabWidget.setCurrentIndex(0)
         # erase bolted flange window
         self.w_bolted_flange = FlangeWindow(self.zero_init_dict,\
-            self.ui_dir, self.loadsTable, self.tabWidget)
+            self.ui_dir, self.info_pic_path, self.loadsTable, self.tabWidget)
         # finally set statusbar
         self.statusbar.showMessage("New BAT project created")
 
@@ -747,10 +758,10 @@ class Ui(QtWidgets.QMainWindow):
         # initialize bolted flange window
         if self.openedInputFile.is_circularflange():
             self.w_bolted_flange = FlangeWindow(self.openedInputFile.circular_flange,\
-                self.ui_dir, self.loadsTable, self.tabWidget)
+                self.ui_dir, self.info_pic_path, self.loadsTable, self.tabWidget)
         else:
             self.w_bolted_flange = FlangeWindow(self.zero_init_dict,\
-                self.ui_dir, self.loadsTable, self.tabWidget)
+                self.ui_dir, self.info_pic_path, self.loadsTable, self.tabWidget)
         # finally set statusbar
         self.statusbar.showMessage("Input File Opened: "+openedFileName)
 
@@ -1098,19 +1109,21 @@ class Ui(QtWidgets.QMainWindow):
         self.w_torque_info.setWindowModality(Qt.WindowModal) # do not lock main window
         self.w_torque_info.show()
 
-    # tool-Button: mu-Info
+    # tool-Button: mu-Info for bolt friction
     def muInfoPressed(self):
+        fric_info_table_path = self.info_pic_path+"/friction_bolt_info_table.png"
         # create image help window
         self.w_mu_info = ImageInfoWindow(\
-            self.fric_info_table_path, 770, 600, "Friction Info Window")
+            fric_info_table_path, 770, 600, "Bolt Friction Info Window")
         self.w_mu_info.setWindowModality(Qt.WindowModal) # do not lock main window
         self.w_mu_info.show()
 
     # tool-Button: prevailing-torque-Info
     def prevailingTorqueInfoPressed(self):
+        mp_info_table_path = self.info_pic_path+"/prev_torque_info_table.png"
         # create image help window
         self.w_mp_info = ImageInfoWindow(\
-            self.mp_info_table_path, 740, 170, "Prevailing-Torque Info Window")
+            mp_info_table_path, 740, 170, "Prevailing-Torque Info Window")
         self.w_mp_info.setWindowModality(Qt.WindowModal) # do not lock main window
         self.w_mp_info.show()
 
@@ -1134,3 +1147,39 @@ class Ui(QtWidgets.QMainWindow):
             print(log_str)
             logging.warning(log_str)
             self.messageBox(QMessageBox.Warning, "NO Shim Available", log_str)
+
+    # tool-Button: friction of clamped parts Info
+    def fricInfoPressed(self):
+        fric_info_table_path = self.info_pic_path+"/friction_cp_info_table.png"
+        # create image help window
+        self.w_fric_info = ImageInfoWindow(\
+            fric_info_table_path, 700, 600, "Clamped Parts Friction Info Window")
+        self.w_fric_info.setWindowModality(Qt.WindowModal) # do not lock main window
+        self.w_fric_info.show()
+
+    # tool-Button: through hole diameter Info
+    def dHoleInfoPressed(self):
+        through_hole_dia_info_table_path = self.info_pic_path+"/through_hole_dia_info_table.png"
+        # create image help window
+        self.w_dhole_info = ImageInfoWindow(\
+            through_hole_dia_info_table_path, 700, 250, "Through Hole Info Window")
+        self.w_dhole_info.setWindowModality(Qt.WindowModal) # do not lock main window
+        self.w_dhole_info.show()
+
+    # tool-Button: embedding Info
+    def embeddingInfoPressed(self):
+        embedding_info_table_path = self.info_pic_path+"/embedding_info.png"
+        # create image help window
+        self.w_emb_info = ImageInfoWindow(\
+            embedding_info_table_path, 550, 400, "Embedding Preload Loss Info Window")
+        self.w_emb_info.setWindowModality(Qt.WindowModal) # do not lock main window
+        self.w_emb_info.show()
+
+    # tool-Button: D_A / D_avail Info
+    def daInfoPressed(self):
+        da_info_path = self.info_pic_path+"/davail_info.png"
+        # create image help window
+        self.w_da_info = ImageInfoWindow(\
+            da_info_path, 700, 410, "Available Diameter of Basic Solid Info Window")
+        self.w_da_info.setWindowModality(Qt.WindowModal) # do not lock main window
+        self.w_da_info.show()
