@@ -14,10 +14,10 @@ import src.ThreadPullOut as thread_pull_out
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.8.2-ALPHA"
+__version__ = "0.8.2"
 """
 Change Log:
-v0.8.2 - xx.xx.2021
+v0.8.2 - 01.12.2021
 - info buttons added (fixes #10)
 - execution bug corrected (fixes #13)
 v0.8.1 - 12.09.2021
