@@ -14,9 +14,11 @@ import src.ThreadPullOut as thread_pull_out
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.8.1"
+__version__ = "0.8.2-ALPHA"
 """
 Change Log:
+v0.8.2 - xx.xx.2021
+- TBD
 v0.8.1 - 12.09.2021
 - corrected hashtag-bug in UNC/UNF bolt and washer files
 - all input fields (QLineEdit, QTableWidget) only permit decimal numbers as input

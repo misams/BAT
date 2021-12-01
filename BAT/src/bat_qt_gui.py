@@ -580,7 +580,7 @@ class Ui(QtWidgets.QMainWindow):
                     "Bolt Coefficient-of-Fricton Error: input of minimum / maximum CoF-values " +\
                     "NOT correct! Check GUI input in Tab <Bolt>.\n\nMU-Error: {0:^}".format(str(checkCof)),\
                         None, "OK")
-        except ValueError as e:
+        except (ValueError, AttributeError) as e:
             print("No analysis performed --> input not correct (ValueError: " + str(e) + ")")
 
     # MENU - new
