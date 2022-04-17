@@ -50,14 +50,14 @@
 # Definition of bolt loads
 # load/bolt-ID (max. 12 char.), axial-force, lateral-force-1, lateral-force-2 (optional)
 *BOLT_LOAD_DEFINITION
-Bolt:1, 4050.28, 453.47, 0.00
+Bolt:1, 4950.28, 993.47, 0.00
 Bolt:2, 3990.86, 550.75, 0.00
 Bolt:3, 3814.39, 645.07, 0.00
 Bolt:4, 3526.25, 733.57, 0.00
-Bolt:5, 3135.19, 813.56, 0.00
+Bolt:5, 5135.19, 953.56, 0.00
 Bolt:6, 2653.08, 882.61, 0.00
 Bolt:7, 2094.58, 938.62, 0.00
-Bolt:8, 1476.66, 979.88, 0.00
+Bolt:8, 5476.66, 979.88, 0.00
 *BOLT_LOAD_DEFINITION_END
 
 # Definition of temperature environment

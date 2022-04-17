@@ -52,6 +52,7 @@ class BoltAnalysisBase(ABC):
         self.sig_v = None # von-Mises stress aft. tightening [min, max]
         self.nue = None # bolt utilization [min, max] (ECSS: gamma)
         self.bolt_results = {} # results per bolt / loadcase
+        self.bolt_results_filtered = {} # MOS filtered results per bolt / loadcase
         self.MOS_glob_slip = 0.0 # global slippage margin
         self.MOS_pres = 0.0 # yield check under bolt head 
         self.mos_col_format = 0 # MOS column format (for bolt result string)
@@ -253,9 +254,10 @@ class BoltAnalysisBase(ABC):
                 self._get_MOS_end_string(4))
         output_str += "{0:=^75}{1:^}".format('=', self._get_MOS_end_string(5))
         # loop through bolts / loadcases
-        bolt_nmbr = 0 # to fill Number-# column
-        for lc_name, lc in self.bolt_results.items():
-            bolt_nmbr += 1 # count bolts / loadcases
+        self._filter_MOS_output(0.1)
+        for lc_name, val in self.bolt_results_filtered.items():
+            bolt_nmbr = val[0] # bolt number (w/o filter applied)
+            lc = val[1] # bolt results for each loadcase
             #         lc[0   1   2     3   4             5        6       7     8             9        ]
             # lc_name : [FA, FQ, FSA, FPA, MOS_loc_slip, MOS_gap, MOS_y, MOS_u, MOS_loc_pres, gap_check]
             output_str += "|{0:^8d}|{1:^12}|{2:^12.1f}|{3:^12.1f}|{4:^12.1f}|{5:^12.1f}|{6:^}"\
@@ -273,6 +275,18 @@ class BoltAnalysisBase(ABC):
         output_str += "{0:=^75}{1:^}".format('=', self._get_MOS_end_string(-1))
         # return output_str
         return output_str
+
+    # filter bolt results based on MOS-limit
+    # do not show bolts where MOS<LIMIT in bolt summary output (fixes #17)
+    def _filter_MOS_output(self, mos_print_limit=math.inf):
+        bolt_nmbr = 0
+        for lc_name, lc in self.bolt_results.items():
+            bolt_nmbr += 1
+            # check if one margin is below limit
+            if lc[4]<=mos_print_limit or lc[5]<=mos_print_limit \
+                or lc[6]<=mos_print_limit or lc[7]<=mos_print_limit or lc[8]<=mos_print_limit:
+                # save filtered bolt results to new dict
+                self.bolt_results_filtered[lc_name] = [bolt_nmbr, lc]
 
     # handles MOS-column logic for output-printing
     # TODO: find a more beautiful way for the code segment; works but ugly
