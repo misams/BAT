@@ -168,7 +168,7 @@ class Ui(QtWidgets.QMainWindow):
         self.copyLoadsTable = self.findChild(QtWidgets.QPushButton, "copyLoadsTable")
         self.copyLoadsTable.clicked.connect(self.copyLoadsTableToClipboard)
         self.deltaT = self.findChild(QtWidgets.QLineEdit, "deltaT")
-        self.deltaT.setValidator(self.decimalValidator())
+        self.deltaT.setValidator(self.negativeDecimalValidator())
         self.checkBoxVdiThermal = self.findChild(QtWidgets.QCheckBox, "checkBoxVdiThermal")
         self.checkBoxVdiThermal.stateChanged.connect(self.useVdiChecked)
         # Calculate tab
@@ -196,6 +196,9 @@ class Ui(QtWidgets.QMainWindow):
     # regular expression validator for QLineEdit Format mask (permit decimal number only)
     def decimalValidator(self):
         return QtGui.QRegExpValidator(QtCore.QRegExp("^\d*\.?\d*$"))
+    # negative values can be entered (for delta-T field)
+    def negativeDecimalValidator(self):
+        return QtGui.QRegExpValidator(QtCore.QRegExp("^(?:^-|\d)*\.?\d*$"))
 
     # key press handler
     def keyPressEvent(self, event):

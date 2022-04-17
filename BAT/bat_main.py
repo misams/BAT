@@ -4,11 +4,22 @@ import argparse
 import logging
 import configparser
 from PyQt5 import QtWidgets
-import src
+import src.EsaPss as esapss
+import src.Ecss as ecss
+import src.TorqueTable as torque_table
+import src.ThreadPullOut as thread_pull_out
+import src.functions.InputFileParser as fp
+import src.functions.MaterialManager as mat
+import src.functions.BoltManager as bm
+import src.functions.exceptions as ex
+import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.8.2"
+__version__ = "0.8.3-ALPHA"
 """
 Change Log:
+v0.8.3-ALPHA - xx.xx.2022
+- merged pull-request #16, @PascaSch
+- negative entries for delta-T but corrected (fixes #18)
 v0.8.2 - 01.12.2021
 - info buttons added (fixes #10)
 - execution bug corrected (fixes #13)
@@ -163,42 +174,42 @@ def main():
         print("#\n# Bolt Analysis Tool (BAT: {0:^})\n#".format(__version__))
 
         # read and process material-database files
-        materials = src.mat.MaterialManager(db_dir+"/materials.mat")
+        materials = mat.MaterialManager(db_dir+"/materials.mat")
 
         # handle bolt db files - read all available bolts and washers
-        bolts = src.bm.BoltManager(db_dir)
+        bolts = bm.BoltManager(db_dir)
 
         # use GUI or command-line
         if args.gui is True:
             print("BAT GUI initialized...rock it!")
             app = QtWidgets.QApplication(sys.argv)
-            window = src.bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__,\
+            window = bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__,\
                                     info_pic_path)
             window.show()
             sys.exit(app.exec_())
         elif args.torque_table is True:
-            tb = src.torque_table.TorqueTable(materials, bolts)
+            tb = torque_table.TorqueTable(materials, bolts)
         elif args.thread_pull_out is True:
-            tpo = src.thread_pull_out.ThreadPullOut(materials, bolts)
+            tpo = thread_pull_out.ThreadPullOut(materials, bolts)
         else:
             # read and process input file
-            inp_file = src.fp.InputFileParser(args.Input, bolts)
+            inp_file = fp.InputFileParser(args.Input, bolts)
             #inp_file.print() # debug
             #
             if inp_file.method == "ESAPSS":
                 # calc ESA PSS-03-208
-                ana_esapss = src.esapss.EsaPss(inp_file, materials, bolts, __version__)
+                ana_esapss = esapss.EsaPss(inp_file, materials, bolts, __version__)
                 ana_esapss.print_results(output_file, True, 0)
             elif inp_file.method == "ECSS":
                 # calc ECSS-E-HB-32-23A
-                ana_ecss = src.ecss.Ecss(inp_file, materials, bolts, __version__)
+                ana_ecss = ecss.Ecss(inp_file, materials, bolts, __version__)
                 ana_ecss.print_results(output_file, True, 0)
             else:
                 print("#\n# ERROR: analysis method not implemented.")
                 logging.error("ERROR: analysis method not implemented.")
 
     # handle exceptions
-    except (src.ex.Error, ValueError, IndexError, FileNotFoundError, KeyError) as e:
+    except (ex.Error, ValueError, IndexError, FileNotFoundError, KeyError) as e:
         # print successful end of BAT analysis
         print("#\n# ERROR --> go to \"bat.log\" file\n# BAT analysis terminated: " + str(e))
         logging.error("BAT run terminated due to fatal error: " + str(e))
