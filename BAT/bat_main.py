@@ -4,15 +4,7 @@ import argparse
 import logging
 import configparser
 from PyQt5 import QtWidgets
-import src.functions.InputFileParser as fp
-import src.functions.MaterialManager as mat
-import src.functions.BoltManager as bm
-import src.EsaPss as esapss
-import src.Ecss as ecss
-import src.TorqueTable as torque_table
-import src.ThreadPullOut as thread_pull_out
-import src.functions.exceptions as ex
-import src.bat_qt_gui as bat_qt_gui
+import src
 
 __version__ = "0.8.2"
 """
@@ -127,10 +119,9 @@ def main():
     # parse command line arguments
     args = arg_parser.parse_args()
     # set output file default
+    output_file = args.Input.split('.')[0]+".out"
     if args.Output:
         output_file = args.Output
-    else:
-        output_file = args.Input.split('.')[0]+".out"
 
     # EXCECUTE BAT
     try:
@@ -142,35 +133,27 @@ def main():
         print("BAT config file   : " + args.config)
         logging.info("BAT config file   : " + args.config)
         # database directory
-        db_dir = config["PATHS"]["db_dir"]
-        if db_dir != "DEFAULT":
+        db_dir = work_dir+"/db"
+        if config["PATHS"]["db_dir"] != "DEFAULT":
             db_dir = os.path.abspath(db_dir)
-        else:
-            db_dir = work_dir+"/db"
         print("BAT DB directory  : " + db_dir)
         logging.info("BAT DB directory  : " + db_dir)
         # directory of *.ui-files
-        ui_dir = config["PATHS"]["ui_dir"]
-        if ui_dir != "DEFAULT":
+        ui_dir = work_dir+"/src/gui"
+        if config["PATHS"]["ui_dir"] != "DEFAULT":
             ui_dir = os.path.abspath(ui_dir)
-        else:
-            ui_dir = work_dir+"/src/gui"
         print("BAT GUI ui-directory   : " + ui_dir)
         logging.info("BAT GUI ui-directory   : " + ui_dir)
         # default input-file directory
-        inp_dir = config["PATHS"]["inp_dir"]
-        if inp_dir != "DEFAULT":
+        inp_dir = work_dir
+        if config["PATHS"]["inp_dir"] != "DEFAULT":
             inp_dir = os.path.abspath(inp_dir)
-        else:
-            inp_dir = work_dir
         print("BAT input-file : " + inp_dir)
         logging.info("BAT input-file : " + inp_dir)
         # path to info PNGs
-        info_pic_path = config["PATHS"]["info_pic_path"]
-        if info_pic_path != "DEFAULT":
+        info_pic_path = work_dir+"/doc/BAT_info"
+        if config["PATHS"]["info_pic_path"] != "DEFAULT":
             info_pic_path = os.path.abspath(info_pic_path)
-        else:
-            info_pic_path = work_dir+"/doc/BAT_info"
         print("BAT info pic location  : " + info_pic_path)
         logging.info("BAT info pic location  : " + info_pic_path)
         #
@@ -180,42 +163,42 @@ def main():
         print("#\n# Bolt Analysis Tool (BAT: {0:^})\n#".format(__version__))
 
         # read and process material-database files
-        materials = mat.MaterialManager(db_dir+"/materials.mat")
+        materials = src.mat.MaterialManager(db_dir+"/materials.mat")
 
         # handle bolt db files - read all available bolts and washers
-        bolts = bm.BoltManager(db_dir)
+        bolts = src.bm.BoltManager(db_dir)
 
         # use GUI or command-line
         if args.gui is True:
             print("BAT GUI initialized...rock it!")
             app = QtWidgets.QApplication(sys.argv)
-            window = bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__,\
+            window = src.bat_qt_gui.Ui(ui_dir, materials, bolts, inp_dir, __version__,\
                                     info_pic_path)
             window.show()
             sys.exit(app.exec_())
         elif args.torque_table is True:
-            tb = torque_table.TorqueTable(materials, bolts)
+            tb = src.torque_table.TorqueTable(materials, bolts)
         elif args.thread_pull_out is True:
-            tpo = thread_pull_out.ThreadPullOut(materials, bolts)
+            tpo = src.thread_pull_out.ThreadPullOut(materials, bolts)
         else:
             # read and process input file
-            inp_file = fp.InputFileParser(args.Input, bolts)
+            inp_file = src.fp.InputFileParser(args.Input, bolts)
             #inp_file.print() # debug
             #
             if inp_file.method == "ESAPSS":
                 # calc ESA PSS-03-208
-                ana_esapss = esapss.EsaPss(inp_file, materials, bolts, __version__)
+                ana_esapss = src.esapss.EsaPss(inp_file, materials, bolts, __version__)
                 ana_esapss.print_results(output_file, True, 0)
             elif inp_file.method == "ECSS":
                 # calc ECSS-E-HB-32-23A
-                ana_ecss = ecss.Ecss(inp_file, materials, bolts, __version__)
+                ana_ecss = src.ecss.Ecss(inp_file, materials, bolts, __version__)
                 ana_ecss.print_results(output_file, True, 0)
             else:
                 print("#\n# ERROR: analysis method not implemented.")
                 logging.error("ERROR: analysis method not implemented.")
 
     # handle exceptions
-    except (ex.Error, ValueError, IndexError, FileNotFoundError, KeyError) as e:
+    except (src.ex.Error, ValueError, IndexError, FileNotFoundError, KeyError) as e:
         # print successful end of BAT analysis
         print("#\n# ERROR --> go to \"bat.log\" file\n# BAT analysis terminated: " + str(e))
         logging.error("BAT run terminated due to fatal error: " + str(e))
