@@ -45,6 +45,7 @@ $ python bat_main.py --gui
 
 Release | Date | Info
 --- | --- | ---
+v0.8.4 | 01.05.2022 |- minor Windows bugs corrected (font size, etc.)<br>- flange plot window bug corrected
 v0.8.3 | 01.05.2022 |- merged pull-request #16, @PascaSch<br>- negative entries for delta-T but corrected (fixes #18)<br>- bolt result filter (MOS cut-off filter, GUI only) implemented (fixes #17)
 v0.8.2 | 01.12.2021 |- info buttons added (fixes #10)<br>- execution bug corrected (fixes #13)
 v0.8.1 | 12.09.2021 |- corrected hashtag-bug in UNC/UNF bolt and washer files<br>- all input fields (QLineEdit, QTableWidget) only permit decimal numbers as input

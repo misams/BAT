@@ -14,9 +14,12 @@ import src.functions.BoltManager as bm
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.8.3"
+__version__ = "0.8.4"
 """
 Change Log:
+v0.8.4 - 01.05.2022
+- minor Windows bugs corrected (font size, etc.)
+- flange plot window bug corrected 
 v0.8.3 - 01.05.2022
 - merged pull-request #16, @PascaSch
 - negative entries for delta-T but corrected (fixes #18)
