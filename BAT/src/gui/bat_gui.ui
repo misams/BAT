@@ -1264,6 +1264,44 @@ Excel</string>
            <string>BAT Output Options</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_10">
+           <item row="1" column="1" colspan="2">
+            <widget class="QTableWidget" name="filterTable">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="autoFillBackground">
+              <bool>false</bool>
+             </property>
+             <property name="sizeAdjustPolicy">
+              <enum>QAbstractScrollArea::AdjustToContents</enum>
+             </property>
+             <property name="rowCount">
+              <number>0</number>
+             </property>
+             <property name="columnCount">
+              <number>0</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QCheckBox" name="checkBoxColGap">
+             <property name="text">
+              <string>Gapping-MOS</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1">
             <widget class="QCheckBox" name="checkBoxColLocSlip">
              <property name="text">
@@ -1281,13 +1319,10 @@ Excel</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
-            <widget class="QCheckBox" name="checkBoxColGap">
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_45">
              <property name="text">
-              <string>Gapping-MOS</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
+              <string>Output Cut-Off Limit Filter:</string>
              </property>
             </widget>
            </item>
@@ -1504,9 +1539,9 @@ Excel</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupLocking"/>
   <buttongroup name="buttonGroupMosType"/>
   <buttongroup name="buttonGroupMethods"/>
+  <buttongroup name="buttonGroupLocking"/>
   <buttongroup name="buttonGroupJointType"/>
  </buttongroups>
 </ui>

@@ -56,6 +56,7 @@ class BoltAnalysisBase(ABC):
         self.MOS_glob_slip = 0.0 # global slippage margin
         self.MOS_pres = 0.0 # yield check under bolt head 
         self.mos_col_format = 0 # MOS column format (for bolt result string)
+        self.mos_filter = None # MOS output cut-off filter
         # set T_scatter
         self._set_T_scatter()
 
@@ -254,7 +255,7 @@ class BoltAnalysisBase(ABC):
                 self._get_MOS_end_string(4))
         output_str += "{0:=^75}{1:^}".format('=', self._get_MOS_end_string(5))
         # loop through bolts / loadcases
-        self._filter_MOS_output(0.1)
+        self._filter_MOS_output() # filter output (just list bolts / LC with MOS < limit)
         for lc_name, val in self.bolt_results_filtered.items():
             bolt_nmbr = val[0] # bolt number (w/o filter applied)
             lc = val[1] # bolt results for each loadcase
@@ -278,15 +279,23 @@ class BoltAnalysisBase(ABC):
 
     # filter bolt results based on MOS-limit
     # do not show bolts where MOS<LIMIT in bolt summary output (fixes #17)
-    def _filter_MOS_output(self, mos_print_limit=math.inf):
+    def _filter_MOS_output(self):
         bolt_nmbr = 0
         for lc_name, lc in self.bolt_results.items():
             bolt_nmbr += 1
-            # check if one margin is below limit
-            if lc[4]<=mos_print_limit or lc[5]<=mos_print_limit \
-                or lc[6]<=mos_print_limit or lc[7]<=mos_print_limit or lc[8]<=mos_print_limit:
-                # save filtered bolt results to new dict
+            # check if no filter is applied (all entries math.inf)
+            if self.mos_filter[0]==math.inf and self.mos_filter[1]==math.inf \
+                and self.mos_filter[2]==math.inf and self.mos_filter[3]==math.inf:
                 self.bolt_results_filtered[lc_name] = [bolt_nmbr, lc]
+            else: # process each filter
+                if lc[4]<=self.mos_filter[0] and self.mos_filter[0]!=math.inf:
+                    self.bolt_results_filtered[lc_name] = [bolt_nmbr, lc]
+                if lc[5]<=self.mos_filter[1] and self.mos_filter[1]!=math.inf:
+                    self.bolt_results_filtered[lc_name] = [bolt_nmbr, lc]
+                if lc[6]<=self.mos_filter[2] and self.mos_filter[2]!=math.inf:
+                    self.bolt_results_filtered[lc_name] = [bolt_nmbr, lc]
+                if lc[7]<=self.mos_filter[3] and self.mos_filter[3]!=math.inf:
+                    self.bolt_results_filtered[lc_name] = [bolt_nmbr, lc]
 
     # handles MOS-column logic for output-printing
     # TODO: find a more beautiful way for the code segment; works but ugly
@@ -570,8 +579,13 @@ class BoltAnalysisBase(ABC):
     #       1 : local slippage column hidden
     #       2 : local gapping column hidden
     #       3 : both - slippage and gapping columns hidden
-    def print_results(self, output_file=None, print_to_cmd=True, mos_col_format=0):
+    # "mos_filter"     : MOS filter for bolt / loadcase output
+    #    [slippage-MOS, gapping-MOS, yield-MOS, ultimate-MOS]
+    def print_results(self, output_file=None, print_to_cmd=True, mos_col_format=0,\
+                        mos_filter=[math.inf,math.inf,math.inf,math.inf]):
         self.mos_col_format = mos_col_format # set MOS column visibility
+        self.mos_filter = mos_filter # set output MOS cut-off filter
+        print("MOS cut-off filter = " + str(self.mos_filter))
         # print results to command-line
         if print_to_cmd is True:
             print() # print empty line

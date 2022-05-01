@@ -11,11 +11,21 @@ from PyQt5.Qt import Qt
 from src.gui.ImageInfoWindow import ImageInfoWindow
 
 # regular expression validator for QTableWidget Format mask (permit decimal number only)
+# with negative sign:       "^(?:^-|\d)*\.?\d*$"
 class NumericDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         editor = super(NumericDelegate, self).createEditor(parent, option, index)
         if isinstance(editor, QtWidgets.QLineEdit):
-            reg_ex = QtCore.QRegExp("^\d*\.?\d*$")
+            reg_ex = QtCore.QRegExp("^(?:^-|\d)*\.?\d*$")
+            validator = QtGui.QRegExpValidator(reg_ex, editor)
+            editor.setValidator(validator)
+        return editor
+# without negative sign:    "^\d*\.?\d*$" / positive numbers only
+class NumericDelegatePositive(QtWidgets.QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        editor = super(NumericDelegatePositive, self).createEditor(parent, option, index)
+        if isinstance(editor, QtWidgets.QLineEdit):
+            reg_ex = QtCore.QRegExp("^\d*\.?\d*$") # only positive numbers
             validator = QtGui.QRegExpValidator(reg_ex, editor)
             editor.setValidator(validator)
         return editor

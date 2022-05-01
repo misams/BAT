@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 import webbrowser
+import math
 from pathlib import Path
 from collections import Counter, OrderedDict
 from src.functions.InputFileParser import InputFileParser
@@ -16,7 +17,7 @@ from src.gui.BoltInfoWindow import BoltInfoWindow
 from src.gui.MatInfoWindow import MatInfoWindow
 from src.gui.TorqueInfoWindow import TorqueInfoWindow
 from src.gui.ImageInfoWindow import ImageInfoWindow
-from src.gui.FlangeGuiWindow import NumericDelegate
+from src.gui.FlangeGuiWindow import NumericDelegate, NumericDelegatePositive
 
 # inherit correct QMainWindow class as defined in UI file (designer)
 class Ui(QtWidgets.QMainWindow):
@@ -184,6 +185,14 @@ class Ui(QtWidgets.QMainWindow):
         self.radioJointMean = self.findChild(QtWidgets.QRadioButton, "radioJointMean")
         self.checkBoxColLocSlip = self.findChild(QtWidgets.QCheckBox, "checkBoxColLocSlip")
         self.checkBoxColGap = self.findChild(QtWidgets.QCheckBox, "checkBoxColGap")
+        self.filterTable = self.findChild(QtWidgets.QTableWidget, "filterTable")
+        self.filterCheckBox = [QtWidgets.QCheckBox(""), QtWidgets.QCheckBox(""),\
+            QtWidgets.QCheckBox(""), QtWidgets.QCheckBox("")] # filter [slip, gap, yield, ult]
+        self.filterCheckBox[0].stateChanged.connect(self.outputFilterChecked)
+        self.filterCheckBox[1].stateChanged.connect(self.outputFilterChecked)
+        self.filterCheckBox[2].stateChanged.connect(self.outputFilterChecked)
+        self.filterCheckBox[3].stateChanged.connect(self.outputFilterChecked)
+        self.filterValues = []
         # Output tab
         self.textEditOutput = self.findChild(QtWidgets.QTextEdit, "textEditOutput")
         # initial dict for circular flange clean initialization
@@ -289,7 +298,30 @@ class Ui(QtWidgets.QMainWindow):
         self.clampedPartsTable.setCellWidget(1,2,combo_cp_matT)
         self.useShimChecked()
         self.boltComboChanged() # apply shim filter
-        self.clampedPartsTable.setItemDelegateForColumn(0,NumericDelegate(self.clampedPartsTable))
+        self.clampedPartsTable.setItemDelegateForColumn(0,NumericDelegatePositive(self.clampedPartsTable))
+        # setup filter table
+        self.filterTable.setColumnCount(4) # init filter-table
+        self.filterTable.setHorizontalHeaderLabels(\
+            ["Slippage MOS", "Gapping MOS", "Yield MOS", "Ultimate MOS"])
+        self.filterTable.insertRow(0)
+        self.filterTable.setVerticalHeaderItem(0, QtWidgets.QTableWidgetItem("Activate"))
+        self.filterTable.insertRow(1)
+        self.filterTable.setVerticalHeaderItem(1, QtWidgets.QTableWidgetItem("Cut-Off Limit [%]"))
+        header = self.filterTable.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        for i in range(0,4): # fill setup filter table
+            # checkbox row
+            self.filterCheckBox[i].setStyleSheet("text-align:center; margin-left:50%; margin-right:50%;")
+            self.filterTable.setCellWidget(0,i,self.filterCheckBox[i])
+            # values row
+            self.filterValues.append(QtWidgets.QTableWidgetItem("0.0"))
+            self.filterValues[-1].setTextAlignment(Qt.AlignCenter)
+            self.filterTable.setItem(1,i,self.filterValues[-1])
+            self.filterTable.setItemDelegateForColumn(i,NumericDelegate(self.filterTable))
+        self.outputFilterChecked()
         # output tab setup
         self.tabWidget.setTabEnabled(5, False) # disable output tab
         font = QtGui.QFont("Monospace", 9) # set monospace font (platform independent)
@@ -300,6 +332,26 @@ class Ui(QtWidgets.QMainWindow):
         # initialize bolted flange window
         self.w_bolted_flange = FlangeWindow(self.zero_init_dict,\
             self.ui_dir, self.info_pic_path, self.loadsTable, self.tabWidget)
+
+    # output cut-off filter checkboxes
+    def outputFilterChecked(self):
+        for i in range(0,4):
+            flags = self.filterTable.item(1,i).flags() # get flags of item[i]
+            if not self.filterCheckBox[i].isChecked():
+                flags &= ~QtCore.Qt.ItemIsEditable
+                flags &= ~QtCore.Qt.ItemIsEnabled
+            else:
+                flags |= QtCore.Qt.ItemIsEditable
+                flags |= QtCore.Qt.ItemIsEnabled
+            self.filterTable.item(1,i).setFlags(flags)
+    
+    # get selected output cut-off filter setup
+    def getFilterSetup(self):
+        filter_setup = [math.inf, math.inf, math.inf, math.inf]
+        for i in range(0,4):
+            if self.filterCheckBox[i].isChecked():
+                filter_setup[i] = float(self.filterTable.item(1,i).text())/100 # convert from [%]
+        return filter_setup
 
     # erase gui - reset / new
     def erase_gui(self):
@@ -355,6 +407,9 @@ class Ui(QtWidgets.QMainWindow):
         self.outputFile.setText('')
         self.checkBoxColLocSlip.setChecked(True)
         self.checkBoxColGap.setChecked(True)
+        for i in range(0,4): # reset cut-off filter
+            self.filterCheckBox[i].setChecked(False)
+            self.filterTable.item(1,i).setText("0.0")
         # output tab
         self.textEditOutput.clear()
         self.tabWidget.setTabEnabled(5, False)
@@ -559,7 +614,7 @@ class Ui(QtWidgets.QMainWindow):
                     ana_esapss = EsaPss(\
                         self.openedInputFile, self.materials, self.bolts, self.bat_version)
                     output_results = ana_esapss.print_results(\
-                        self.outputFile.text(), False, self.getMosColFormat())
+                        self.outputFile.text(), False, self.getMosColFormat(), self.getFilterSetup())
                     # enable output-tab and fill with results
                     self.tabWidget.setTabEnabled(5, True)
                     self.textEditOutput.setText(output_results)
@@ -568,7 +623,7 @@ class Ui(QtWidgets.QMainWindow):
                     ana_ecss = Ecss(\
                         self.openedInputFile, self.materials, self.bolts, self.bat_version)
                     output_results = ana_ecss.print_results(\
-                        self.outputFile.text(), False, self.getMosColFormat())
+                        self.outputFile.text(), False, self.getMosColFormat(), self.getFilterSetup())
                     # enable output-tab and fill with results
                     self.tabWidget.setTabEnabled(5, True)
                     self.textEditOutput.setText(output_results)

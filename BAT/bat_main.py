@@ -20,6 +20,7 @@ Change Log:
 v0.8.3-ALPHA - xx.xx.2022
 - merged pull-request #16, @PascaSch
 - negative entries for delta-T but corrected (fixes #18)
+- bolt result filter (MOS cut-off filter, GUI only) implemented (fixes #17)
 v0.8.2 - 01.12.2021
 - info buttons added (fixes #10)
 - execution bug corrected (fixes #13)
