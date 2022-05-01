@@ -14,10 +14,10 @@ import src.functions.BoltManager as bm
 import src.functions.exceptions as ex
 import src.bat_qt_gui as bat_qt_gui
 
-__version__ = "0.8.3-ALPHA"
+__version__ = "0.8.3"
 """
 Change Log:
-v0.8.3-ALPHA - xx.xx.2022
+v0.8.3 - 01.05.2022
 - merged pull-request #16, @PascaSch
 - negative entries for delta-T but corrected (fixes #18)
 - bolt result filter (MOS cut-off filter, GUI only) implemented (fixes #17)
