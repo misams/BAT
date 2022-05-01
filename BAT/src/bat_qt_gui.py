@@ -308,10 +308,12 @@ class Ui(QtWidgets.QMainWindow):
         self.filterTable.insertRow(1)
         self.filterTable.setVerticalHeaderItem(1, QtWidgets.QTableWidgetItem("Cut-Off Limit [%]"))
         header = self.filterTable.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+        header.setStyleSheet("QHeaderView { font-size: 8pt; }") # for Windows
+        self.filterTable.verticalHeader().setStyleSheet("QHeaderView { font-size: 8pt; }") # for Windows
         for i in range(0,4): # fill setup filter table
             # checkbox row
             self.filterCheckBox[i].setStyleSheet("text-align:center; margin-left:50%; margin-right:50%;")

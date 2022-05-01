@@ -1264,6 +1264,23 @@ Excel</string>
            <string>BAT Output Options</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_10">
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="checkBoxColLocSlip">
+             <property name="text">
+              <string>Slippage-MOS</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_45">
+             <property name="text">
+              <string>Output Cut-Off Limit Filter:</string>
+             </property>
+            </widget>
+           </item>
            <item row="1" column="1" colspan="2">
             <widget class="QTableWidget" name="filterTable">
              <property name="sizePolicy">
@@ -1302,16 +1319,6 @@ Excel</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QCheckBox" name="checkBoxColLocSlip">
-             <property name="text">
-              <string>Slippage-MOS</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="0">
             <widget class="QLabel" name="label_44">
              <property name="text">
@@ -1319,12 +1326,18 @@ Excel</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_45">
-             <property name="text">
-              <string>Output Cut-Off Limit Filter:</string>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
-            </widget>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -1539,9 +1552,9 @@ Excel</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupMosType"/>
   <buttongroup name="buttonGroupMethods"/>
   <buttongroup name="buttonGroupLocking"/>
+  <buttongroup name="buttonGroupMosType"/>
   <buttongroup name="buttonGroupJointType"/>
  </buttongroups>
 </ui>

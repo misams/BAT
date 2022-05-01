@@ -65,7 +65,6 @@ class FlangeWindow(QtWidgets.QMainWindow):
         # button box and normal buttons
         self.buttonBox = self.findChild(QtWidgets.QDialogButtonBox, "buttonBox")
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(self.close)
-        #self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.click_apply)
         self.buttonCalc = self.findChild(QtWidgets.QPushButton, "buttonCalc")
         self.buttonCalc.clicked.connect(self.click_calculate)
         self.buttonWriteResults = self.findChild(QtWidgets.QPushButton, "buttonWriteResults")
@@ -73,6 +72,7 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.toolButton_help = self.findChild(QtWidgets.QToolButton, "toolButton_help")
         self.toolButton_help.clicked.connect(self.helpButtonPressed)
         self.w_help_window = None # help window
+        self.w_plot = None # plot window
         #
         # analysis results
         self.phi_array = None
@@ -105,7 +105,7 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.forceCompTable.setColumnCount(4)
         self.forceCompTable.insertRow(0)
         self.forceCompTable.setHorizontalHeaderLabels(\
-            ["FX\n[N]", "FY\n[N]", "FZ\n[N]", "Remark"])
+            ["FX [N]", "FY [N]", "FZ [N]", "Remark"])
         self.forceCompTable.horizontalHeader().setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         self.forceCompTable.setItem(0,0,QtWidgets.QTableWidgetItem(str(init_dict["force_comp"][0])))
         self.forceCompTable.setItem(0,1,QtWidgets.QTableWidgetItem(str(init_dict["force_comp"][1])))
@@ -114,11 +114,12 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.forceCompTable.setItemDelegateForColumn(0,NumericDelegate(self.forceCompTable))
         self.forceCompTable.setItemDelegateForColumn(1,NumericDelegate(self.forceCompTable))
         self.forceCompTable.setItemDelegateForColumn(2,NumericDelegate(self.forceCompTable))
+        self.forceCompTable.horizontalHeader().setStyleSheet("QHeaderView { font-size: 8pt; }") # for Windows
         # force location table init
         self.forceLocTable.setColumnCount(3)
         self.forceLocTable.insertRow(0)
         self.forceLocTable.setHorizontalHeaderLabels(\
-            ["X (long.)\n[mm]", "Y (lat.)\n[mm]", "Z (vert.)\n[mm]"])
+            ["X (long.) [mm]", "Y (lat.) [mm]", "Z (vert.) [mm]"])
         self.forceLocTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.forceLocTable.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         self.forceLocTable.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
@@ -128,6 +129,7 @@ class FlangeWindow(QtWidgets.QMainWindow):
         self.forceLocTable.setItemDelegateForColumn(0,NumericDelegate(self.forceLocTable))
         self.forceLocTable.setItemDelegateForColumn(1,NumericDelegate(self.forceLocTable))
         self.forceLocTable.setItemDelegateForColumn(2,NumericDelegate(self.forceLocTable))
+        self.forceLocTable.horizontalHeader().setStyleSheet("QHeaderView { font-size: 8pt; }") # for Windows
         
     # BUTTON - click "Calculate Bolt Forces"
     def click_calculate(self):
@@ -195,10 +197,10 @@ class FlangeWindow(QtWidgets.QMainWindow):
             self.Fbs_array = np.abs(self.Fbs_lat_array + self.Fbs_tors_array) # linear addition (correct for worst case bolt locations)
 
             # Plot bolt forces in window
-            w_plot = PlotWindowCircFlange(self.phi_array, self.Fbn_array, self.Fbs_array, \
+            self.w_plot = PlotWindowCircFlange(self.phi_array, self.Fbn_array, self.Fbs_array, \
                 self.Fbs_lat_array, self.Fbs_tors_array, self.circ_analysis_summary)
-            w_plot.setWindowModality(Qt.ApplicationModal) # lock main window
-            w_plot.show()
+            self.w_plot.setWindowModality(Qt.ApplicationModal) # lock main window
+            self.w_plot.show()
         except Exception as e:
             print("Circular-Flange Exception A: " + str(e))
 
